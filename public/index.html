@@ -83,8 +83,56 @@
   .toggle input:checked + i { background: var(--purple); }
   .toggle input:checked + i::after { left: 21px; }
 
-  .lib-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-  .lib-head h2 { margin: 0 auto 0 0; font-size: 20px; }
+  .lib-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+  [hidden] { display: none !important; }
+
+  .tabs { display: flex; gap: 6px; border-bottom: 1px solid var(--line); }
+  .tab {
+    background: none; border: none; border-bottom: 3px solid transparent; padding: 10px 16px 9px;
+    font-size: 18px; font-weight: 700; color: var(--muted); margin-bottom: -1px;
+  }
+  .tab span { font-size: 13px; font-weight: 600; margin-left: 4px; opacity: .7; }
+  .tab.on { color: var(--text); border-bottom-color: var(--purple); }
+  .tab:hover:not(.on) { color: var(--text); }
+
+  .browse-bar { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-bottom: 10px; }
+  .browse-bar input[type=search] { flex: 1; min-width: 200px; max-width: 420px; border-radius: 999px; padding: 8px 16px; }
+  .browse-bar .hint { margin-right: auto; }
+  .filters { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+  .chips { display: flex; gap: 6px; flex-wrap: wrap; }
+  .chip {
+    border: 1px solid var(--line); background: none; border-radius: 999px; padding: 4px 12px;
+    font-size: 13px; font-weight: 600; color: var(--muted); display: inline-flex; align-items: center; gap: 6px;
+  }
+  .chip span { opacity: .6; font-weight: 500; }
+  .chip:hover { color: var(--text); border-color: rgba(255,255,255,.3); }
+  .chip.on { background: var(--text); color: var(--bg); border-color: var(--text); }
+  .cat-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+
+  .wo-badges { display: flex; gap: 6px; flex-wrap: wrap; }
+  .badge {
+    font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+    padding: 2px 8px; border-radius: 999px; background: rgba(255,255,255,.08); color: var(--muted);
+  }
+  .badge.cat { color: var(--c); background: color-mix(in srgb, var(--c) 16%, transparent); }
+
+  .modal {
+    position: fixed; inset: 0; z-index: 20; display: none; place-items: center; padding: 20px;
+    background: rgba(5,4,14,.7); backdrop-filter: blur(4px);
+  }
+  .modal.show { display: grid; }
+  .modal-box {
+    width: min(920px, 100%); max-height: calc(100dvh - 40px); overflow: auto;
+    background: var(--panel); border: 1px solid var(--line); border-radius: 18px; padding: 20px 22px;
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .modal-head { display: flex; justify-content: space-between; gap: 16px; align-items: flex-start; }
+  .modal-head h2 { margin: 6px 0 0; font-size: 24px; }
+  #dChart { width: 100%; height: 200px; display: block; }
+  .d-desc { white-space: pre-wrap; color: rgba(255,255,255,.8); line-height: 1.5; max-height: 34vh; overflow: auto; font-size: 14px; }
+  .modal-foot { display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; padding-top: 6px; }
+  .modal-foot .danger { margin-right: auto; }
+  .b-stats b.plain { font-family: inherit; font-size: 14px; }
   .library { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; }
   .wo {
     background: var(--panel); border: 2px solid transparent; border-radius: 14px; padding: 14px;
@@ -99,7 +147,7 @@
   .wo-desc { color: var(--muted); font-size: 13px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
   .wo-actions { display: flex; gap: 6px; margin-top: auto; }
   .empty { color: var(--muted); padding: 30px; text-align: center; border: 1px dashed var(--line); border-radius: 14px; grid-column: 1 / -1; }
-  .dropping .library { outline: 2px dashed var(--purple); outline-offset: 6px; border-radius: 14px; }
+  .dropping .home-grid { outline: 2px dashed var(--purple); outline-offset: 6px; border-radius: 14px; }
 
   .startbar {
     position: sticky; bottom: 14px; display: flex; align-items: center; gap: 14px;
@@ -305,13 +353,57 @@
     </div>
   </div>
 
-  <div class="lib-head">
-    <h2>Workouts</h2>
-    <label class="btn small" for="importFile">Import .zwo</label>
-    <input type="file" id="importFile" accept=".zwo,.xml" multiple hidden>
-    <button class="btn small primary" id="btnNew">+ New workout</button>
+  <nav class="tabs">
+    <button class="tab" data-tab="browse">Browse <span id="tabBrowseCount"></span></button>
+    <button class="tab" data-tab="mine">My workouts <span id="tabMineCount"></span></button>
+  </nav>
+
+  <div id="browsePane">
+    <div class="browse-bar">
+      <input type="search" id="fSearch" placeholder="Search workouts…">
+      <span class="hint" id="browseCount"></span>
+      <label class="btn small primary" for="uploadFile">⇪ Upload .zwo</label>
+      <input type="file" id="uploadFile" accept=".zwo,.xml" multiple hidden>
+    </div>
+    <div class="filters">
+      <div class="chips" id="fCollection"></div>
+      <div class="chips" id="fCategory"></div>
+      <div class="chips" id="fLength"></div>
+    </div>
+    <div class="library home-grid" id="browseGrid"></div>
   </div>
-  <div class="library" id="library"></div>
+
+  <div id="minePane" hidden>
+    <div class="lib-head">
+      <span class="hint" style="margin-right:auto">Workouts you've built or copied from Browse to edit.</span>
+      <label class="btn small" for="importFile">Import .zwo</label>
+      <input type="file" id="importFile" accept=".zwo,.xml" multiple hidden>
+      <button class="btn small primary" id="btnNew">+ New workout</button>
+    </div>
+    <div class="library home-grid" id="mineGrid"></div>
+  </div>
+
+  <div class="modal" id="details">
+    <div class="modal-box">
+      <div class="modal-head">
+        <div>
+          <div class="wo-badges" id="dBadges"></div>
+          <h2 id="dTitle"></h2>
+        </div>
+        <button class="icon-btn" id="dClose">✕</button>
+      </div>
+      <div class="b-stats" id="dMeta"></div>
+      <canvas id="dChart"></canvas>
+      <div class="d-desc" id="dDesc"></div>
+      <div class="modal-foot">
+        <button class="btn ghost danger" id="dDelete">Delete</button>
+        <button class="btn" id="dFtp" hidden></button>
+        <button class="btn" id="dDownload">Download .zwo</button>
+        <button class="btn" id="dEdit">Copy &amp; edit</button>
+        <button class="btn primary" id="dRide">RIDE IT</button>
+      </div>
+    </div>
+  </div>
 
   <div class="startbar">
     <span class="sel-name" id="selName">Pick a workout</span>

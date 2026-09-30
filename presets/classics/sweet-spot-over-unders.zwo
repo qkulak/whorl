@@ -1,0 +1,19 @@
+<workout_file>
+    <author>Whorl</author>
+    <name>Sweet Spot Over-Unders</name>
+    <description>Alternating 2 minutes at 95% and 2 minutes at 85% for three 12-minute sets. Main set as specified; the warmup and cooldown are added.</description>
+    <category>Sweet Spot</category>
+    <sportType>bike</sportType>
+    <tags>
+        <tag name="classic"/>
+    </tags>
+    <workout>
+        <Warmup Duration="600" PowerLow="0.45" PowerHigh="0.75"/>
+        <IntervalsT Repeat="3" OnDuration="120" OffDuration="120" OnPower="0.95" OffPower="0.85"/>
+        <SteadyState Duration="300" Power="0.55"/>
+        <IntervalsT Repeat="3" OnDuration="120" OffDuration="120" OnPower="0.95" OffPower="0.85"/>
+        <SteadyState Duration="300" Power="0.55"/>
+        <IntervalsT Repeat="3" OnDuration="120" OffDuration="120" OnPower="0.95" OffPower="0.85"/>
+        <Cooldown Duration="600" PowerLow="0.6" PowerHigh="0.4"/>
+    </workout>
+</workout_file>

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<workout_file>
+  <author>Training Plan Calc</author>
+  <name>Week 1 Sat – Easy Spin</name>
+  <description>Easy 1h00 spin. No intensity. Keep blood flowing.</description>
+  <sportType>bike</sportType>
+  <tags/>
+  <workout>
+    <!-- 10 min warmup -->
+    <Warmup Duration="600" PowerLow="0.40" PowerHigh="0.60"/>
+    <!-- 40 min easy Z2 -->
+    <SteadyState Duration="2400" Power="0.60"/>
+    <!-- 10 min cooldown -->
+    <Cooldown Duration="600" PowerLow="0.60" PowerHigh="0.40"/>
+  </workout>
+</workout_file>

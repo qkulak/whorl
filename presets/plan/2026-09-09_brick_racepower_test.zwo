@@ -1,0 +1,63 @@
+<workout_file>
+    <author>Coach Claude</author>
+    <name>Race Week Brick — 3x4 @ 181W, race-power bridge, 15min run</name>
+    <description>Wed Sep 9. FOUR DAYS OUT. SET FTP TO 185.
+
+BIKE: 12min warmup, 3x4min at 181W with 2min easy, then 4min at 161W RACE POWER. Ends at 34min - no cooldown, straight to T2.
+
+TWO DIFFERENT JOBS, DELIBERATELY. The 181W blocks are SHARPENING, not a race-power rehearsal - short efforts above race pace to recruit high-threshold fibres and potentiate the system. That is the one thing a 4min block is good for. You have already rehearsed race power at length (Aug 21 2x25, Aug 23 45min at 159W, Aug 27 85min, Aug 29 66mi, Sep 2 2x20). You do not need more of it.
+
+THE LAST 4min AT 161W IS THE IMPORTANT CHANGE. Transitioning off 181W would leave your legs more loaded than they will be on Sunday and would make the run read slower than it should - a false negative you would then stew on for four days. Coming off race power makes the run diagnostic.
+
+181W IS NOT YOUR RACE NUMBER. Sep 2 settled it: you held 2x20 at 188W clean (16.2min at 187W avg, HR 145). That puts FTP at 185-190, which makes 181W an IF of 0.95-0.98 - your 40-to-60min power. Sunday is 158-166W, first 20min at the bottom of that range.
+
+T2 REHEARSAL - this is the other half of the session. Galveston's T1+T2 was 10:39. Five free minutes are sitting there and you have not practised a transition all block. Set your shoes and kit out exactly as you will in transition. TIME IT. Target under 2:00 from stopping to running.
+
+RUN: 5min easy (7:45-8:00/mi), then 10min at 7:05-7:15/mi. Stop there.
+
+WHY A BRICK AND NOT THE TRACK: heavy legs want short and sharp, not more easy volume, and transitions are worth more minutes than another set of 400s.
+
+TOTAL LOAD IS LOW ON PURPOSE. 12min of intensity across both sports. Travel tomorrow.</description>
+    <sportType>bike</sportType>
+    <tags>
+        <tag name="brick"/>
+        <tag name="raceweek"/>
+        <tag name="703"/>
+    </tags>
+    <workout>
+        <Warmup Duration="720" PowerLow="0.50" PowerHigh="0.68" Cadence="90">
+            <textevent timeoffset="10" message="Brick. 12min warmup, 3x4min at 181W, then straight into 15min run"/>
+            <textevent timeoffset="60" message="RUN KIT AND SHOES OUT NOW - laid out like transition. You are timing T2"/>
+            <textevent timeoffset="420" message="Into aero for the last 3min of warmup"/>
+            <textevent timeoffset="600" message="Block 1 next. 181W - sharpening, ABOVE race power. Not Sunday's number"/>
+        </Warmup>
+
+        <SteadyState Duration="240" Power="0.978" Cadence="90">
+            <textevent timeoffset="10" message="1 of 3: 4min at 181W. AERO. How does this feel?"/>
+            <textevent timeoffset="180" message="This should feel hard. It is meant to - it is 0.95+ IF"/>
+        </SteadyState>
+        <SteadyState Duration="120" Power="0.55" Cadence="85">
+            <textevent timeoffset="5" message="2min easy"/>
+        </SteadyState>
+
+        <SteadyState Duration="240" Power="0.978" Cadence="90">
+            <textevent timeoffset="10" message="2 of 3. Same 181W, aero"/>
+            <textevent timeoffset="180" message="Harder than block 1? That matters"/>
+        </SteadyState>
+        <SteadyState Duration="120" Power="0.55" Cadence="85">
+            <textevent timeoffset="5" message="2min easy. One to go"/>
+        </SteadyState>
+
+        <SteadyState Duration="240" Power="0.978" Cadence="90">
+            <textevent timeoffset="10" message="3 of 3. Last one - then 4min at race power, then you run"/>
+            <textevent timeoffset="180" message="1min. Then settle straight onto 161W"/>
+        </SteadyState>
+
+        <SteadyState Duration="240" Power="0.87" Cadence="88">
+            <textevent timeoffset="10" message="4min at 161W - RACE POWER. Full aero. This is what Sunday feels like"/>
+            <textevent timeoffset="60" message="Notice the contrast. After 181W this should feel like cruising"/>
+            <textevent timeoffset="120" message="Shoes within reach. Race bottle - last practice drink in aero"/>
+            <textevent timeoffset="180" message="60s. START THE CLOCK when this ends - T2 target under 2:00"/>
+        </SteadyState>
+    </workout>
+</workout_file>

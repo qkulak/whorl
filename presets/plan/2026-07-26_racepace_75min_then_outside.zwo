@@ -1,0 +1,42 @@
+<workout_file>
+    <author>Coach Claude</author>
+    <name>70.3 Race Power 3x12 (75min) then ride outside Z2</name>
+    <description>Indoor race-specific portion: 3x12min at Santa Cruz race power (~156W), then roll straight outside for ~1h40 easy Z2 (total day ~2h45). Set FTP to 190. Blocks should feel boring-sustainable - HR 140-150, RPE 6, aero, 85-90rpm. GUT CHECK: day after a hard 16.5mi run - if warmup legs are wrecked, skip the blocks and just spin easy inside then out. OUTSIDE: keep it honest Z2, HR under ~140, power under 133W, fuel 60-90g carb/hr. Protect Wednesday's track.</description>
+    <sportType>bike</sportType>
+    <tags>
+        <tag name="raceeffort"/>
+        <tag name="70.3"/>
+    </tags>
+    <workout>
+        <Warmup Duration="900" PowerLow="0.50" PowerHigh="0.79">
+            <textevent timeoffset="10" message="75min inside: 3x12 at race power (156W), then 1h40 easy outside"/>
+            <textevent timeoffset="600" message="Gut check: legs wrecked from yesterday? Bad = skip blocks, spin easy"/>
+            <textevent timeoffset="810" message="Aero for the last 90s of warmup"/>
+        </Warmup>
+        <SteadyState Duration="720" Power="0.82">
+            <textevent timeoffset="10" message="Block 1 of 3: 12min at 156W. Should feel EASY-sustainable, not hard"/>
+            <textevent timeoffset="360" message="Halfway. HR 140-150, RPE 6. Higher = ease off, blame heat+fatigue"/>
+            <textevent timeoffset="660" message="1min left, smooth"/>
+        </SteadyState>
+        <SteadyState Duration="360" Power="0.60">
+            <textevent timeoffset="10" message="6min easy. Drink, fuel"/>
+        </SteadyState>
+        <SteadyState Duration="720" Power="0.82">
+            <textevent timeoffset="10" message="Block 2 of 3: 156W, hold aero and form"/>
+            <textevent timeoffset="360" message="Halfway. This is your Santa Cruz wattage - boring is the goal"/>
+            <textevent timeoffset="660" message="1min left, locked in"/>
+        </SteadyState>
+        <SteadyState Duration="360" Power="0.60">
+            <textevent timeoffset="10" message="6min easy. Keep drinking"/>
+        </SteadyState>
+        <SteadyState Duration="720" Power="0.82">
+            <textevent timeoffset="10" message="Block 3 of 3: last one at 156W, strong and smooth"/>
+            <textevent timeoffset="360" message="Halfway. RPE past 7? Sit up, finish easy - no ego"/>
+            <textevent timeoffset="660" message="1min. Then out the door"/>
+        </SteadyState>
+        <Cooldown Duration="720" PowerLow="0.60" PowerHigh="0.55">
+            <textevent timeoffset="10" message="12min easy spin - or unclip and head outside for 1h40 Z2"/>
+            <textevent timeoffset="600" message="OUTSIDE: HR under 140, power under 133W, fuel 60-90g/hr. Keep it honest"/>
+        </Cooldown>
+    </workout>
+</workout_file>

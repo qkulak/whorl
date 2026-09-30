@@ -8,6 +8,8 @@ from urllib.parse import unquote
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 WORKOUT_DIR = os.path.join(ROOT, "workouts")
+PRESET_DIR = os.path.join(ROOT, "presets")
+UPLOAD_DIR = os.path.join(PRESET_DIR, "uploaded")
 RIDE_DIR = os.path.join(ROOT, "rides")
 PORT = 8010
 
@@ -17,23 +19,47 @@ def slugify(name):
     return slug or "workout"
 
 
-def workout_path(file_id):
-    """Resolve a workout id to a path inside WORKOUT_DIR, or None if it escapes."""
+def safe_path(directory, file_id):
+    """Resolve a file id to a .zwo path directly inside directory, or None if it escapes."""
     name = os.path.basename(unquote(file_id))
-    if not name.endswith(".zwo"):
+    if not name.lower().endswith(".zwo"):
         name += ".zwo"
-    path = os.path.join(WORKOUT_DIR, name)
-    return path if os.path.dirname(path) == WORKOUT_DIR else None
+    path = os.path.join(directory, name)
+    return path if os.path.dirname(path) == directory else None
+
+
+def unique_name(directory, stem):
+    name, n = f"{stem}.zwo", 2
+    while os.path.exists(os.path.join(directory, name)):
+        name, n = f"{stem}-{n}.zwo", n + 1
+    return name
+
+
+def read_zwo(path):
+    with open(path, encoding="utf-8", errors="replace") as f:
+        return f.read()
 
 
 def list_workouts():
+    return [
+        {"id": name, "xml": read_zwo(os.path.join(WORKOUT_DIR, name))}
+        for name in sorted(os.listdir(WORKOUT_DIR))
+        if name.lower().endswith(".zwo")
+    ]
+
+
+def list_presets():
+    """Every .zwo under presets/<collection>/ — the collection is the folder name."""
     out = []
-    for name in sorted(os.listdir(WORKOUT_DIR)):
-        if not name.lower().endswith(".zwo"):
+    for collection in sorted(os.listdir(PRESET_DIR)):
+        folder = os.path.join(PRESET_DIR, collection)
+        if not os.path.isdir(folder):
             continue
-        path = os.path.join(WORKOUT_DIR, name)
-        with open(path, encoding="utf-8", errors="replace") as f:
-            out.append({"id": name, "xml": f.read(), "mtime": os.path.getmtime(path)})
+        for name in sorted(os.listdir(folder)):
+            if name.lower().endswith(".zwo"):
+                out.append(
+                    {"id": f"{collection}/{name}", "collection": collection, "xml": read_zwo(os.path.join(folder, name))}
+                )
     return out
 
 
@@ -62,6 +88,8 @@ class Handler(SimpleHTTPRequestHandler):
     def do_GET(self):
         if self.path == "/api/workouts":
             self._json(200, list_workouts())
+        elif self.path == "/api/presets":
+            self._json(200, list_presets())
         else:
             super().do_GET()
 
@@ -79,19 +107,27 @@ class Handler(SimpleHTTPRequestHandler):
             if "<workout_file" not in xml:
                 self._json(400, {"error": "not a zwo file"})
                 return
-            file_id = payload.get("id")
-            if not file_id:
-                stem = slugify(payload.get("name", "workout"))
-                file_id, n = f"{stem}.zwo", 2
-                while os.path.exists(os.path.join(WORKOUT_DIR, file_id)):
-                    file_id, n = f"{stem}-{n}.zwo", n + 1
-            path = workout_path(file_id)
+            file_id = payload.get("id") or unique_name(WORKOUT_DIR, slugify(payload.get("name", "workout")))
+            path = safe_path(WORKOUT_DIR, file_id)
             if not path:
                 self._json(400, {"error": "bad id"})
                 return
             with open(path, "w", encoding="utf-8") as f:
                 f.write(xml)
             self._json(200, {"ok": True, "id": os.path.basename(path)})
+
+        elif self.path == "/api/presets":
+            # Upload into the browse library. Never overwrites: a second file
+            # with the same name gets a suffix.
+            xml = payload.get("xml", "")
+            if "<workout_file" not in xml:
+                self._json(400, {"error": "not a zwo file"})
+                return
+            stem = slugify(os.path.splitext(os.path.basename(payload.get("filename") or "workout"))[0])
+            name = unique_name(UPLOAD_DIR, stem)
+            with open(os.path.join(UPLOAD_DIR, name), "w", encoding="utf-8") as f:
+                f.write(xml)
+            self._json(200, {"ok": True, "id": f"uploaded/{name}"})
 
         elif self.path == "/api/rides":
             stamp = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H-%M-%SZ")
@@ -104,13 +140,15 @@ class Handler(SimpleHTTPRequestHandler):
             self._json(404, {"error": "not found"})
 
     def do_DELETE(self):
+        # Only files the rider made or uploaded can be deleted; bundled presets can't.
+        path = None
         if self.path.startswith("/api/workouts/"):
-            path = workout_path(self.path[len("/api/workouts/"):])
-            if path and os.path.exists(path):
-                os.remove(path)
-                self._json(200, {"ok": True})
-            else:
-                self._json(404, {"error": "not found"})
+            path = safe_path(WORKOUT_DIR, self.path[len("/api/workouts/"):])
+        elif self.path.startswith("/api/presets/uploaded/"):
+            path = safe_path(UPLOAD_DIR, self.path[len("/api/presets/uploaded/"):])
+        if path and os.path.exists(path):
+            os.remove(path)
+            self._json(200, {"ok": True})
         else:
             self._json(404, {"error": "not found"})
 
@@ -122,8 +160,10 @@ class Handler(SimpleHTTPRequestHandler):
 
 if __name__ == "__main__":
     os.makedirs(WORKOUT_DIR, exist_ok=True)
+    os.makedirs(UPLOAD_DIR, exist_ok=True)
     os.makedirs(RIDE_DIR, exist_ok=True)
     print(f"ZWO Ride — http://localhost:{PORT}")
     print(f"Workouts → {WORKOUT_DIR}")
+    print(f"Presets  → {PRESET_DIR}")
     print(f"Rides    → {RIDE_DIR}")
     HTTPServer(("127.0.0.1", PORT), Handler).serve_forever()

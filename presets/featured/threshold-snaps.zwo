@@ -1,0 +1,17 @@
+<workout_file>
+    <author>Whorl</author>
+    <name>Threshold Snaps</name>
+    <description>Two sets of short FTP efforts with short recoveries, all on an aerobic base.</description>
+    <category>Threshold</category>
+    <sportType>bike</sportType>
+    <tags>
+            </tags>
+    <workout>
+        <Warmup Duration="300" PowerLow="0.65" PowerHigh="0.7"/>
+        <IntervalsT Repeat="6" OnDuration="30" OffDuration="30" OnPower="1.05" OffPower="0.65"/>
+        <SteadyState Duration="240" Power="0.65"/>
+        <IntervalsT Repeat="6" OnDuration="30" OffDuration="30" OnPower="1.05" OffPower="0.65"/>
+        <SteadyState Duration="360" Power="0.65"/>
+        <Cooldown Duration="360" PowerLow="0.7" PowerHigh="0.65"/>
+    </workout>
+</workout_file>

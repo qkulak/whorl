@@ -1,0 +1,70 @@
+<workout_file>
+    <author>Coach Claude</author>
+    <name>3x12 Threshold — 188W (80min)</name>
+    <description>Wed Aug 26 PM. SET FTP TO 185. 3x12min at 188W, 4min recoveries.
+
+SET AT THE TOP OF THE BAND (180-190W) ON PURPOSE. Two sessions now say your ceiling is above 185: the Aug 20 test held 4x8min at 185W with max HR 149, and Aug 23 held 45min CONTINUOUS at 159W with max HR 143. Neither of those is a rider at their limit.
+
+RECORD RPE PER BLOCK. That is the output of this session, same as the FTP test. If 188W reads 6-7/10 across all three, next Wednesday goes to 198-200W and race power moves up with it - which makes the sub-5 bike split materially easier.
+
+EAT FIRST. You ran 8x400m this morning. 40-60g carbs at least 30min before you start.
+
+HIDE THE HEART RATE FIELD. Watts and RPE only.
+
+SIM IS SUNDAY, not Saturday - so this sits 4 days out and can be a real session. Do not sandbag it.
+
+AERO where you can. Not required on the threshold blocks if it costs you power, but the Z2 block after should be in the bars.
+
+AFTER: 75-90g carb + 30-40g protein within 60min.</description>
+    <sportType>bike</sportType>
+    <tags>
+        <tag name="threshold"/>
+        <tag name="703"/>
+    </tags>
+    <workout>
+        <Warmup Duration="960" PowerLow="0.50" PowerHigh="0.75" Cadence="90">
+            <textevent timeoffset="10" message="80min: 16 warmup, 3x12min at 188W, 4min recoveries, 12min Z2"/>
+            <textevent timeoffset="40" message="Did you eat? Track this morning - you need carbs on board"/>
+            <textevent timeoffset="240" message="HIDE THE HR FIELD. Watts and RPE only"/>
+            <textevent timeoffset="660" message="Spin-up 1: 30s at 105rpm, same power"/>
+            <textevent timeoffset="780" message="Spin-up 2: 30s at 105rpm"/>
+            <textevent timeoffset="890" message="Settle. Block 1 next. 188W - a touch above the last test"/>
+        </Warmup>
+
+        <SteadyState Duration="720" Power="1.016" Cadence="90">
+            <textevent timeoffset="10" message="Block 1 of 3: 12min at 188W"/>
+            <textevent timeoffset="360" message="Halfway. Note the RPE - it decides next week's target"/>
+            <textevent timeoffset="660" message="1min left. Smooth to the line"/>
+        </SteadyState>
+        <SteadyState Duration="240" Power="0.55" Cadence="85">
+            <textevent timeoffset="10" message="4min easy. RPE for block 1? Remember it"/>
+            <textevent timeoffset="150" message="Drink"/>
+        </SteadyState>
+
+        <SteadyState Duration="720" Power="1.016" Cadence="90">
+            <textevent timeoffset="10" message="Block 2 of 3. Same 188W"/>
+            <textevent timeoffset="360" message="Halfway. Higher than block 1? A little is normal"/>
+            <textevent timeoffset="660" message="Final minute"/>
+        </SteadyState>
+        <SteadyState Duration="240" Power="0.55" Cadence="85">
+            <textevent timeoffset="10" message="4min easy. Eat. One to go"/>
+        </SteadyState>
+
+        <SteadyState Duration="720" Power="1.016" Cadence="90">
+            <textevent timeoffset="10" message="Block 3 of 3. This is the one that sets next week"/>
+            <textevent timeoffset="360" message="Halfway. Still 6-7/10? Then 200W next Wednesday"/>
+            <textevent timeoffset="660" message="Final minute. Finish it"/>
+        </SteadyState>
+
+        <SteadyState Duration="720" Power="0.72" Cadence="90">
+            <textevent timeoffset="10" message="12min Z2 at 133W. GET IN THE BARS - free position time"/>
+            <textevent timeoffset="400" message="Log the three RPE numbers before you forget them"/>
+        </SteadyState>
+
+        <Cooldown Duration="480" PowerLow="0.62" PowerHigh="0.45" Cadence="85">
+            <textevent timeoffset="10" message="8min down"/>
+            <textevent timeoffset="240" message="75-90g carb + 30-40g protein within the hour"/>
+            <textevent timeoffset="420" message="Send me the RPEs and the average watts held"/>
+        </Cooldown>
+    </workout>
+</workout_file>

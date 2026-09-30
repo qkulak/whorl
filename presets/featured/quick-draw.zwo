@@ -1,0 +1,15 @@
+<workout_file>
+    <author>Whorl</author>
+    <name>Quick Draw</name>
+    <description>Short, punchy sweet-spot intervals with brief recoveries. Time-efficient.</description>
+    <category>Sweet Spot</category>
+    <sportType>bike</sportType>
+    <tags>
+            </tags>
+    <workout>
+        <Warmup Duration="300" PowerLow="0.45" PowerHigh="0.75"/>
+        <IntervalsT Repeat="6" OnDuration="120" OffDuration="60" OnPower="0.95" OffPower="0.7"/>
+        <SteadyState Duration="225" Power="0.6"/>
+        <Cooldown Duration="120" PowerLow="0.72" PowerHigh="0.55"/>
+    </workout>
+</workout_file>

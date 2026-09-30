@@ -1,0 +1,15 @@
+<workout_file>
+    <author>Whorl</author>
+    <name>VO2 Max 5x4</name>
+    <description>Five 4-minute efforts at 110% FTP with 4 minutes recovery. Main set as specified; the warmup and cooldown are added.</description>
+    <category>VO2 Max</category>
+    <sportType>bike</sportType>
+    <tags>
+        <tag name="classic"/>
+    </tags>
+    <workout>
+        <Warmup Duration="900" PowerLow="0.45" PowerHigh="0.75"/>
+        <IntervalsT Repeat="5" OnDuration="240" OffDuration="240" OnPower="1.1" OffPower="0.5"/>
+        <Cooldown Duration="600" PowerLow="0.6" PowerHigh="0.4"/>
+    </workout>
+</workout_file>

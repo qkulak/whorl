@@ -80,6 +80,8 @@ export function parseZwo(xml) {
     name: text("name") || "Untitled workout",
     author: text("author"),
     description: text("description"),
+    category: text("category"),
+    tags: [...root.querySelectorAll("tags > tag")].map((t) => t.getAttribute("name")).filter(Boolean),
     blocks,
   };
 }
@@ -130,8 +132,8 @@ export function serializeZwo(w) {
     <author>${esc(w.author || "")}</author>
     <name>${esc(w.name || "Untitled workout")}</name>
     <description>${esc(w.description || "")}</description>
-    <sportType>bike</sportType>
-    <tags/>
+${w.category ? `    <category>${esc(w.category)}</category>\n` : ""}    <sportType>bike</sportType>
+    ${w.tags?.length ? `<tags>\n${w.tags.map((t) => `        <tag name="${esc(t)}"/>`).join("\n")}\n    </tags>` : "<tags/>"}
     <workout>
 ${lines.join("\n")}
     </workout>
@@ -219,6 +221,35 @@ export const ZONES = [
 
 export function zoneFor(fraction) {
   return ZONES.find((z) => fraction < z.max) || ZONES[ZONES.length - 1];
+}
+
+// ---------- categories ----------
+
+export const CATEGORIES = ["Recovery", "Endurance", "Tempo", "Sweet Spot", "Threshold", "VO2 Max", "Anaerobic"];
+
+// What a workout trains, judged by how long it spends at each intensity.
+// An explicit <category> in the file wins if it names one of ours.
+export function categorize(workout, timeline) {
+  const named = CATEGORIES.find((c) => c.toLowerCase() === (workout.category || "").toLowerCase());
+  if (named) return named;
+  const at = (lo, hi = Infinity) => {
+    let t = 0;
+    for (const s of timeline.segments) {
+      if (s.free) continue;
+      const f = (s.from + s.to) / 2;
+      if (f >= lo && f < hi) t += s.duration;
+    }
+    return t;
+  };
+  // Bands overlap the zone edges on purpose: 105% is still threshold work,
+  // 95% is still sweet spot.
+  const vo2 = at(1.06);
+  if (vo2 >= 300) return at(1.3) / vo2 > 0.5 ? "Anaerobic" : "VO2 Max";
+  if (at(1.2) >= 30) return "Anaerobic";
+  if (at(0.96, 1.06) >= 360) return "Threshold";
+  if (at(0.88, 0.96) >= 600) return "Sweet Spot";
+  if (at(0.76, 0.88) >= 600) return "Tempo";
+  return stats(timeline).IF < 0.6 ? "Recovery" : "Endurance";
 }
 
 // ---------- summary numbers ----------

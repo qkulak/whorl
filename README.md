@@ -5,8 +5,9 @@ A local web app for building `.zwo` workouts and riding them on a smart trainer 
 ```
 Browser (Web Bluetooth) ──FTMS──▶ trainer   (target watts every interval / ramp step)
         │           ◀──────────── power, cadence, speed, HR
-        └── /api/workouts ──▶ server.py ──▶ workouts/*.zwo
-            /api/rides    ──▶ server.py ──▶ rides/*.json
+        ├── /api/presets  ──▶ server.py ──▶ presets/<collection>/*.zwo
+        ├── /api/workouts ──▶ server.py ──▶ workouts/*.zwo
+        └── /api/rides    ──▶ server.py ──▶ rides/*.json
 ```
 
 ## Run it
@@ -21,7 +22,7 @@ Open http://localhost:8010 in **Chrome or Edge** (Web Bluetooth isn't in Safari/
 
 1. **Connect** your trainer. Smart trainers that speak FTMS get full ERG control. A power-only device still works, but it can't set resistance. Heart rate is optional. No hardware handy? Click **Simulate trainer**.
 2. Set your **FTP**. Every target in a `.zwo` is a % of FTP.
-3. Pick a workout and hit **START RIDE**. The clock starts when you start pedaling.
+3. Pick a workout from **Browse** or **My workouts** and hit **START RIDE**. The clock starts when you start pedaling.
 
 On the ride screen:
 
@@ -41,11 +42,26 @@ Auto-pause stops the clock after 3 s of zero power and resumes when you pedal. B
 
 Finished rides can be saved to `rides/` as JSON (per-second power, HR, cadence, and target, plus a summary).
 
+## Browse
+
+**Browse** lists every preset workout. You can filter by collection, by type (Recovery → Anaerobic, colored by zone) and by length, or search. Click a card to select it, double-click to ride, or open **Details** for the full chart and description.
+
+| Collection | Folder | What it is |
+|---|---|---|
+| FEATURED | `presets/featured/` | 14 named workouts, each built to an exact duration and min/max/average % FTP, following any published interval outline. Each description says it's an approximation. |
+| Classics | `presets/classics/` | Fully specified protocols from published coaching protocols (2×20 sweet spot, Rønnestad 30/15s, 5×4 VO2…) plus the original samples. |
+| Training plan | `presets/plan/` | The bike workouts from `trainingplancalc`, copied as-is. |
+| Uploaded | `presets/uploaded/` | Anything you add with **⇪ Upload .zwo** (or by dragging files onto Browse). |
+
+If a workout's description says "Set FTP to 185", Details offers a **Use FTP 185 W** button.
+
+Any folder you add under `presets/` shows up as its own collection. Categories come from a `<category>` element when the file has one; otherwise they're inferred from time spent at each intensity. `python3 scripts/build_presets.py` regenerates the FEATURED and Classics files and checks each FEATURED rebuild against the published numbers.
+
+Only uploads and your own workouts can be deleted. Bundled presets can't.
+
 ## Build
 
-**+ New workout** or **Edit** on any card opens the builder. You can add Warmup / Steady / Intervals / Ramp / Cooldown / Free-ride blocks, then reorder, duplicate, or delete them. Times are `m:ss`, power is % FTP, and the watts at your current FTP show next to each field. **Save** writes the file to `workouts/`, and **Download .zwo** gives you a file you can use in Zwift, TrainerRoad, etc.
-
-To import `.zwo` files, use **Import .zwo** or drag them onto the library. You can also drop files straight into `workouts/`.
+**My workouts** holds the workouts you build. Use **+ New workout**, or **Copy & edit** on any preset (the preset itself is untouched). The builder lets you add Warmup / Steady / Intervals / Ramp / Cooldown / Free-ride blocks, then reorder, duplicate, or delete them. Times are `m:ss`, power is % FTP, and the watts at your current FTP show next to each field. **Save** writes the file to `workouts/`, and **Download .zwo** gives you a file you can use in Zwift, TrainerRoad, etc.
 
 ## Notes
 

@@ -1,0 +1,54 @@
+<workout_file>
+    <author>Whorl</author>
+    <name>Six Over-Unders</name>
+    <description>Six 4-minute threshold intervals that alternate just below and just above FTP, with aerobic recoveries. Builds lactate clearance.</description>
+    <category>Threshold</category>
+    <sportType>bike</sportType>
+    <tags>
+            </tags>
+    <workout>
+        <Warmup Duration="600" PowerLow="0.45" PowerHigh="0.75"/>
+        <SteadyState Duration="60" Power="0.95">
+            <textevent timeoffset="0" message="Threshold 1 of 6: under / over / under / over"/>
+        </SteadyState>
+        <SteadyState Duration="60" Power="1.05"/>
+        <SteadyState Duration="60" Power="0.95"/>
+        <SteadyState Duration="60" Power="1.05"/>
+        <SteadyState Duration="240" Power="0.55"/>
+        <SteadyState Duration="60" Power="0.95">
+            <textevent timeoffset="0" message="Threshold 2 of 6: under / over / under / over"/>
+        </SteadyState>
+        <SteadyState Duration="60" Power="1.05"/>
+        <SteadyState Duration="60" Power="0.95"/>
+        <SteadyState Duration="60" Power="1.05"/>
+        <SteadyState Duration="240" Power="0.55"/>
+        <SteadyState Duration="60" Power="0.95">
+            <textevent timeoffset="0" message="Threshold 3 of 6: under / over / under / over"/>
+        </SteadyState>
+        <SteadyState Duration="60" Power="1.05"/>
+        <SteadyState Duration="60" Power="0.95"/>
+        <SteadyState Duration="60" Power="1.05"/>
+        <SteadyState Duration="240" Power="0.55"/>
+        <SteadyState Duration="60" Power="0.95">
+            <textevent timeoffset="0" message="Threshold 4 of 6: under / over / under / over"/>
+        </SteadyState>
+        <SteadyState Duration="60" Power="1.05"/>
+        <SteadyState Duration="60" Power="0.95"/>
+        <SteadyState Duration="60" Power="1.05"/>
+        <SteadyState Duration="240" Power="0.55"/>
+        <SteadyState Duration="60" Power="0.95">
+            <textevent timeoffset="0" message="Threshold 5 of 6: under / over / under / over"/>
+        </SteadyState>
+        <SteadyState Duration="60" Power="1.05"/>
+        <SteadyState Duration="60" Power="0.95"/>
+        <SteadyState Duration="60" Power="1.05"/>
+        <SteadyState Duration="240" Power="0.55"/>
+        <SteadyState Duration="60" Power="0.95">
+            <textevent timeoffset="0" message="Threshold 6 of 6: under / over / under / over"/>
+        </SteadyState>
+        <SteadyState Duration="60" Power="1.05"/>
+        <SteadyState Duration="60" Power="0.95"/>
+        <SteadyState Duration="60" Power="1.05"/>
+        <SteadyState Duration="240" Power="0.55"/>
+    </workout>
+</workout_file>

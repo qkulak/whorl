@@ -1,0 +1,74 @@
+<workout_file>
+    <author>Coach Claude</author>
+    <name>Race Power Aero — 2x25 + 35 (2hr)</name>
+    <description>Fri Aug 21. Makes up the aero session lost Wednesday to the drivetrain. SET FTP TO 185.
+
+2x25min at ~161W in full aero, 8min between, then a 35min Z2 block also in aero. 85 MINUTES TOTAL IN POSITION - track that number against race day's 2h36.
+
+THE POSITION IS THE SESSION. Power is moderate on purpose - RPE 5.5-6.5 throughout. What you are training is holding aero without coming up. Race day is 2h36 of it, and the legs are never what fails: it is the neck, shoulders, hip flexors and saddle. Only time in position fixes that, and it is where the remaining 2-3 minutes of the sub-5 bike split has to come from.
+
+The closing 35min Z2 block is deliberately in aero too. Holding position when the effort is easy but you have already been down for an hour is closer to race-day hour three than the hard blocks are.
+
+DO NOT COME UP during any block. If you have to, note the minute. That number is the output of this session and it should climb every week.
+
+GEARING: still stuck in the small gear, so expect harsh ERG feel and a poor cadence reading. The Kickr measures power directly so the watts are fine - ignore the RPM number. Get the shifting fixed before Aug 29.
+
+TOMORROW IS THE 13mi LONG RUN with 30min at race pace. Do not overcook this.
+
+EAT: 40-60g carb across the ride. AFTER: 75-90g carb + 30-40g protein within 60min.</description>
+    <sportType>bike</sportType>
+    <tags>
+        <tag name="racepower"/>
+        <tag name="aero"/>
+        <tag name="703"/>
+    </tags>
+    <workout>
+        <Warmup Duration="900" PowerLow="0.50" PowerHigh="0.72" Cadence="90">
+            <textevent timeoffset="10" message="2hr: 15 warmup, 2x25 at 161W aero, then 35min Z2 aero. 85min in position"/>
+            <textevent timeoffset="180" message="HIDE THE HR FIELD. Watts and RPE only. Ignore the cadence number too"/>
+            <textevent timeoffset="600" message="Into aero now, stay down for the rest of the warmup"/>
+            <textevent timeoffset="840" message="Setup check: forearms flat, elbows narrow, back flat, head low"/>
+        </Warmup>
+
+        <SteadyState Duration="1500" Power="0.87" Cadence="88">
+            <textevent timeoffset="10" message="Block 1 of 2. 25min at 161W. AERO the whole way"/>
+            <textevent timeoffset="180" message="Shoulders forward and down, not shrugged up"/>
+            <textevent timeoffset="600" message="Look up with your EYES, not by lifting your head"/>
+            <textevent timeoffset="750" message="Halfway. Where is the discomfort - neck, shoulders, hips, saddle?"/>
+            <textevent timeoffset="1200" message="20min in. This is where race day starts to bite. Stay down"/>
+            <textevent timeoffset="1440" message="Last minute of block 1"/>
+        </SteadyState>
+
+        <SteadyState Duration="480" Power="0.55" Cadence="85">
+            <textevent timeoffset="10" message="8min easy. Sit up, drink, eat. Roll the shoulders out"/>
+            <textevent timeoffset="300" message="Stay down for all 25? If not, what minute did you come up?"/>
+            <textevent timeoffset="420" message="Back into aero for the last 60s"/>
+        </SteadyState>
+
+        <SteadyState Duration="1500" Power="0.87" Cadence="88">
+            <textevent timeoffset="10" message="Block 2 of 2. Same power, same position"/>
+            <textevent timeoffset="300" message="Second block is the one that counts - fatigue breaks position, not power"/>
+            <textevent timeoffset="750" message="Halfway. Still holding the bars?"/>
+            <textevent timeoffset="1320" message="3min left. On race day you would have 90min still to go"/>
+            <textevent timeoffset="1440" message="Final minute"/>
+        </SteadyState>
+
+        <SteadyState Duration="300" Power="0.55" Cadence="85">
+            <textevent timeoffset="10" message="5min easy. Eat. One block left and it is the easy one"/>
+        </SteadyState>
+
+        <SteadyState Duration="2100" Power="0.70" Cadence="90">
+            <textevent timeoffset="10" message="35min Z2 at 130W - but STAY IN AERO. This is the race-hour-three block"/>
+            <textevent timeoffset="480" message="Easy power, hard position. That combination is the whole point"/>
+            <textevent timeoffset="1200" message="20min in. Legs are fine - it is the neck and shoulders talking now"/>
+            <textevent timeoffset="1500" message="10min left. Sit up only if you genuinely have to, and note the minute"/>
+            <textevent timeoffset="1900" message="Nearly there. Total time down today is the number that matters"/>
+        </SteadyState>
+
+        <Cooldown Duration="420" PowerLow="0.62" PowerHigh="0.45" Cadence="85">
+            <textevent timeoffset="10" message="7min down. Sit up, stretch neck and hip flexors"/>
+            <textevent timeoffset="180" message="LOG IT: longest unbroken time in aero, and what hurt first"/>
+            <textevent timeoffset="360" message="75-90g carb + 30-40g protein. 13mi long run tomorrow"/>
+        </Cooldown>
+    </workout>
+</workout_file>

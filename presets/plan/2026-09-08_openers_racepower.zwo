@@ -1,0 +1,72 @@
+<workout_file>
+    <author>Coach Claude</author>
+    <name>Race Week Openers — 5x2 @ 181W (45min)</name>
+    <description>Tue Sep 8. FIVE DAYS TO SANTA CRUZ. SET FTP TO 185.
+
+45min easy with 5x2min at 181W. This builds nothing and it is not supposed to. The job is to keep the legs and the nervous system awake while you shed fatigue - short touches of race intensity, long recoveries, low total load.
+
+IT SHOULD FEEL EASY AND YOU SHOULD FINISH WANTING MORE. If you feel like adding, do not. Nothing you do this week improves race day; plenty could cost you.
+
+STAY IN AERO for the 2min efforts. Last few chances to feel race position at race power before Sunday.
+
+181W - note how it feels - that is the sensation you are hunting for in the first 20min on Sunday when adrenaline makes everything feel easy.
+
+Travel Thursday. Wednesday is the last real session at home, then it is shakeouts.
+
+FUEL NORMALLY. Race week is not the time to change anything - same breakfast, same products, same timing you have used all block.</description>
+    <sportType>bike</sportType>
+    <tags>
+        <tag name="openers"/>
+        <tag name="raceweek"/>
+        <tag name="703"/>
+    </tags>
+    <workout>
+        <Warmup Duration="720" PowerLow="0.50" PowerHigh="0.66" Cadence="90">
+            <textevent timeoffset="10" message="Openers. 5 days out. 12min warmup, 5x2min at 161W, easy home"/>
+            <textevent timeoffset="240" message="Easy. Nothing today is a workout"/>
+            <textevent timeoffset="540" message="Into aero for the last 2min of warmup"/>
+        </Warmup>
+
+        <SteadyState Duration="120" Power="0.978" Cadence="92">
+            <textevent timeoffset="5" message="1 of 5: 2min at 181W. AERO"/>
+        </SteadyState>
+        <SteadyState Duration="180" Power="0.55" Cadence="88">
+            <textevent timeoffset="5" message="3min easy. Sit up, relax"/>
+        </SteadyState>
+
+        <SteadyState Duration="120" Power="0.978" Cadence="92">
+            <textevent timeoffset="5" message="2 of 5. Back into aero. Note how 181W feels"/>
+        </SteadyState>
+        <SteadyState Duration="180" Power="0.55" Cadence="88">
+            <textevent timeoffset="5" message="3min easy"/>
+        </SteadyState>
+
+        <SteadyState Duration="120" Power="0.978" Cadence="92">
+            <textevent timeoffset="5" message="3 of 5. Smooth, no surging"/>
+        </SteadyState>
+        <SteadyState Duration="180" Power="0.55" Cadence="88">
+            <textevent timeoffset="5" message="3min easy. Legs should feel snappy, not tired"/>
+        </SteadyState>
+
+        <SteadyState Duration="120" Power="0.978" Cadence="92">
+            <textevent timeoffset="5" message="4 of 5. Aero, relaxed shoulders"/>
+        </SteadyState>
+        <SteadyState Duration="180" Power="0.55" Cadence="88">
+            <textevent timeoffset="5" message="3min easy. One to go"/>
+        </SteadyState>
+
+        <SteadyState Duration="120" Power="0.978" Cadence="92">
+            <textevent timeoffset="5" message="5 of 5. Last one. Finish in the bars"/>
+        </SteadyState>
+
+        <SteadyState Duration="300" Power="0.66" Cadence="90">
+            <textevent timeoffset="10" message="5min easy Z2. Done with the efforts"/>
+        </SteadyState>
+
+        <Cooldown Duration="360" PowerLow="0.60" PowerHigh="0.45" Cadence="85">
+            <textevent timeoffset="10" message="6min down. That is it - short on purpose"/>
+            <textevent timeoffset="180" message="Wednesday is the last session at home. Travel Thursday"/>
+            <textevent timeoffset="300" message="Eat and sleep. Freshness is the only thing left to gain"/>
+        </Cooldown>
+    </workout>
+</workout_file>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<workout_file>
+  <author>Training Plan Calc</author>
+  <name>Week 1 Thu – Z2 + Sweet Spot</name>
+  <description>Easy Z2 with 3x5 min at sweet spot (88-93% FTP). Stay fresh.</description>
+  <sportType>bike</sportType>
+  <tags/>
+  <workout>
+    <!-- 10 min warmup -->
+    <Warmup Duration="600" PowerLow="0.45" PowerHigh="0.65"/>
+    <!-- 15 min steady Z2 -->
+    <SteadyState Duration="900" Power="0.65"/>
+    <!-- 3x5 min sweet spot @ 90% FTP, 5 min Z2 recovery -->
+    <IntervalsT Repeat="3" OnDuration="300" OffDuration="300" OnPower="0.90" OffPower="0.65"/>
+    <!-- 10 min Z2 -->
+    <SteadyState Duration="600" Power="0.65"/>
+    <!-- 10 min cooldown -->
+    <Cooldown Duration="600" PowerLow="0.65" PowerHigh="0.40"/>
+  </workout>
+</workout_file>

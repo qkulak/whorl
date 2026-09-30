@@ -1,0 +1,15 @@
+<workout_file>
+    <author>Whorl</author>
+    <name>VO2 Max 6x3</name>
+    <description>Six 3-minute efforts at 115% FTP, 3 on / 3 off. Main set as specified; the warmup and cooldown are added.</description>
+    <category>VO2 Max</category>
+    <sportType>bike</sportType>
+    <tags>
+        <tag name="classic"/>
+    </tags>
+    <workout>
+        <Warmup Duration="900" PowerLow="0.45" PowerHigh="0.75"/>
+        <IntervalsT Repeat="6" OnDuration="180" OffDuration="180" OnPower="1.15" OffPower="0.5"/>
+        <Cooldown Duration="600" PowerLow="0.6" PowerHigh="0.4"/>
+    </workout>
+</workout_file>

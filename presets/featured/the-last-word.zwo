@@ -1,0 +1,26 @@
+<workout_file>
+    <author>Whorl</author>
+    <name>The Last Word</name>
+    <description>Tempo at 80%, then sweet spot at 90%, then a short harder effort to finish strong.</description>
+    <category>Sweet Spot</category>
+    <sportType>bike</sportType>
+    <tags>
+            </tags>
+    <workout>
+        <Warmup Duration="600" PowerLow="0.45" PowerHigh="0.7"/>
+        <SteadyState Duration="300" Power="0.8"/>
+        <SteadyState Duration="180" Power="0.46"/>
+        <SteadyState Duration="300" Power="0.8"/>
+        <SteadyState Duration="180" Power="0.46"/>
+        <SteadyState Duration="300" Power="0.8"/>
+        <SteadyState Duration="180" Power="0.46"/>
+        <SteadyState Duration="300" Power="0.9"/>
+        <SteadyState Duration="180" Power="0.46"/>
+        <SteadyState Duration="300" Power="0.9"/>
+        <SteadyState Duration="180" Power="0.46"/>
+        <SteadyState Duration="60" Power="0.95">
+            <textevent timeoffset="0" message="The last word: one minute, finish strong"/>
+        </SteadyState>
+        <Cooldown Duration="150" PowerLow="0.55" PowerHigh="0.45"/>
+    </workout>
+</workout_file>

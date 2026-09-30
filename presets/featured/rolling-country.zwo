@@ -1,0 +1,28 @@
+<workout_file>
+    <author>Whorl</author>
+    <name>Rolling Country</name>
+    <description>Endurance ride that rolls between easy and upper zone 2, like steady terrain. Comfortable cadence throughout.</description>
+    <category>Endurance</category>
+    <sportType>bike</sportType>
+    <tags>
+            </tags>
+    <workout>
+        <Warmup Duration="300" PowerLow="0.55" PowerHigh="0.65"/>
+        <SteadyState Duration="240" Power="0.65"/>
+        <SteadyState Duration="120" Power="0.75"/>
+        <SteadyState Duration="180" Power="0.63"/>
+        <SteadyState Duration="240" Power="0.67"/>
+        <SteadyState Duration="120" Power="0.75"/>
+        <SteadyState Duration="180" Power="0.63"/>
+        <SteadyState Duration="240" Power="0.67"/>
+        <SteadyState Duration="120" Power="0.75"/>
+        <SteadyState Duration="180" Power="0.63"/>
+        <SteadyState Duration="240" Power="0.67"/>
+        <SteadyState Duration="120" Power="0.75"/>
+        <SteadyState Duration="180" Power="0.63"/>
+        <SteadyState Duration="240" Power="0.67"/>
+        <SteadyState Duration="120" Power="0.75"/>
+        <SteadyState Duration="180" Power="0.63"/>
+        <Cooldown Duration="300" PowerLow="0.65" PowerHigh="0.55"/>
+    </workout>
+</workout_file>

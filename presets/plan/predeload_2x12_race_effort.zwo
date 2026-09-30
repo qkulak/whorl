@@ -1,0 +1,37 @@
+<workout_file>
+    <author>Coach Claude</author>
+    <name>Pre-Deload 2x12 Race Effort (75min)</name>
+    <description>Last ride before 9-day travel deload. Set FTP to 190. 2x12min at ~165W race effort in aero, rest easy. ABORT RULES: if HR passes ~158 in block 1 or RPE over 7/10, sit up and ride the rest easy. If warmup legs feel like Sunday, skip the blocks entirely and spin 60-75min easy.</description>
+    <sportType>bike</sportType>
+    <tags>
+        <tag name="raceeffort"/>
+        <tag name="predeload"/>
+    </tags>
+    <workout>
+        <Warmup Duration="900" PowerLow="0.50" PowerHigh="0.68">
+            <textevent timeoffset="10" message="75min: 2x12 at race effort (~165W), then easy"/>
+            <textevent timeoffset="600" message="Gut check: how are the legs? Bad = skip blocks, spin easy"/>
+            <textevent timeoffset="810" message="Aero position for the last 90s of warmup"/>
+        </Warmup>
+        <SteadyState Duration="720" Power="0.87">
+            <textevent timeoffset="10" message="Block 1 of 2: 12min at 165W, full aero"/>
+            <textevent timeoffset="360" message="Halfway. If HR is past 158, sit up and ride easy - no negotiating"/>
+            <textevent timeoffset="660" message="Last minute, keep it smooth"/>
+        </SteadyState>
+        <SteadyState Duration="300" Power="0.63">
+            <textevent timeoffset="10" message="5min easy. Drink"/>
+        </SteadyState>
+        <SteadyState Duration="720" Power="0.87">
+            <textevent timeoffset="10" message="Block 2 of 2: same deal, 165W aero"/>
+            <textevent timeoffset="360" message="Halfway. HR under 158 and RPE 7 or less, or shut it down"/>
+            <textevent timeoffset="660" message="1min. This carries you through the deload"/>
+        </SteadyState>
+        <SteadyState Duration="1560" Power="0.60">
+            <textevent timeoffset="10" message="Work's done. 26min easy - conversational, spinny"/>
+            <textevent timeoffset="1440" message="Almost there. Swim tomorrow, then rest. See you in 9 days"/>
+        </SteadyState>
+        <Cooldown Duration="300" PowerLow="0.58" PowerHigh="0.48">
+            <textevent timeoffset="10" message="5min spin down"/>
+        </Cooldown>
+    </workout>
+</workout_file>

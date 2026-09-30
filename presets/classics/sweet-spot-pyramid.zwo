@@ -1,0 +1,23 @@
+<workout_file>
+    <author>Whorl</author>
+    <name>Sweet Spot Pyramid</name>
+    <description>Sweet spot pyramid: 5-10-15-10-5 minutes at 90% FTP with 3 minutes easy between. Main set as specified; the warmup and cooldown are added.</description>
+    <category>Sweet Spot</category>
+    <sportType>bike</sportType>
+    <tags>
+        <tag name="classic"/>
+    </tags>
+    <workout>
+        <Warmup Duration="600" PowerLow="0.45" PowerHigh="0.75"/>
+        <SteadyState Duration="300" Power="0.9"/>
+        <SteadyState Duration="180" Power="0.55"/>
+        <SteadyState Duration="600" Power="0.9"/>
+        <SteadyState Duration="180" Power="0.55"/>
+        <SteadyState Duration="900" Power="0.9"/>
+        <SteadyState Duration="180" Power="0.55"/>
+        <SteadyState Duration="600" Power="0.9"/>
+        <SteadyState Duration="180" Power="0.55"/>
+        <SteadyState Duration="300" Power="0.9"/>
+        <Cooldown Duration="600" PowerLow="0.6" PowerHigh="0.4"/>
+    </workout>
+</workout_file>

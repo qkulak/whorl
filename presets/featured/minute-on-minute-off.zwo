@@ -1,0 +1,17 @@
+<workout_file>
+    <author>Whorl</author>
+    <name>Minute On, Minute Off</name>
+    <description>VO2 max: one minute hard, one minute easy in zone 1, in two sets. The second set is a notch harder.</description>
+    <category>VO2 Max</category>
+    <sportType>bike</sportType>
+    <tags>
+            </tags>
+    <workout>
+        <Warmup Duration="600" PowerLow="0.45" PowerHigh="0.75"/>
+        <SteadyState Duration="300" Power="0.55"/>
+        <IntervalsT Repeat="8" OnDuration="60" OffDuration="60" OnPower="1.15" OffPower="0.43"/>
+        <SteadyState Duration="300" Power="0.5"/>
+        <IntervalsT Repeat="8" OnDuration="60" OffDuration="60" OnPower="1.2" OffPower="0.43"/>
+        <Cooldown Duration="540" PowerLow="0.6" PowerHigh="0.4"/>
+    </workout>
+</workout_file>

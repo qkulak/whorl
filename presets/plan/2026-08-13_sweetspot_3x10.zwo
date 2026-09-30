@@ -1,0 +1,72 @@
+<workout_file>
+    <author>Coach Claude</author>
+    <name>Sweet Spot 3x10 (75min) — Reset Week</name>
+    <description>Thu Aug 13, moved to AM after pool closure. SET FTP TO 185 in Zwift before starting — that is the current working estimate, not a tested number.
+
+3x10min at ~170W (165-175W band) with 5min easy between, then 10min Z2 and cooldown.
+
+EAT FIRST. 40-60g carbs at least 25min before you start — the warmup doubles as digestion time. Riding sweet spot fasted at 6:30am is the exact pattern behind the low testosterone and free T3 on the Aug 11 panel. This is not optional today.
+
+IGNORE HEART RATE. Observed HR has drifted ~20bpm since June and the cause is still unresolved (50k recovery failure, energy deficit, heat — all confounded). Hide the HR field if you can. Judge this session on WATTS and RPE only.
+
+RPE ceiling 7/10. If holding 170W feels like RPE 8+, stop the intervals and spin easy — that is real information, not weakness. Morning power runs 3-5% below evening for most people, so do not over-read a hard-feeling first block.
+
+TODAY IS NOT THE FTP TEST. Aug 19 (4x8min @ 180-190W) is. A compromised read this morning costs nothing.
+
+You raced a 5k TT yesterday (17:38, load 183). This is a reset week. The point is to reintroduce bike quality, not to prove anything.
+
+AFTER: 75-90g carb + 30-40g protein within 60min. Not at 10am.</description>
+    <sportType>bike</sportType>
+    <tags>
+        <tag name="sweetspot"/>
+        <tag name="703"/>
+        <tag name="resetweek"/>
+    </tags>
+    <workout>
+        <Warmup Duration="900" PowerLow="0.50" PowerHigh="0.72" Cadence="90">
+            <textevent timeoffset="10" message="75min: 15 warmup, 3x10min at 170W, 10min Z2, cooldown"/>
+            <textevent timeoffset="30" message="Did you eat? 40-60g carbs should already be in. If not, sip a drink mix now"/>
+            <textevent timeoffset="240" message="HIDE THE HR FIELD. Watts and RPE only today"/>
+            <textevent timeoffset="540" message="3x30s spin-ups coming. Same power, 105rpm, relaxed shoulders"/>
+            <textevent timeoffset="660" message="Spin-up 1: 30s at 105rpm"/>
+            <textevent timeoffset="740" message="Spin-up 2: 30s at 105rpm"/>
+            <textevent timeoffset="820" message="Spin-up 3: 30s at 105rpm, then settle"/>
+        </Warmup>
+
+        <SteadyState Duration="600" Power="0.92" Cadence="90">
+            <textevent timeoffset="10" message="Block 1 of 3: 10min at 170W. Target RPE 6-7"/>
+            <textevent timeoffset="180" message="Settle in. This should feel controlled, not urgent"/>
+            <textevent timeoffset="300" message="Halfway. RPE check — 8 or above means stop after this block"/>
+            <textevent timeoffset="540" message="Last minute. Smooth, no surge"/>
+        </SteadyState>
+        <SteadyState Duration="300" Power="0.60" Cadence="85">
+            <textevent timeoffset="10" message="5min easy. Drink. First bike quality in a while — that felt how?"/>
+        </SteadyState>
+
+        <SteadyState Duration="600" Power="0.92" Cadence="90">
+            <textevent timeoffset="10" message="Block 2 of 3. Back to 170W"/>
+            <textevent timeoffset="300" message="Halfway. Same RPE as block 1, or higher?"/>
+            <textevent timeoffset="540" message="1min left. Hold the watts"/>
+        </SteadyState>
+        <SteadyState Duration="300" Power="0.60" Cadence="85">
+            <textevent timeoffset="10" message="5min easy. Take on some carbs if you have them"/>
+        </SteadyState>
+
+        <SteadyState Duration="600" Power="0.92" Cadence="90">
+            <textevent timeoffset="10" message="Block 3 of 3. This is the one that tells us where FTP sits"/>
+            <textevent timeoffset="300" message="Halfway. If 170W still reads 6-7/10, Aug 19 goes at 190-200W"/>
+            <textevent timeoffset="540" message="Final minute. Done after this"/>
+        </SteadyState>
+
+        <SteadyState Duration="600" Power="0.72" Cadence="90">
+            <textevent timeoffset="10" message="10min Z2 at 133W. Free aerobic volume, no cost"/>
+            <textevent timeoffset="300" message="Get into aero if you are on the TT bike — position practice is free speed"/>
+        </SteadyState>
+
+        <Cooldown Duration="600" PowerLow="0.65" PowerHigh="0.45" Cadence="85">
+            <textevent timeoffset="10" message="10min down. Note peak RPE on the blocks — that sets Aug 19"/>
+            <textevent timeoffset="300" message="Post-ride: 75-90g carb + 30-40g protein within the hour. Not at 10am"/>
+            <textevent timeoffset="540" message="Log the average watts you actually held, not the target"/>
+        </Cooldown>
+    </workout>
+</workout_file>

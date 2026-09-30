@@ -1,0 +1,17 @@
+<workout_file>
+    <author>Whorl</author>
+    <name>Five-Minute Fury</name>
+    <description>Four 5-minute all-out VO2 efforts after a warmup and some shorter openers. The ERG target is a floor. If you have more, press + to raise it.</description>
+    <category>VO2 Max</category>
+    <sportType>bike</sportType>
+    <tags>
+            </tags>
+    <workout>
+        <Warmup Duration="600" PowerLow="0.45" PowerHigh="0.75"/>
+        <IntervalsT Repeat="3" OnDuration="60" OffDuration="60" OnPower="1" OffPower="0.55"/>
+        <SteadyState Duration="240" Power="0.5"/>
+        <IntervalsT Repeat="4" OnDuration="300" OffDuration="300" OnPower="1.15" OffPower="0.47">
+            <textevent timeoffset="0" message="All out for 5 minutes. Press + if the target feels low"/>
+        </IntervalsT>
+    </workout>
+</workout_file>

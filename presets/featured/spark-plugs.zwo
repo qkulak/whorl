@@ -1,0 +1,21 @@
+<workout_file>
+    <author>Whorl</author>
+    <name>Spark Plugs</name>
+    <description>Sprint power: two sets of five 8-second bursts. Spin the cadence up just before each one, and switch ERG off in the menu if you want a true sprint.</description>
+    <category>Anaerobic</category>
+    <sportType>bike</sportType>
+    <tags>
+            </tags>
+    <workout>
+        <Warmup Duration="900" PowerLow="0.45" PowerHigh="0.75"/>
+        <SteadyState Duration="300" Power="0.65"/>
+        <IntervalsT Repeat="5" OnDuration="8" OffDuration="172" OnPower="2" OffPower="0.55">
+            <textevent timeoffset="0" message="Set 1: 5 bursts of 8 seconds. Spin up before each"/>
+        </IntervalsT>
+        <SteadyState Duration="300" Power="0.55"/>
+        <IntervalsT Repeat="5" OnDuration="8" OffDuration="172" OnPower="2" OffPower="0.55">
+            <textevent timeoffset="0" message="Set 2: 5 more bursts"/>
+        </IntervalsT>
+        <Cooldown Duration="120" PowerLow="0.55" PowerHigh="0.4"/>
+    </workout>
+</workout_file>

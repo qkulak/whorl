@@ -1,0 +1,49 @@
+<workout_file>
+    <author>TrainingPlanCalc</author>
+    <name>Z2 Endurance Waves - 1h50m</name>
+    <description>Undulating Z2 endurance ride with rolling power waves. 10 min warmup, 3 ascending waves with recovery dips between, finishing kick, 10 min cooldown. All efforts stay in Z2 (56-76% FTP).</description>
+    <sportType>bike</sportType>
+    <tags>
+        <tag name="Endurance"/>
+        <tag name="Z2"/>
+    </tags>
+    <workout>
+        <!-- Warmup: 10 min ramp 41% to 59% FTP -->
+        <Warmup Duration="600" PowerLow="0.41" PowerHigh="0.59"/>
+
+        <!-- Wave 1: step up (20 min) -->
+        <SteadyState Duration="300" Power="0.59"/>
+        <SteadyState Duration="300" Power="0.64"/>
+        <SteadyState Duration="300" Power="0.69"/>
+        <SteadyState Duration="300" Power="0.74"/>
+
+        <!-- Recovery dip (5 min) -->
+        <SteadyState Duration="300" Power="0.56"/>
+
+        <!-- Wave 2: step up higher (20 min) -->
+        <SteadyState Duration="300" Power="0.61"/>
+        <SteadyState Duration="300" Power="0.66"/>
+        <SteadyState Duration="300" Power="0.71"/>
+        <SteadyState Duration="300" Power="0.76"/>
+
+        <!-- Recovery dip (5 min) -->
+        <SteadyState Duration="300" Power="0.56"/>
+
+        <!-- Wave 3: step up (20 min) -->
+        <SteadyState Duration="300" Power="0.59"/>
+        <SteadyState Duration="300" Power="0.64"/>
+        <SteadyState Duration="300" Power="0.69"/>
+        <SteadyState Duration="300" Power="0.74"/>
+
+        <!-- Recovery dip (5 min) -->
+        <SteadyState Duration="300" Power="0.56"/>
+
+        <!-- Wave 4: finishing kick (15 min) -->
+        <SteadyState Duration="300" Power="0.61"/>
+        <SteadyState Duration="300" Power="0.69"/>
+        <SteadyState Duration="300" Power="0.76"/>
+
+        <!-- Cooldown: 10 min ramp 66% to 41% FTP -->
+        <Cooldown Duration="600" PowerLow="0.66" PowerHigh="0.41"/>
+    </workout>
+</workout_file>

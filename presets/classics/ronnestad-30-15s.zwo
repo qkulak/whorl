@@ -1,0 +1,19 @@
+<workout_file>
+    <author>Whorl</author>
+    <name>Rønnestad 30/15s</name>
+    <description>Three sets of 13 x (30 s at 120% / 15 s at 50%), with 5 minutes between sets. Short recoveries keep your VO2 high for longer. Main set as specified; the warmup and cooldown are added.</description>
+    <category>VO2 Max</category>
+    <sportType>bike</sportType>
+    <tags>
+        <tag name="classic"/>
+    </tags>
+    <workout>
+        <Warmup Duration="900" PowerLow="0.45" PowerHigh="0.75"/>
+        <IntervalsT Repeat="13" OnDuration="30" OffDuration="15" OnPower="1.2" OffPower="0.5"/>
+        <SteadyState Duration="300" Power="0.5"/>
+        <IntervalsT Repeat="13" OnDuration="30" OffDuration="15" OnPower="1.2" OffPower="0.5"/>
+        <SteadyState Duration="300" Power="0.5"/>
+        <IntervalsT Repeat="13" OnDuration="30" OffDuration="15" OnPower="1.2" OffPower="0.5"/>
+        <Cooldown Duration="600" PowerLow="0.6" PowerHigh="0.4"/>
+    </workout>
+</workout_file>

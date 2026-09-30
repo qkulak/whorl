@@ -1,0 +1,26 @@
+<workout_file>
+    <author>Whorl</author>
+    <name>Low-Cadence Climber</name>
+    <description>Climbing strength: long sweet-spot efforts at 55-65 rpm, each ending with a surge over FTP.</description>
+    <category>Sweet Spot</category>
+    <sportType>bike</sportType>
+    <tags>
+            </tags>
+    <workout>
+        <Warmup Duration="600" PowerLow="0.55" PowerHigh="0.75" Cadence="85"/>
+        <SteadyState Duration="360" Power="0.9" Cadence="60"/>
+        <SteadyState Duration="60" Power="1.08" Cadence="60"/>
+        <SteadyState Duration="240" Power="0.65" Cadence="90"/>
+        <SteadyState Duration="360" Power="0.9" Cadence="60"/>
+        <SteadyState Duration="60" Power="1.08" Cadence="60"/>
+        <SteadyState Duration="240" Power="0.65" Cadence="90"/>
+        <SteadyState Duration="360" Power="0.9" Cadence="60"/>
+        <SteadyState Duration="60" Power="1.08" Cadence="60"/>
+        <SteadyState Duration="240" Power="0.65" Cadence="90"/>
+        <SteadyState Duration="360" Power="0.9" Cadence="60"/>
+        <SteadyState Duration="60" Power="1.08" Cadence="60"/>
+        <SteadyState Duration="240" Power="0.65" Cadence="90"/>
+        <SteadyState Duration="360" Power="0.79" Cadence="85"/>
+        <Cooldown Duration="300" PowerLow="0.7" PowerHigh="0.55"/>
+    </workout>
+</workout_file>

@@ -1,0 +1,16 @@
+<workout_file>
+    <author>Whorl</author>
+    <name>First Taste of FTP</name>
+    <description>A gentle first look at efforts up to FTP, with plenty of easy riding between. Good before starting structured intervals.</description>
+    <category>Endurance</category>
+    <sportType>bike</sportType>
+    <tags>
+            </tags>
+    <workout>
+        <Warmup Duration="420" PowerLow="0.55" PowerHigh="0.7"/>
+        <IntervalsT Repeat="4" OnDuration="30" OffDuration="90" OnPower="1" OffPower="0.6"/>
+        <SteadyState Duration="300" Power="0.57"/>
+        <IntervalsT Repeat="3" OnDuration="60" OffDuration="120" OnPower="1" OffPower="0.57"/>
+        <Cooldown Duration="60" PowerLow="0.6" PowerHigh="0.55"/>
+    </workout>
+</workout_file>

@@ -1,0 +1,21 @@
+<workout_file>
+    <author>Whorl</author>
+    <name>Sweet Spot 4x10</name>
+    <description>Four 10-minute blocks at the top of sweet spot (93%) with 5 minutes recovery. Main set as specified; the warmup and cooldown are added.</description>
+    <category>Sweet Spot</category>
+    <sportType>bike</sportType>
+    <tags>
+        <tag name="classic"/>
+    </tags>
+    <workout>
+        <Warmup Duration="600" PowerLow="0.45" PowerHigh="0.75"/>
+        <SteadyState Duration="600" Power="0.93"/>
+        <SteadyState Duration="300" Power="0.55"/>
+        <SteadyState Duration="600" Power="0.93"/>
+        <SteadyState Duration="300" Power="0.55"/>
+        <SteadyState Duration="600" Power="0.93"/>
+        <SteadyState Duration="300" Power="0.55"/>
+        <SteadyState Duration="600" Power="0.93"/>
+        <Cooldown Duration="600" PowerLow="0.6" PowerHigh="0.4"/>
+    </workout>
+</workout_file>

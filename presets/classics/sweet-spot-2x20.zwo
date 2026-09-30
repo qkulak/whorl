@@ -1,0 +1,17 @@
+<workout_file>
+    <author>Whorl</author>
+    <name>Sweet Spot 2x20</name>
+    <description>The sweet spot standard: two 20-minute blocks at 90% FTP with 8 minutes easy between. Main set as specified; the warmup and cooldown are added.</description>
+    <category>Sweet Spot</category>
+    <sportType>bike</sportType>
+    <tags>
+        <tag name="classic"/>
+    </tags>
+    <workout>
+        <Warmup Duration="600" PowerLow="0.45" PowerHigh="0.75"/>
+        <SteadyState Duration="1200" Power="0.9"/>
+        <SteadyState Duration="480" Power="0.55"/>
+        <SteadyState Duration="1200" Power="0.9"/>
+        <Cooldown Duration="600" PowerLow="0.6" PowerHigh="0.4"/>
+    </workout>
+</workout_file>

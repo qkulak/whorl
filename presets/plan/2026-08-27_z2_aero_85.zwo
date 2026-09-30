@@ -1,0 +1,98 @@
+<workout_file>
+    <author>Coach Claude</author>
+    <name>Z2 in AERO — undulating, 40 + 28 (85min)</name>
+    <description>Thu Aug 27 PM. SET FTP TO 185. 85min averaging ~142W, and the entire point is TIME IN THE BARS.
+
+POWER AND CADENCE CHANGE EVERY 4-5 MINUTES. Position does NOT. The variation is there so you are managing something instead of staring at one number for 68 minutes - boredom is what makes people sit up, more than fatigue.
+
+Everything stays Z2 (132-152W), RPE 3-4 throughout. You swam 3,000y this morning and rode 3x12 at 188W yesterday. This is position practice with an aerobic bonus, not a workout.
+
+CADENCE IS PART OF IT: 85rpm segments are mild torque work and closer to real TT cadence; 100rpm segments keep the legs supple. Both at easy power.
+
+TWO NUMBERS TO BEAT:
+  1. Longest UNBROKEN block in aero. Best is ~35min (Aug 21). Today is 40.
+  2. Total aero time. Aug 21 was 85min, Aug 23 was ~45min. Today ~70min.
+
+Race day is 2h36 essentially unbroken in the bars. The legs never fail - neck, shoulders, hip flexors and saddle do, and only accumulated position time fixes that.
+
+If you come up mid-block, note the minute and get back down.
+
+SIM IS SUNDAY. FIRST TO DROP if anything feels off Friday or Saturday.
+FUEL: 60g carb/hr. HIDE THE HR FIELD.</description>
+    <sportType>bike</sportType>
+    <tags>
+        <tag name="aero"/>
+        <tag name="endurance"/>
+        <tag name="703"/>
+    </tags>
+    <workout>
+        <Warmup Duration="600" PowerLow="0.50" PowerHigh="0.74" Cadence="90">
+            <textevent timeoffset="10" message="85min. Power and cadence move every 4-5min. Position does not"/>
+            <textevent timeoffset="300" message="HIDE THE HR FIELD. This is easy on purpose"/>
+            <textevent timeoffset="420" message="Into aero NOW. Forearms flat, elbows narrow, back flat, head low"/>
+            <textevent timeoffset="540" message="Shoulders forward and DOWN, not shrugged up. Block 1 next: 40min"/>
+        </Warmup>
+
+        <SteadyState Duration="300" Power="0.746" Cadence="90">
+            <textevent timeoffset="10" message="BLOCK 1 of 2 - 40min. Seg 1/8: 138W, 90rpm. Settle"/>
+        </SteadyState>
+        <SteadyState Duration="300" Power="0.800" Cadence="88">
+            <textevent timeoffset="10" message="Seg 2/8: 148W, 88rpm. Slightly more pressure, same position"/>
+        </SteadyState>
+        <SteadyState Duration="300" Power="0.714" Cadence="100">
+            <textevent timeoffset="10" message="Seg 3/8: 132W, 100rpm SPIN. Light legs, relaxed hips, no bouncing"/>
+        </SteadyState>
+        <SteadyState Duration="300" Power="0.811" Cadence="85">
+            <textevent timeoffset="10" message="Seg 4/8: 150W, 85rpm TORQUE. Closest to real TT cadence"/>
+            <textevent timeoffset="240" message="20min in - halfway through block 1. Where is it talking?"/>
+        </SteadyState>
+        <SteadyState Duration="300" Power="0.757" Cadence="92">
+            <textevent timeoffset="10" message="Seg 5/8: 140W, 92rpm. Past your previous block length soon"/>
+        </SteadyState>
+        <SteadyState Duration="300" Power="0.800" Cadence="95">
+            <textevent timeoffset="10" message="Seg 6/8: 148W, 95rpm. 30min down. New territory from here"/>
+        </SteadyState>
+        <SteadyState Duration="300" Power="0.714" Cadence="100">
+            <textevent timeoffset="10" message="Seg 7/8: 132W, 100rpm SPIN. Easiest segment - use it to reset the position"/>
+        </SteadyState>
+        <SteadyState Duration="300" Power="0.811" Cadence="85">
+            <textevent timeoffset="10" message="Seg 8/8: 150W, 85rpm. Last five. Do NOT come up"/>
+            <textevent timeoffset="240" message="1min. Finish the 40 down"/>
+        </SteadyState>
+
+        <SteadyState Duration="180" Power="0.55" Cadence="85">
+            <textevent timeoffset="10" message="3min up. Roll the shoulders, stretch the neck, drink, eat"/>
+            <textevent timeoffset="100" message="Hold all 40? If not, what minute did you come up?"/>
+            <textevent timeoffset="150" message="Back into aero for the last 30s"/>
+        </SteadyState>
+
+        <SteadyState Duration="240" Power="0.757" Cadence="90">
+            <textevent timeoffset="10" message="BLOCK 2 of 2 - 28min. Seg 1/7: 140W, 90rpm"/>
+        </SteadyState>
+        <SteadyState Duration="240" Power="0.811" Cadence="85">
+            <textevent timeoffset="10" message="Seg 2/7: 150W, 85rpm torque"/>
+        </SteadyState>
+        <SteadyState Duration="240" Power="0.730" Cadence="100">
+            <textevent timeoffset="10" message="Seg 3/7: 135W, 100rpm spin"/>
+        </SteadyState>
+        <SteadyState Duration="240" Power="0.800" Cadence="92">
+            <textevent timeoffset="10" message="Seg 4/7: 148W, 92rpm. Halfway. Same setup as block 1?"/>
+        </SteadyState>
+        <SteadyState Duration="240" Power="0.757" Cadence="95">
+            <textevent timeoffset="10" message="Seg 5/7: 140W, 95rpm. On race day you would have an hour left"/>
+        </SteadyState>
+        <SteadyState Duration="240" Power="0.822" Cadence="85">
+            <textevent timeoffset="10" message="Seg 6/7: 152W, 85rpm. Hardest of the day and still only RPE 4-5"/>
+        </SteadyState>
+        <SteadyState Duration="240" Power="0.746" Cadence="90">
+            <textevent timeoffset="10" message="Seg 7/7: 138W, 90rpm. Last four, finish in the bars"/>
+            <textevent timeoffset="180" message="1min"/>
+        </SteadyState>
+
+        <Cooldown Duration="240" PowerLow="0.60" PowerHigh="0.45" Cadence="85">
+            <textevent timeoffset="10" message="4min down. Sit up, stretch neck and hip flexors"/>
+            <textevent timeoffset="90" message="LOG BOTH: longest unbroken block, and total aero time"/>
+            <textevent timeoffset="180" message="75-90g carb + 30-40g protein. Sim Sunday"/>
+        </Cooldown>
+    </workout>
+</workout_file>

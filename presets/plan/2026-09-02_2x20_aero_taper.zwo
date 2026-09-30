@@ -1,0 +1,66 @@
+<workout_file>
+    <author>Coach Claude</author>
+    <name>2x20 Aero @ 188W — Taper Wk1 (76min)</name>
+    <description>Wed Sep 2 PM. SET FTP TO 185. 2x20min at 188W in FULL AERO, 6min between.
+
+TAPER WEEK 1. Volume is down 28% from peak; INTENSITY IS NOT. This is the point of a taper and the part people get wrong - cutting hard sessions is what wastes it. Ride this at full effort.
+
+SAME POWER AS AUG 26 but longer blocks: 20min instead of 12. If Aug 26's 3x12 read RPE 6-7, this should sit at 7 and be entirely doable.
+
+FULL AERO FOR BOTH BLOCKS. Unlike the threshold sessions, position is non-negotiable here - this is the last chance to hold race power in race position before Sept 13. 40min in the bars at 188W is the closest thing to the actual demand you will do.
+
+EAT FIRST. Track session this morning. 40-60g carbs at least 30min out.
+HIDE THE HR FIELD. Watts and RPE only.
+
+11 DAYS TO RACE DAY. Nothing after Sunday Sep 6 is adaptive - this and Sunday's long ride are the last two sessions that still build anything. Do not sandbag them, and do not add to them.
+
+AFTER: 75-90g carb + 30-40g protein within 60min.</description>
+    <sportType>bike</sportType>
+    <tags>
+        <tag name="threshold"/>
+        <tag name="aero"/>
+        <tag name="taper"/>
+        <tag name="703"/>
+    </tags>
+    <workout>
+        <Warmup Duration="900" PowerLow="0.50" PowerHigh="0.75" Cadence="90">
+            <textevent timeoffset="10" message="76min: 15 warmup, 2x20min at 188W FULL AERO, 6min between"/>
+            <textevent timeoffset="40" message="Did you eat? Track this morning - carbs on board"/>
+            <textevent timeoffset="240" message="HIDE THE HR FIELD. Watts and RPE only"/>
+            <textevent timeoffset="600" message="Into aero now. Forearms flat, shoulders forward and down, head low"/>
+            <textevent timeoffset="820" message="Settle. Block 1: 20min at 188W, same power as Aug 26 but longer"/>
+        </Warmup>
+
+        <SteadyState Duration="1200" Power="1.016" Cadence="90">
+            <textevent timeoffset="10" message="Block 1 of 2: 20min at 188W. AERO the whole way"/>
+            <textevent timeoffset="360" message="6min. Longer than any block you have done at this power"/>
+            <textevent timeoffset="600" message="Halfway. RPE? Aug 26's 3x12 is your reference"/>
+            <textevent timeoffset="900" message="15min. Position holding? Do not sit up to make the watts"/>
+            <textevent timeoffset="1140" message="1min left. Finish in the bars"/>
+        </SteadyState>
+
+        <SteadyState Duration="360" Power="0.55" Cadence="85">
+            <textevent timeoffset="10" message="6min easy. Sit up, drink, eat. RPE for block 1?"/>
+            <textevent timeoffset="240" message="Back into aero for the last 60s"/>
+        </SteadyState>
+
+        <SteadyState Duration="1200" Power="1.016" Cadence="90">
+            <textevent timeoffset="10" message="Block 2 of 2. Same 188W, same position"/>
+            <textevent timeoffset="360" message="6min. This is the last hard 20min you will do before the race"/>
+            <textevent timeoffset="600" message="Halfway. Hold the watts, hold the bars"/>
+            <textevent timeoffset="1020" message="3min left"/>
+            <textevent timeoffset="1140" message="Final minute. Finish it down"/>
+        </SteadyState>
+
+        <SteadyState Duration="600" Power="0.72" Cadence="90">
+            <textevent timeoffset="10" message="10min Z2 at 133W - stay in aero. Free position time"/>
+            <textevent timeoffset="360" message="Log both RPEs and total aero time"/>
+        </SteadyState>
+
+        <Cooldown Duration="300" PowerLow="0.62" PowerHigh="0.45" Cadence="85">
+            <textevent timeoffset="10" message="5min down"/>
+            <textevent timeoffset="120" message="75-90g carb + 30-40g protein within the hour"/>
+            <textevent timeoffset="240" message="Last long ride Sunday. Then it is all sharpening"/>
+        </Cooldown>
+    </workout>
+</workout_file>

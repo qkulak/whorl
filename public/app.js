@@ -2,7 +2,9 @@
 
 import {
   BLOCK_TYPES,
+  CATEGORIES,
   ZONES,
+  categorize,
   parseZwo,
   serializeZwo,
   expand,
@@ -157,96 +159,317 @@ function currentHr() {
 }
 
 // ======================================================================
-// Library
+// Library — "Browse" (presets/<collection>/) and "My workouts" (workouts/)
 // ======================================================================
 
-let library = []; // { id, workout, timeline, stats }
-let selectedId = store.get("selected", null);
+const COLLECTION_LABELS = {
+  mine: "My workouts",
+  featured: "Featured",
+  classics: "Classics",
+  plan: "Training plan",
+  uploaded: "Uploaded",
+};
+const collectionLabel = (c) => COLLECTION_LABELS[c] || c.charAt(0).toUpperCase() + c.slice(1);
+
+let library = []; // { key, id, collection, workout, timeline, stats, category }
+let selectedKey = store.get("selectedKey", null);
+const browse = { collection: "all", category: "all", length: "any", q: "" };
+let homeTab = store.get("homeTab", "browse");
+
+function toItem(r, collection) {
+  const workout = parseZwo(r.xml);
+  const timeline = expand(workout);
+  return {
+    key: `${collection}:${r.id}`,
+    id: r.id,
+    collection,
+    workout,
+    timeline,
+    stats: stats(timeline),
+    category: categorize(workout, timeline),
+  };
+}
 
 async function loadLibrary() {
-  let raw = [];
-  try {
-    raw = await (await fetch("/api/workouts")).json();
-  } catch (e) {
-    console.warn("library load failed", e);
-  }
+  const [mine, presets] = await Promise.all(
+    ["/api/workouts", "/api/presets"].map((u) =>
+      fetch(u)
+        .then((r) => r.json())
+        .catch((e) => {
+          console.warn(`${u} failed`, e);
+          return [];
+        }),
+    ),
+  );
   library = [];
-  for (const r of raw) {
+  for (const [r, collection] of [...mine.map((r) => [r, "mine"]), ...presets.map((r) => [r, r.collection])]) {
     try {
-      const workout = parseZwo(r.xml);
-      const timeline = expand(workout);
-      library.push({ id: r.id, workout, timeline, stats: stats(timeline) });
+      library.push(toItem(r, collection));
     } catch (e) {
       console.warn(`skipping ${r.id}: ${e.message}`);
     }
   }
   library.sort((a, b) => a.workout.name.localeCompare(b.workout.name));
-  if (!library.some((w) => w.id === selectedId)) selectedId = null;
-  renderLibrary();
+  if (!library.some((w) => w.key === selectedKey)) selectedKey = null;
+  renderBrowseFilters();
+  renderHome();
 }
 
-function renderLibrary() {
-  const el = $("library");
-  el.innerHTML = "";
-  if (!library.length) {
-    el.innerHTML = `<div class="empty">No workouts yet — build one or drop .zwo files here.</div>`;
+// ---- tabs ----
+
+function setHomeTab(tab) {
+  homeTab = tab;
+  store.set("homeTab", tab);
+  document.querySelectorAll(".tab").forEach((t) => t.classList.toggle("on", t.dataset.tab === tab));
+  $("browsePane").hidden = tab !== "browse";
+  $("minePane").hidden = tab !== "mine";
+  renderHome();
+}
+document.querySelectorAll(".tab").forEach((t) => t.addEventListener("click", () => setHomeTab(t.dataset.tab)));
+
+function renderHome() {
+  const presets = library.filter((w) => w.collection !== "mine");
+  const mine = library.filter((w) => w.collection === "mine");
+  $("tabBrowseCount").textContent = presets.length;
+  $("tabMineCount").textContent = mine.length;
+  if (homeTab === "browse") {
+    const shown = presets.filter(matchesBrowse);
+    $("browseCount").textContent = `${shown.length} of ${presets.length} workouts`;
+    renderCards($("browseGrid"), shown, "No workouts match these filters.");
+  } else {
+    renderCards($("mineGrid"), mine, "Nothing here yet. Build one, or copy a workout from Browse to edit it.");
   }
-  for (const item of library) {
+  updateStartBar();
+}
+
+// ---- browse filters ----
+
+const LENGTHS = {
+  any: ["Any length", () => true],
+  short: ["Under 45 min", (s) => s < 45 * 60],
+  mid: ["45–75 min", (s) => s >= 45 * 60 && s <= 75 * 60],
+  long: ["Over 75 min", (s) => s > 75 * 60],
+};
+
+function matchesBrowse(w) {
+  if (browse.collection !== "all" && w.collection !== browse.collection) return false;
+  if (browse.category !== "all" && w.category !== browse.category) return false;
+  if (!LENGTHS[browse.length][1](w.stats.duration)) return false;
+  if (browse.q) {
+    const hay = `${w.workout.name} ${w.workout.description} ${w.workout.tags.join(" ")}`.toLowerCase();
+    if (!browse.q.split(/\s+/).every((word) => hay.includes(word))) return false;
+  }
+  return true;
+}
+
+function chips(el, options, current, onPick) {
+  el.innerHTML = "";
+  for (const [value, label, count] of options) {
+    const b = document.createElement("button");
+    b.className = "chip" + (value === current ? " on" : "");
+    b.innerHTML = `${label}${count !== undefined ? ` <span>${count}</span>` : ""}`;
+    b.addEventListener("click", () => onPick(value));
+    el.appendChild(b);
+  }
+}
+
+function renderBrowseFilters() {
+  const presets = library.filter((w) => w.collection !== "mine");
+  const collections = [...new Set(presets.map((w) => w.collection))].sort(
+    (a, b) => Object.keys(COLLECTION_LABELS).indexOf(a) - Object.keys(COLLECTION_LABELS).indexOf(b),
+  );
+  if (browse.collection !== "all" && !collections.includes(browse.collection)) browse.collection = "all";
+  chips(
+    $("fCollection"),
+    [["all", "All", presets.length], ...collections.map((c) => [c, collectionLabel(c), presets.filter((w) => w.collection === c).length])],
+    browse.collection,
+    (v) => {
+      browse.collection = v;
+      renderBrowseFilters();
+      renderHome();
+    },
+  );
+  const cats = CATEGORIES.filter((c) => presets.some((w) => w.category === c));
+  chips(
+    $("fCategory"),
+    [["all", "All types"], ...cats.map((c) => [c, `<i class="cat-dot" style="background:${CATEGORY_COLORS[c]}"></i>${c}`])],
+    browse.category,
+    (v) => {
+      browse.category = v;
+      renderBrowseFilters();
+      renderHome();
+    },
+  );
+  chips(
+    $("fLength"),
+    Object.entries(LENGTHS).map(([k, [label]]) => [k, label]),
+    browse.length,
+    (v) => {
+      browse.length = v;
+      renderBrowseFilters();
+      renderHome();
+    },
+  );
+}
+
+$("fSearch").addEventListener("input", (e) => {
+  browse.q = e.target.value.trim().toLowerCase();
+  renderHome();
+});
+
+// A category's colour is the zone it lives in, so the chips match the charts.
+const CATEGORY_COLORS = {
+  Recovery: ZONES[0].color,
+  Endurance: ZONES[1].color,
+  Tempo: ZONES[2].color,
+  "Sweet Spot": "#c9d62a",
+  Threshold: ZONES[3].color,
+  "VO2 Max": ZONES[4].color,
+  Anaerobic: ZONES[5].color,
+};
+
+// ---- cards ----
+
+function renderCards(el, items, emptyText) {
+  el.innerHTML = "";
+  if (!items.length) el.innerHTML = `<div class="empty"></div>`;
+  if (!items.length) el.firstChild.textContent = emptyText;
+  for (const item of items) {
     const card = document.createElement("div");
-    card.className = "wo" + (item.id === selectedId ? " sel" : "");
-    card.dataset.id = item.id;
+    card.className = "wo" + (item.key === selectedKey ? " sel" : "");
+    card.dataset.key = item.key;
     const s = item.stats;
+    const isMine = item.collection === "mine";
+    const canDelete = isMine || item.collection === "uploaded";
     card.innerHTML = `
+      <div class="wo-badges">
+        <span class="badge cat" style="--c:${CATEGORY_COLORS[item.category]}">${item.category}</span>
+        ${isMine ? "" : `<span class="badge">${collectionLabel(item.collection)}</span>`}
+      </div>
       <div class="wo-title"></div>
       <div class="wo-meta"><span><b>${fmtTime(s.duration)}</b></span><span>TSS <b>${Math.round(s.tss)}</b></span><span>IF <b>${s.IF.toFixed(2)}</b></span></div>
       <canvas></canvas>
       <div class="wo-desc"></div>
       <div class="wo-actions">
-        <button class="btn small" data-act="edit">Edit</button>
-        <button class="btn small" data-act="download">.zwo</button>
-        <button class="btn small ghost danger" data-act="delete" style="margin-left:auto">Delete</button>
+        <button class="btn small" data-act="details">Details</button>
+        <button class="btn small" data-act="edit">${isMine ? "Edit" : "Copy & edit"}</button>
+        ${canDelete ? `<button class="btn small ghost danger" data-act="delete" style="margin-left:auto">Delete</button>` : ""}
       </div>`;
     card.querySelector(".wo-title").textContent = item.workout.name;
     card.querySelector(".wo-desc").textContent = item.workout.description;
     card.addEventListener("click", (e) => {
       const act = e.target.closest("[data-act]")?.dataset.act;
-      if (act === "edit") return openBuilder(item);
-      if (act === "download") return downloadZwo(item.workout);
-      if (act === "delete") return deleteWorkout(item);
-      selectWorkout(item.id);
+      if (act) return cardAction(item, act);
+      selectWorkout(item.key);
     });
     card.addEventListener("dblclick", (e) => {
       if (!e.target.closest("[data-act]")) startRide();
     });
     el.appendChild(card);
   }
-  updateStartBar();
-  drawLibraryCharts();
+  requestAnimationFrame(drawLibraryCharts);
+}
+
+function cardAction(item, act) {
+  if (act === "details") return openDetails(item);
+  if (act === "edit") return openBuilder(item);
+  if (act === "download") return downloadZwo(item.workout);
+  if (act === "delete") return deleteWorkout(item);
+  if (act === "ride") {
+    selectWorkout(item.key);
+    closeDetails();
+    return startRide();
+  }
 }
 
 function drawLibraryCharts() {
-  document.querySelectorAll("#library .wo").forEach((card) => {
-    const item = library.find((w) => w.id === card.dataset.id);
+  document.querySelectorAll(".home-grid .wo").forEach((card) => {
+    const item = library.find((w) => w.key === card.dataset.key);
     if (item) drawWorkout(card.querySelector("canvas"), { timeline: item.timeline, ftp: homeFtp() });
   });
 }
 
-function selectWorkout(id) {
-  selectedId = id;
-  store.set("selected", id);
-  document.querySelectorAll("#library .wo").forEach((c) => c.classList.toggle("sel", c.dataset.id === id));
+function selectWorkout(key) {
+  selectedKey = key;
+  store.set("selectedKey", key);
+  document.querySelectorAll(".home-grid .wo").forEach((c) => c.classList.toggle("sel", c.dataset.key === key));
   updateStartBar();
 }
 
+function selectedItem() {
+  return library.find((w) => w.key === selectedKey) || null;
+}
+
 function updateStartBar() {
-  const item = library.find((w) => w.id === selectedId);
+  const item = selectedItem();
   $("selName").textContent = item ? `${item.workout.name} · ${fmtTime(item.stats.duration)}` : "Pick a workout";
   $("btnStart").disabled = !item;
 }
 
+// ---- details modal ----
+
+let detailsItem = null;
+
+function openDetails(item) {
+  detailsItem = item;
+  const w = item.workout;
+  const s = item.stats;
+  $("dTitle").textContent = w.name;
+  $("dBadges").innerHTML = `<span class="badge cat" style="--c:${CATEGORY_COLORS[item.category]}">${item.category}</span><span class="badge">${collectionLabel(item.collection)}</span>`;
+  $("dMeta").innerHTML = `<span>Duration <b>${fmtTime(s.duration)}</b></span><span>TSS <b>${Math.round(s.tss)}</b></span><span>IF <b>${s.IF.toFixed(2)}</b></span><span>Author <b class="plain"></b></span>`;
+  $("dMeta").querySelector(".plain").textContent = w.author || "—";
+  $("dDesc").textContent = w.description || "No description.";
+  // Coached files often say "Set FTP to 185" — offer to apply it.
+  const wanted = Number(/set ftp to (\d{2,3})/i.exec(w.description)?.[1]);
+  $("dFtp").hidden = !wanted || wanted === homeFtp();
+  $("dFtp").textContent = `Use FTP ${wanted} W`;
+  $("dFtp").dataset.ftp = wanted || "";
+  $("dEdit").textContent = item.collection === "mine" ? "Edit" : "Copy & edit";
+  $("dDelete").hidden = !(item.collection === "mine" || item.collection === "uploaded");
+  $("details").classList.add("show");
+  requestAnimationFrame(() =>
+    drawWorkout($("dChart"), { timeline: item.timeline, ftp: homeFtp(), labels: true }),
+  );
+}
+
+function closeDetails() {
+  $("details").classList.remove("show");
+  detailsItem = null;
+}
+
+$("dClose").addEventListener("click", closeDetails);
+$("dFtp").addEventListener("click", () => {
+  ftpInput.value = $("dFtp").dataset.ftp;
+  ftpInput.dispatchEvent(new Event("change"));
+  $("dFtp").hidden = true;
+  drawWorkout($("dChart"), { timeline: detailsItem.timeline, ftp: homeFtp(), labels: true });
+});
+$("details").addEventListener("click", (e) => {
+  if (e.target === $("details")) closeDetails();
+});
+for (const [id, act] of [
+  ["dRide", "ride"],
+  ["dEdit", "edit"],
+  ["dDownload", "download"],
+  ["dDelete", "delete"],
+]) {
+  $(id).addEventListener("click", () => {
+    const item = detailsItem;
+    if (act !== "download" && act !== "ride") closeDetails();
+    cardAction(item, act);
+  });
+}
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && detailsItem) closeDetails();
+});
+
+// ---- file operations ----
+
 async function deleteWorkout(item) {
-  if (!confirm(`Delete "${item.workout.name}"? This removes ${item.id} from the workouts folder.`)) return;
-  await fetch(`/api/workouts/${encodeURIComponent(item.id)}`, { method: "DELETE" });
+  const where = item.collection === "mine" ? "My workouts" : "the uploaded library";
+  if (!confirm(`Delete "${item.workout.name}" from ${where}?`)) return;
+  const url = item.collection === "mine" ? `/api/workouts/${encodeURIComponent(item.id)}` : `/api/presets/${item.id}`;
+  await fetch(url, { method: "DELETE" });
   await loadLibrary();
 }
 
@@ -263,31 +486,49 @@ function downloadZwo(workout) {
   setTimeout(() => URL.revokeObjectURL(a.href), 1000);
 }
 
-async function importFiles(files) {
+// Uploads land in Browse (presets/uploaded/); imports on My workouts land in workouts/.
+async function uploadFiles(files, target) {
   let ok = 0;
+  let lastKey = null;
   const failed = [];
   for (const file of files) {
     const xml = await file.text();
     try {
       parseZwo(xml); // validate before it lands in the folder
-      await fetch("/api/workouts", {
+      const res = await fetch(target === "browse" ? "/api/presets" : "/api/workouts", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: file.name.replace(/\.xml$/i, ".zwo"), xml }),
+        body: JSON.stringify(
+          target === "browse" ? { filename: file.name, xml } : { name: file.name.replace(/\.(zwo|xml)$/i, ""), xml },
+        ),
       });
+      const out = await res.json();
+      if (!out.ok) throw new Error(out.error);
+      lastKey = target === "browse" ? `uploaded:${out.id}` : `mine:${out.id}`;
       ok++;
     } catch (e) {
       failed.push(`${file.name}: ${e.message}`);
     }
   }
-  if (failed.length) alert(`Couldn't import:\n${failed.join("\n")}`);
-  if (ok) await loadLibrary();
+  if (failed.length) alert(`Couldn't add:\n${failed.join("\n")}`);
+  if (!ok) return;
+  if (target === "browse") {
+    browse.collection = "uploaded";
+    browse.category = "all";
+  }
+  await loadLibrary();
+  if (ok === 1) selectWorkout(lastKey);
 }
 
-$("importFile").addEventListener("change", (e) => {
-  importFiles([...e.target.files]);
-  e.target.value = "";
-});
+for (const [inputId, target] of [
+  ["uploadFile", "browse"],
+  ["importFile", "mine"],
+]) {
+  $(inputId).addEventListener("change", (e) => {
+    uploadFiles([...e.target.files], target);
+    e.target.value = "";
+  });
+}
 $("home").addEventListener("dragover", (e) => {
   e.preventDefault();
   $("home").classList.add("dropping");
@@ -298,11 +539,15 @@ $("home").addEventListener("dragleave", (e) => {
 $("home").addEventListener("drop", (e) => {
   e.preventDefault();
   $("home").classList.remove("dropping");
-  importFiles([...e.dataTransfer.files].filter((f) => /\.(zwo|xml)$/i.test(f.name)));
+  uploadFiles(
+    [...e.dataTransfer.files].filter((f) => /\.(zwo|xml)$/i.test(f.name)),
+    homeTab === "browse" ? "browse" : "mine",
+  );
 });
 
 $("btnNew").addEventListener("click", () => openBuilder(null));
 $("btnStart").addEventListener("click", startRide);
+setHomeTab(homeTab);
 
 // ======================================================================
 // Builder
@@ -320,10 +565,11 @@ const DEFAULT_BLOCKS = {
 const builder = { id: null, workout: null, selected: null };
 
 function openBuilder(item) {
-  builder.id = item?.id ?? null;
+  // Editing a preset edits a copy — saving puts it in My workouts, the preset stays as it was.
+  builder.id = item?.collection === "mine" ? item.id : null;
   builder.workout = item
     ? structuredClone(item.workout)
-    : { name: "", author: "", description: "", blocks: [{ type: "warmup", ...DEFAULT_BLOCKS.warmup }] };
+    : { name: "", author: "", description: "", tags: [], blocks: [{ type: "warmup", ...DEFAULT_BLOCKS.warmup }] };
   builder.selected = null;
   $("bName").value = builder.workout.name;
   $("bDesc").value = builder.workout.description;
@@ -500,9 +746,9 @@ $("bSave").addEventListener("click", async () => {
   });
   const out = await res.json();
   if (!out.ok) return alert(`Save failed: ${out.error}`);
-  selectedId = out.id;
-  store.set("selected", out.id);
   await loadLibrary();
+  selectWorkout(`mine:${out.id}`);
+  setHomeTab("mine");
   show("home");
 });
 
@@ -549,7 +795,7 @@ document.addEventListener("visibilitychange", () => {
 });
 
 function startRide() {
-  const item = library.find((w) => w.id === selectedId);
+  const item = selectedItem();
   if (!item) return;
   if (!trainer.device && !trainer.simulated) {
     if (!confirm("No trainer connected. Start anyway? (Use \"Simulate trainer\" to try it without hardware.)")) return;

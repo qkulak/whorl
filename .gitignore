@@ -2,3 +2,5 @@ rides/*
 !rides/.gitkeep
 .DS_Store
 .claude/settings.local.json
+presets/uploaded/*
+!presets/uploaded/.gitkeep

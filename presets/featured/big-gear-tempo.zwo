@@ -1,0 +1,26 @@
+<workout_file>
+    <author>Whorl</author>
+    <name>Big Gear Tempo</name>
+    <description>Cycling-specific strength: tempo efforts at a low 60-70 rpm, with recoveries and riding at 80-90 rpm.</description>
+    <category>Tempo</category>
+    <sportType>bike</sportType>
+    <tags>
+            </tags>
+    <workout>
+        <Warmup Duration="600" PowerLow="0.45" PowerHigh="0.72" Cadence="85"/>
+        <SteadyState Duration="300" Power="0.86" Cadence="65">
+            <textevent timeoffset="0" message="Low cadence: 60-70 rpm, seated, strong"/>
+        </SteadyState>
+        <SteadyState Duration="180" Power="0.65" Cadence="90"/>
+        <SteadyState Duration="300" Power="0.86" Cadence="65"/>
+        <SteadyState Duration="180" Power="0.65" Cadence="90"/>
+        <SteadyState Duration="300" Power="0.86" Cadence="65"/>
+        <SteadyState Duration="180" Power="0.65" Cadence="90"/>
+        <SteadyState Duration="300" Power="0.86" Cadence="65"/>
+        <SteadyState Duration="180" Power="0.65" Cadence="90"/>
+        <SteadyState Duration="300" Power="0.86" Cadence="65"/>
+        <SteadyState Duration="180" Power="0.65" Cadence="90"/>
+        <SteadyState Duration="600" Power="0.7" Cadence="90"/>
+        <Cooldown Duration="300" PowerLow="0.65" PowerHigh="0.45"/>
+    </workout>
+</workout_file>
