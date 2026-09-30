@@ -1,0 +1,16 @@
+<workout_file>
+    <author>ZWO Ride</author>
+    <name>VO2 Max 5x3</name>
+    <description>Five 3-minute efforts at 118% with 3 minutes recovery. Hard but short.</description>
+    <sportType>bike</sportType>
+    <tags/>
+    <workout>
+        <Warmup Duration="480" PowerLow="0.45" PowerHigh="0.75"/>
+        <IntervalsT Repeat="3" OnDuration="30" OffDuration="30" OnPower="1.0" OffPower="0.55"/>
+        <SteadyState Duration="180" Power="0.55"/>
+        <IntervalsT Repeat="5" OnDuration="180" OffDuration="180" OnPower="1.18" OffPower="0.5" Cadence="95" CadenceResting="85">
+            <textevent timeoffset="0" message="Five efforts. Aim for a high cadence."/>
+        </IntervalsT>
+        <Cooldown Duration="480" PowerLow="0.6" PowerHigh="0.4"/>
+    </workout>
+</workout_file>

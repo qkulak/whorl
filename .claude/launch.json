@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "zworide",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["/Users/quintonkulak/Documents/GitHub/zworide/server.py"],
+      "port": 8010
+    }
+  ]
+}

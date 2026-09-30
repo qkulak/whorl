@@ -1,0 +1,4 @@
+rides/*
+!rides/.gitkeep
+.DS_Store
+.claude/settings.local.json

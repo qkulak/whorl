@@ -1,0 +1,16 @@
+<workout_file>
+    <author>ZWO Ride</author>
+    <name>Endurance 60</name>
+    <description>An hour of steady zone 2 with a few short tempo lifts to break it up.</description>
+    <sportType>bike</sportType>
+    <tags/>
+    <workout>
+        <Warmup Duration="480" PowerLow="0.45" PowerHigh="0.68"/>
+        <SteadyState Duration="900" Power="0.68"/>
+        <SteadyState Duration="180" Power="0.82"/>
+        <SteadyState Duration="900" Power="0.68"/>
+        <SteadyState Duration="180" Power="0.82"/>
+        <SteadyState Duration="660" Power="0.68"/>
+        <Cooldown Duration="300" PowerLow="0.6" PowerHigh="0.4"/>
+    </workout>
+</workout_file>
