@@ -830,6 +830,7 @@ function startRide() {
   $("rStripTotal").textContent = fmtTime(ride.timeline.duration);
   $("rDone").classList.remove("show");
   $("rMenu").classList.remove("open");
+  closeConfirm(false);
   buildZoneBar();
   renderFtp();
   renderErgState();
@@ -1039,6 +1040,9 @@ function render() {
   }
 
   // top-right
+  const onLast = r.segIdx >= r.timeline.segments.length - 1;
+  $("rSkipBtn").disabled = onLast;
+  $("rSkip").disabled = onLast;
   $("rClock").textContent = fmtTime(r.pos, { hours: true });
   $("rRemain").textContent = fmtTime(dur - r.pos);
 
@@ -1100,17 +1104,62 @@ function seek(to) {
   render();
 }
 
-function skipForward() {
-  const seg = currentSeg();
-  if (seg) seek(seg.start + seg.duration);
+// ---- "are you sure?" for anything that jumps around the workout ----
+
+let pendingConfirm = null;
+
+function askConfirm({ title, body, yes, onYes }) {
+  $("rMenu").classList.remove("open");
+  $("rConfirmTitle").textContent = title;
+  $("rConfirmBody").innerHTML = body;
+  $("rConfirmYes").textContent = yes;
+  pendingConfirm = onYes;
+  $("rConfirm").classList.add("show");
+  $("rConfirmYes").focus();
 }
 
-function skipBack() {
+function closeConfirm(accepted) {
+  const action = pendingConfirm;
+  pendingConfirm = null;
+  $("rConfirm").classList.remove("show");
+  if (accepted && action && ride) action();
+}
+
+$("rConfirmYes").addEventListener("click", () => closeConfirm(true));
+$("rConfirmNo").addEventListener("click", () => closeConfirm(false));
+$("rConfirm").addEventListener("click", (e) => {
+  if (e.target === $("rConfirm")) closeConfirm(false);
+});
+
+function describeSeg(seg) {
+  if (seg.free) return "Free ride";
+  const w = (f) => Math.round(f * ride.ftp);
+  return seg.from === seg.to ? `${w(seg.from)} W` : `${w(seg.from)} → ${w(seg.to)} W`;
+}
+
+// The destination is fixed when the button is pressed, so an interval that
+// rolls over while the modal is open doesn't turn "skip" into a double skip.
+function skipForward() {
   const i = segmentAt(ride.timeline, ride.pos);
-  const seg = ride.timeline.segments[i];
-  // Early in an interval, "back" means the previous one — like a music player.
-  if (seg && ride.pos - seg.start < 3 && i > 0) seek(ride.timeline.segments[i - 1].start);
-  else if (seg) seek(seg.start);
+  const next = ride.timeline.segments[i + 1];
+  if (!next) return;
+  askConfirm({
+    title: "Skip to next interval?",
+    body: `You'll jump to <b>${describeSeg(next)}</b> for <b>${fmtTime(next.duration)}</b>.`,
+    yes: "Skip",
+    onYes: () => seek(next.start),
+  });
+}
+
+function restartInterval() {
+  const seg = currentSeg();
+  if (!seg) return;
+  askConfirm({
+    title: "Restart this interval?",
+    body: `Back to the start of <b>${describeSeg(seg)}</b> for <b>${fmtTime(seg.duration)}</b>. The time you've done in it is cleared from the chart.`,
+    yes: "Restart",
+    onYes: () => seek(seg.start),
+  });
 }
 
 function summarize() {
@@ -1142,6 +1191,7 @@ function finishRide() {
   trainer.setFreeRide();
   $("rMenu").classList.remove("open");
   $("rPaused").classList.remove("show");
+  closeConfirm(false);
   render();
   const s = (ride.summary = summarize());
   const cells = [
@@ -1206,11 +1256,18 @@ $("rPause").addEventListener("click", () => {
   else pause("manual");
   $("rMenu").classList.remove("open");
 });
-$("rEnd").addEventListener("click", () => {
-  if (confirm("End the ride now?")) finishRide();
-});
+$("rEnd").addEventListener("click", () =>
+  askConfirm({
+    title: "End the ride?",
+    body: `You've done <b>${fmtTime(ride.pos)}</b> of <b>${fmtTime(ride.timeline.duration)}</b>. You'll see the summary next.`,
+    yes: "End ride",
+    onYes: finishRide,
+  }),
+);
 $("rSkip").addEventListener("click", skipForward);
-$("rBack").addEventListener("click", skipBack);
+$("rBack").addEventListener("click", restartInterval);
+$("rSkipBtn").addEventListener("click", skipForward);
+$("rRestartBtn").addEventListener("click", restartInterval);
 $("rErgToggle").addEventListener("change", (e) => {
   ride.erg = e.target.checked;
   ride.trainerMode = null;
@@ -1223,7 +1280,16 @@ $("rBeepToggle").addEventListener("change", (e) => (ride.beep = e.target.checked
 
 document.addEventListener("keydown", (e) => {
   if (!ride || !$("ride").classList.contains("active") || $("rDone").classList.contains("show")) return;
-  if (e.target.matches("input, textarea")) return;
+  if (e.target.matches?.("input, textarea")) return;
+  if (pendingConfirm) {
+    // The modal owns the keyboard while it's open.
+    if (e.key === "Escape") closeConfirm(false);
+    else if (e.key === "Enter") {
+      e.preventDefault();
+      closeConfirm(true);
+    }
+    return;
+  }
   if (e.key === "+" || e.key === "=") adjustFtp(FTP_STEP);
   else if (e.key === "-" || e.key === "_") adjustFtp(-FTP_STEP);
   else if (e.key === " ") {
@@ -1231,7 +1297,7 @@ document.addEventListener("keydown", (e) => {
     if (ride.pauseReason) resume();
     else pause("manual");
   } else if (e.key === "ArrowRight") skipForward();
-  else if (e.key === "ArrowLeft") skipBack();
+  else if (e.key === "ArrowLeft") restartInterval();
   else if (e.key === "Escape") $("rMenu").classList.toggle("open");
 });
 

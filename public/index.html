@@ -247,6 +247,12 @@
   .ftp-adj .f { text-align: center; min-width: 70px; }
   .ftp-adj .f b { display: block; font-family: var(--num); font-size: 26px; line-height: 1; }
   .ftp-adj .f span { font-size: 10px; letter-spacing: .12em; color: var(--muted); }
+  .iv-ctl { display: flex; gap: 8px; }
+  .ctl-btn {
+    background: rgba(22,19,46,.75); border: 1px solid var(--line); border-radius: 999px;
+    padding: 8px 14px; font-weight: 700; font-size: 14px; white-space: nowrap;
+  }
+  .ctl-btn:hover:not(:disabled) { border-color: rgba(255,255,255,.45); background: rgba(255,255,255,.08); }
   .erg-state { font-size: 12px; letter-spacing: .1em; color: var(--muted); }
   .erg-state.on { color: var(--good); }
 
@@ -278,6 +284,13 @@
   .overlay .box { text-align: center; }
   .overlay h2 { font-family: var(--num); font-style: italic; font-size: 64px; margin: 0; letter-spacing: .04em; }
   .overlay p { color: var(--muted); font-size: 18px; margin: 6px 0 18px; }
+  .overlay.confirm { z-index: 15; }
+  .confirm .box { padding: 24px 28px; min-width: 340px; max-width: 90vw; }
+  .confirm h3 { margin: 0; font-size: 24px; font-weight: 700; color: var(--text); text-transform: none; letter-spacing: 0; }
+  .confirm p { font-size: 16px; margin: 8px 0 20px; }
+  .confirm p b { color: var(--text); }
+  .confirm-foot { display: flex; gap: 10px; justify-content: center; }
+  .confirm-foot .btn { min-width: 120px; padding: 10px 18px; }
 
   .menu {
     position: absolute; top: 0; right: 0; bottom: 0; width: 360px; max-width: 90vw; background: var(--menu);
@@ -504,6 +517,10 @@
         <div class="f"><b id="rFtp">--</b><span>FTP</span></div>
         <button class="icon-btn" id="rFtpUp" title="FTP +5 W (+)">+</button>
       </div>
+      <div class="iv-ctl">
+        <button class="ctl-btn" id="rRestartBtn" title="Restart this interval (←)">↺ Restart interval</button>
+        <button class="ctl-btn" id="rSkipBtn" title="Skip to the next interval (→)">Skip interval ⏭</button>
+      </div>
       <div class="erg-state" id="rErg">ERG</div>
     </div>
   </div>
@@ -541,13 +558,24 @@
     </div>
   </div>
 
+  <div class="overlay confirm" id="rConfirm">
+    <div class="box card">
+      <h3 id="rConfirmTitle"></h3>
+      <p id="rConfirmBody"></p>
+      <div class="confirm-foot">
+        <button class="btn ghost" id="rConfirmNo">Cancel</button>
+        <button class="btn primary" id="rConfirmYes"></button>
+      </div>
+    </div>
+  </div>
+
   <aside class="menu" id="rMenu">
     <div class="menu-head"><h3>MENU</h3><button class="icon-btn" id="rMenuClose">✕</button></div>
     <label class="menu-item">ERG mode <span class="toggle"><input type="checkbox" id="rErgToggle"><i></i></span></label>
     <label class="menu-item">Interval beeps <span class="toggle"><input type="checkbox" id="rBeepToggle"><i></i></span></label>
     <label class="menu-item">Auto-pause <span class="toggle"><input type="checkbox" id="rAutoPause" checked><i></i></span></label>
-    <button class="menu-item" id="rSkip">Skip to next interval →</button>
-    <button class="menu-item" id="rBack">← Back to previous interval</button>
+    <button class="menu-item" id="rBack">↺ Restart current interval</button>
+    <button class="menu-item" id="rSkip">Skip to next interval ⏭</button>
     <div class="menu-foot">
       <button class="btn primary" id="rPause">PAUSE RIDE</button>
       <button class="btn ghost danger" id="rEnd">END RIDE</button>

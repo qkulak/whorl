@@ -30,8 +30,11 @@ On the ride screen:
 |---|---|
 | **− / +** (or `-` / `+` keys) | FTP down/up 5 W. Every target rescales immediately. |
 | **space** | pause / resume |
-| **→ / ←** | skip to next interval / back to start of this one |
-| **MENU** (or `esc`) | ERG on/off, beeps, auto-pause, skip, pause, end ride |
+| **Skip interval ⏭** (or `→`) | jump to the next interval |
+| **↺ Restart interval** (or `←`) | back to the start of the current interval |
+| **MENU** (or `esc`) | ERG on/off, beeps, auto-pause, skip/restart, pause, end ride |
+
+Skip, restart, and end ride all ask "are you sure?" first (`enter` confirms, `esc` cancels). The destination is locked in when you press the button, so an interval that rolls over while the prompt is open won't turn into a double skip.
 
 - **Top left:** 3 s power, average, NP, the zone bar, then cadence, HR, speed, and kJ.
 - **Top center:** the current target, time left in the interval, how far off target you are, and what's next.
