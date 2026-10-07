@@ -352,19 +352,17 @@ function renderCards(el, items, emptyText) {
       <canvas></canvas>
       <div class="wo-desc"></div>
       <div class="wo-actions">
-        <button class="btn small" data-act="details">Details</button>
         <button class="btn small" data-act="edit">${isMine ? "Edit" : "Copy & edit"}</button>
         ${canDelete ? `<button class="btn small ghost danger" data-act="delete" style="margin-left:auto">Delete</button>` : ""}
       </div>`;
     card.querySelector(".wo-title").textContent = item.workout.name;
     card.querySelector(".wo-desc").textContent = item.workout.description;
+    // Anywhere on the card opens its details; only the card's own buttons do something else.
     card.addEventListener("click", (e) => {
       const act = e.target.closest("[data-act]")?.dataset.act;
       if (act) return cardAction(item, act);
       selectWorkout(item.key);
-    });
-    card.addEventListener("dblclick", (e) => {
-      if (!e.target.closest("[data-act]")) startRide();
+      openDetails(item);
     });
     el.appendChild(card);
   }
@@ -372,7 +370,6 @@ function renderCards(el, items, emptyText) {
 }
 
 function cardAction(item, act) {
-  if (act === "details") return openDetails(item);
   if (act === "edit") return openBuilder(item);
   if (act === "download") return downloadZwo(item.workout);
   if (act === "delete") return deleteWorkout(item);
@@ -428,9 +425,8 @@ function openDetails(item) {
   $("dEdit").textContent = item.collection === "mine" ? "Edit" : "Copy & edit";
   $("dDelete").hidden = !(item.collection === "mine" || item.collection === "uploaded");
   $("details").classList.add("show");
-  requestAnimationFrame(() =>
-    drawWorkout($("dChart"), { timeline: item.timeline, ftp: homeFtp(), labels: true }),
-  );
+  hideTip();
+  requestAnimationFrame(() => drawDetails());
 }
 
 function closeDetails() {
@@ -438,12 +434,92 @@ function closeDetails() {
   detailsItem = null;
 }
 
+// ---- details chart: hover a bar to see its watts ----
+
+let detailsGeom = null;
+let hoverSeg = null;
+
+function drawDetails() {
+  if (!detailsItem) return;
+  detailsGeom = drawWorkout($("dChart"), {
+    timeline: detailsItem.timeline,
+    ftp: homeFtp(),
+    labels: true,
+    hover: hoverSeg,
+  });
+}
+
+function hideTip() {
+  $("dTip").classList.remove("show");
+  if (hoverSeg !== null) {
+    hoverSeg = null;
+    drawDetails();
+  }
+}
+
+function segmentLabel(seg) {
+  if (seg.free) return "Free ride";
+  if (seg.rep) return `${seg.on ? "Interval" : "Recovery"} ${seg.rep}/${seg.reps}`;
+  if (seg.from !== seg.to) return seg.to > seg.from ? "Ramp up" : "Ramp down";
+  return "Steady";
+}
+
+function showTip(e) {
+  if (!detailsItem || !detailsGeom) return;
+  const canvas = $("dChart");
+  const rect = canvas.getBoundingClientRect();
+  const px = e.clientX - rect.left;
+  const t = detailsGeom.timeAt(px);
+  const i = segmentAt(detailsItem.timeline, t);
+  if (t < 0 || i < 0) return hideTip();
+  if (i !== hoverSeg) {
+    hoverSeg = i;
+    drawDetails();
+  }
+
+  const seg = detailsItem.timeline.segments[i];
+  const ftp = homeFtp();
+  const w = (f) => Math.round(f * ftp);
+  const pct = (f) => Math.round(f * 100);
+  let watts;
+  let sub;
+  if (seg.free) {
+    watts = "No target";
+    sub = "ERG off, ride by feel";
+  } else if (seg.from === seg.to) {
+    watts = `${w(seg.from)} W`;
+    sub = `${pct(seg.from)}% FTP`;
+  } else {
+    // Ramps: the range, plus the exact target where the pointer is.
+    watts = `${w(seg.from)} → ${w(seg.to)} W`;
+    sub = `${w(fractionAt(seg, t))} W here · ${pct(seg.from)}–${pct(seg.to)}% FTP`;
+  }
+  const color = seg.free ? "#8a8f98" : zoneFor(fractionAt(seg, t)).color;
+  const tip = $("dTip");
+  tip.innerHTML = `
+    <div class="tip-head"><i style="background:${color}"></i>${segmentLabel(seg)}${seg.cadence ? ` · ${seg.cadence} rpm` : ""}</div>
+    <div class="tip-w">${watts}</div>
+    <div class="tip-sub">${sub}</div>
+    <div class="tip-sub">${fmtTime(seg.duration)} · ${fmtTime(seg.start)}–${fmtTime(seg.start + seg.duration)}</div>`;
+  tip.classList.add("show");
+
+  // Sit just above the bar's top edge, centred on the pointer, kept inside the chart.
+  const top = detailsGeom.yAt(seg.free ? 0.5 : Math.max(seg.from, seg.to));
+  const left = Math.min(Math.max(px, tip.offsetWidth / 2 + 4), rect.width - tip.offsetWidth / 2 - 4);
+  tip.style.left = `${left}px`;
+  tip.style.top = `${Math.max(top - 10, tip.offsetHeight + 4)}px`;
+}
+
+$("dChart").addEventListener("pointermove", showTip);
+$("dChart").addEventListener("pointerdown", showTip);
+$("dChart").addEventListener("pointerleave", hideTip);
+
 $("dClose").addEventListener("click", closeDetails);
 $("dFtp").addEventListener("click", () => {
   ftpInput.value = $("dFtp").dataset.ftp;
   ftpInput.dispatchEvent(new Event("change"));
   $("dFtp").hidden = true;
-  drawWorkout($("dChart"), { timeline: detailsItem.timeline, ftp: homeFtp(), labels: true });
+  drawDetails();
 });
 $("details").addEventListener("click", (e) => {
   if (e.target === $("details")) closeDetails();
@@ -1305,7 +1381,10 @@ document.addEventListener("keydown", (e) => {
 window.addEventListener("resize", () => {
   if (ride) render();
   else if ($("builder").classList.contains("active")) renderPreview();
-  else drawLibraryCharts();
+  else {
+    drawLibraryCharts();
+    drawDetails();
+  }
 });
 window.addEventListener("beforeunload", (e) => {
   if (ride && ride.log.length && !$("rDone").classList.contains("show")) e.preventDefault();

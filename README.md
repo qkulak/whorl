@@ -47,7 +47,7 @@ Finished rides can be saved to `rides/` as JSON (per-second power, HR, cadence, 
 
 ## Browse
 
-**Browse** lists every preset workout. You can filter by collection, by type (Recovery → Anaerobic, colored by zone) and by length, or search. Click a card to select it, double-click to ride, or open **Details** for the full chart and description.
+**Browse** lists every preset workout. You can filter by collection, by type (Recovery → Anaerobic, colored by zone) and by length, or search. Click anywhere on a card to open its details: the full chart, the description, and **RIDE IT**. Hover over (or tap) any bar in the chart to see its target watts, % FTP, and timing. For ramps it also shows the exact watts at that point.
 
 | Collection | Folder | What it is |
 |---|---|---|

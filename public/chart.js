@@ -34,10 +34,13 @@ export function peakFraction(timeline) {
  *   samples    [{ t, w }] actual power, workout seconds
  *   labels     draw target labels + time axis
  *   selected   block index to highlight (builder)
+ *   hover      segment index to outline (details tooltip)
+ *
+ * Returns the geometry so callers can hit-test the pointer against bars.
  */
 export function drawWorkout(canvas, opts) {
   const { ctx, width, height } = fitCanvas(canvas);
-  const { timeline, ftp, labels = false, samples = [], selected = null } = opts;
+  const { timeline, ftp, labels = false, samples = [], selected = null, hover = null } = opts;
   const t0 = opts.t0 ?? 0;
   const t1 = opts.t1 ?? Math.max(1, timeline.duration);
   const pos = opts.position ?? null;
@@ -135,6 +138,26 @@ export function drawWorkout(canvas, opts) {
   drawBars(0.92);
   ctx.restore();
 
+  // Hovered segment: lift it with a light wash and a white outline.
+  const hs = hover !== null ? timeline.segments[hover] : null;
+  if (hs) {
+    const xa = x(hs.start);
+    const xb = x(hs.start + hs.duration);
+    const ya = y(hs.free ? 0.5 : hs.from);
+    const yb = y(hs.free ? 0.5 : hs.to);
+    ctx.beginPath();
+    ctx.moveTo(xa, base);
+    ctx.lineTo(xa, ya);
+    ctx.lineTo(xb, yb);
+    ctx.lineTo(xb, base);
+    ctx.closePath();
+    ctx.fillStyle = "rgba(255,255,255,.18)";
+    ctx.fill();
+    ctx.strokeStyle = "#fff";
+    ctx.lineWidth = 2;
+    ctx.stroke();
+  }
+
   // Target labels over upcoming segments that have room for them.
   if (labels) {
     ctx.font = "700 12px Barlow, system-ui, sans-serif";
@@ -216,4 +239,10 @@ export function drawWorkout(canvas, opts) {
       ctx.fillText(fmtTime(t), x(t), height - 6);
     }
   }
+
+  return {
+    timeAt: (px) => t0 + ((px - pad.l) / W) * (t1 - t0),
+    xAt: x,
+    yAt: y,
+  };
 }
