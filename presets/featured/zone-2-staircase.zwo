@@ -1,0 +1,29 @@
+<workout_file>
+    <author>Whorl</author>
+    <name>Zone 2 Staircase</name>
+    <description>Zone 2 endurance: five 15-minute rounds that step 65 → 70 → 75% FTP every 5 minutes, between an easy start and a 60% then 50% finish.</description>
+    <category>Endurance</category>
+    <sportType>bike</sportType>
+    <tags>
+            </tags>
+    <workout>
+        <SteadyState Duration="300" Power="0.5"/>
+        <SteadyState Duration="300" Power="0.65"/>
+        <SteadyState Duration="300" Power="0.7"/>
+        <SteadyState Duration="300" Power="0.75"/>
+        <SteadyState Duration="300" Power="0.65"/>
+        <SteadyState Duration="300" Power="0.7"/>
+        <SteadyState Duration="300" Power="0.75"/>
+        <SteadyState Duration="300" Power="0.65"/>
+        <SteadyState Duration="300" Power="0.7"/>
+        <SteadyState Duration="300" Power="0.75"/>
+        <SteadyState Duration="300" Power="0.65"/>
+        <SteadyState Duration="300" Power="0.7"/>
+        <SteadyState Duration="300" Power="0.75"/>
+        <SteadyState Duration="300" Power="0.65"/>
+        <SteadyState Duration="300" Power="0.7"/>
+        <SteadyState Duration="300" Power="0.75"/>
+        <SteadyState Duration="300" Power="0.6"/>
+        <SteadyState Duration="300" Power="0.5"/>
+    </workout>
+</workout_file>

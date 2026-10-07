@@ -132,6 +132,7 @@ CATEGORY = {
     "Minute On, Minute Off": "VO2 Max",
     "Five-Minute Fury": "VO2 Max",
     "Spark Plugs": "Anaerobic",
+    "Zone 2 Staircase": "Endurance",
     "Sweet Spot 2x20": "Sweet Spot",
     "Sweet Spot 3x15": "Sweet Spot",
     "Sweet Spot 4x10": "Sweet Spot",
@@ -330,7 +331,22 @@ FEATURED = [
             C(120, 0.55, 0.4),
         ],
     ),
+    (
+        "Zone 2 Staircase",
+        (5400, None, 50, 75),
+        "Zone 2 endurance: five 15-minute rounds that step 65 → 70 → 75% FTP every 5 minutes, between an easy start and a 60% then 50% finish.",
+        [
+            S(300, 0.5),
+            *[b for _ in range(5) for b in (S(300, 0.65), S(300, 0.7), S(300, 0.75))],
+            S(300, 0.6),
+            S(300, 0.5),
+        ],
+    ),
 ]
+
+# Built segment by segment, so these
+# are exact rather than rebuilt from summary stats.
+EXACT = {"Zone 2 Staircase"}
 
 # ======================================================================
 # Classics — protocols as specified in published coaching protocols
@@ -430,11 +446,13 @@ def main():
         m, s = divmod(want_dur, 60)
         h, m = divmod(m, 60)
         dur_txt = f"{h}:{m:02d}:{s:02d}" if h else f"{m}:{s:02d}"
-        note = (
-            APPROX.format(dur=dur_txt, lo=want_lo, hi=want_hi, avg=want_avg)
-            if want_avg and want_lo
-            else ""
-        )
+        if name in EXACT:
+            note = ""
+        elif want_avg and want_lo:
+            note = APPROX.format(dur=dur_txt, lo=want_lo, hi=want_hi, avg=want_avg)
+        else:
+            note = ""
+        AUTHOR = "Featured" if name in EXACT else AUTHOR_FEATURED
         with open(os.path.join(OUT, "featured", slug(name) + ".zwo"), "w") as f:
             f.write(to_xml(name, purpose + note, blocks, [], CATEGORY[name]))
         print(f"featured     {name:32} {dur // 60:>3} min  avg {avg}%  {lo}-{hi}%")
