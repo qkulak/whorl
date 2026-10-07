@@ -166,6 +166,7 @@ const COLLECTION_LABELS = {
   mine: "My workouts",
   featured: "Featured",
   classics: "Classics",
+  endurance: "Z2 Endurance",
   plan: "Training plan",
   uploaded: "Uploaded",
 };

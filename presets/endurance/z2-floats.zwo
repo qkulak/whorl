@@ -1,0 +1,46 @@
+<workout_file>
+    <author>ZWO Ride</author>
+    <name>Z2 Floats</name>
+    <description>Floating between the top and bottom of zone 2: 4 min at 74%, then 4 min at 60%, seven times. The easy halves aren't recovery. They're still aerobic work, just lighter.</description>
+    <category>Endurance</category>
+    <sportType>bike</sportType>
+    <tags>
+        <tag name="endurance"/>
+        <tag name="z2"/>
+    </tags>
+    <workout>
+        <Warmup Duration="600" PowerLow="0.5" PowerHigh="0.65"/>
+        <SteadyState Duration="240" Power="0.74">
+            <textevent timeoffset="0" message="Float 1 of 7: top of Z2, steady breathing, could still talk"/>
+        </SteadyState>
+        <SteadyState Duration="240" Power="0.6"/>
+        <SteadyState Duration="240" Power="0.74">
+            <textevent timeoffset="0" message="Float 2 of 7: top of Z2, steady breathing, could still talk"/>
+        </SteadyState>
+        <SteadyState Duration="240" Power="0.6"/>
+        <SteadyState Duration="240" Power="0.74">
+            <textevent timeoffset="0" message="Float 3 of 7: top of Z2, steady breathing, could still talk"/>
+        </SteadyState>
+        <SteadyState Duration="240" Power="0.6"/>
+        <SteadyState Duration="240" Power="0.74">
+            <textevent timeoffset="0" message="Float 4 of 7: top of Z2, steady breathing, could still talk"/>
+        </SteadyState>
+        <SteadyState Duration="240" Power="0.6"/>
+        <SteadyState Duration="240" Power="0.74">
+            <textevent timeoffset="0" message="Float 5 of 7: top of Z2, steady breathing, could still talk"/>
+        </SteadyState>
+        <SteadyState Duration="240" Power="0.6"/>
+        <SteadyState Duration="240" Power="0.74">
+            <textevent timeoffset="0" message="Float 6 of 7: top of Z2, steady breathing, could still talk"/>
+        </SteadyState>
+        <SteadyState Duration="240" Power="0.6"/>
+        <SteadyState Duration="240" Power="0.74">
+            <textevent timeoffset="0" message="Float 7 of 7: top of Z2, steady breathing, could still talk"/>
+        </SteadyState>
+        <SteadyState Duration="240" Power="0.6"/>
+        <SteadyState Duration="360" Power="0.66">
+            <textevent timeoffset="0" message="Middle of Z2 to finish the main set"/>
+        </SteadyState>
+        <Cooldown Duration="480" PowerLow="0.62" PowerHigh="0.5"/>
+    </workout>
+</workout_file>

@@ -53,12 +53,13 @@ Finished rides can be saved to `rides/` as JSON (per-second power, HR, cadence, 
 |---|---|---|
 | FEATURED | `presets/featured/` | 14 named workouts, each built to an exact duration and min/max/average % FTP, following any published interval outline. Each description says it's an approximation. |
 | Classics | `presets/classics/` | Fully specified protocols from published coaching protocols (2×20 sweet spot, Rønnestad 30/15s, 5×4 VO2…) plus the original samples. |
+| Z2 Endurance | `presets/endurance/` | Five original zone 2 rides from 1:15 to 2:00 (cadence builder, floats, ladder, waves, long steady). The generator asserts that every main-set target stays in Z2 (56–75% FTP). |
 | Training plan | `presets/plan/` | The bike workouts from `trainingplancalc`, copied as-is. |
 | Uploaded | `presets/uploaded/` | Anything you add with **⇪ Upload .zwo** (or by dragging files onto Browse). |
 
 If a workout's description says "Set FTP to 185", Details offers a **Use FTP 185 W** button.
 
-Any folder you add under `presets/` shows up as its own collection. Categories come from a `<category>` element when the file has one; otherwise they're inferred from time spent at each intensity. `python3 scripts/build_presets.py` regenerates the FEATURED and Classics files and checks each FEATURED rebuild against the published numbers.
+Any folder you add under `presets/` shows up as its own collection. Categories come from a `<category>` element when the file has one; otherwise they're inferred from time spent at each intensity. `python3 scripts/build_presets.py` regenerates the FEATURED, Classics and Z2 Endurance files and checks each FEATURED rebuild against the published numbers.
 
 Only uploads and your own workouts can be deleted. Bundled presets can't.
 

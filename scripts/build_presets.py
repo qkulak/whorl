@@ -10,6 +10,10 @@ segment-by-segment profile is designed inside the
     Each file says so in its description. The script asserts the published
     numbers, so a tweak that drifts from them fails loudly.
 
+Z2 Endurance collection
+    Original zone 2 rides from 75 min to 2 h, each with a different structure.
+    Main-set targets are asserted to stay inside zone 2.
+
 Classics collection
     Fully specified protocols from published coaching protocols (sweet spot, VO2
     max). The articles give the main set only, so warmup and cooldown are added
@@ -431,6 +435,115 @@ CLASSICS = [
 ]
 
 
+
+# ======================================================================
+# Z2 Endurance — original zone 2 rides, 75 min to 2 h
+# ======================================================================
+#
+# Every main-set target stays inside zone 2 (56-75% FTP); only the warmup
+# and cooldown may dip to 50%. Variety comes from structure and cadence, not
+# from leaving the zone.
+
+Z2_LO, Z2_HI, EASY = 0.56, 0.75, 0.5
+
+
+def cadence_round(n):
+    return (
+        S(480, 0.68, cad=88, ev=((0, f"Round {n} of 5: settle at 85-90 rpm"),)),
+        S(120, 0.68, cad=100, ev=((0, "Spin up: 100+ rpm, same watts, smooth hips"),)),
+        S(120, 0.7, cad=70, ev=((0, "Torque: drop to ~70 rpm, seated, push through the whole stroke"),)),
+    )
+
+
+ENDURANCE = [
+    (
+        "Z2 Cadence Builder",
+        "75 minutes of steady zone 2 where the power hardly moves but the cadence does. Each round is 8 min cruising at 85-90 rpm, 2 min spinning at 100+ and 2 min grinding at ~70. It's good for pedaling efficiency and keeps the time moving.",
+        [
+            W(600, 0.5, 0.65, cad=85, ev=((10, "Easy start. Five cadence rounds after this"),)),
+            *[b for n in range(1, 6) for b in cadence_round(n)],
+            C(300, 0.62, 0.5, cad=85),
+        ],
+    ),
+    (
+        "Z2 Floats",
+        "Floating between the top and bottom of zone 2: 4 min at 74%, then 4 min at 60%, seven times. The easy halves aren't recovery. They're still aerobic work, just lighter.",
+        [
+            W(600, 0.5, 0.65),
+            *[
+                b
+                for n in range(1, 8)
+                for b in (
+                    S(240, 0.74, ev=((0, f"Float {n} of 7: top of Z2, steady breathing, could still talk"),)),
+                    S(240, 0.6),
+                )
+            ],
+            S(360, 0.66, ev=((0, "Middle of Z2 to finish the main set"),)),
+            C(480, 0.62, 0.5),
+        ],
+    ),
+    (
+        "Z2 Ladder",
+        "A 70-minute ladder through zone 2: 10-minute steps climb 62 → 66 → 70 → 74%, then come back down. Each step is small enough that the top still feels controlled.",
+        [
+            W(600, 0.5, 0.62),
+            S(600, 0.62, ev=((0, "Ladder up: 4 steps, 10 min each"),)),
+            S(600, 0.66),
+            S(600, 0.7),
+            S(600, 0.74, ev=((0, "Top step: upper Z2. Smooth, not straining"),)),
+            S(600, 0.7, ev=((0, "Halfway. Back down the ladder"),)),
+            S(600, 0.66),
+            S(600, 0.62),
+            C(600, 0.6, 0.5),
+        ],
+    ),
+    (
+        "Z2 Waves",
+        "Long, gentle rollers: power ramps from 60% up to 74% over 6 minutes and back down over 6, six times, with 3 easy-Z2 minutes between. It rides like rolling terrain without ever leaving zone 2.",
+        [
+            W(600, 0.5, 0.62),
+            *[
+                b
+                for n in range(1, 7)
+                for b in (
+                    R(360, 0.6, 0.74, ev=((0, f"Wave {n} of 6: climb gradually"),)),
+                    R(360, 0.74, 0.6),
+                    S(180, 0.64),
+                )
+            ],
+            C(300, 0.6, 0.5),
+        ],
+    ),
+    (
+        "Z2 Long Steady",
+        "Two hours of classic long-ride zone 2: three 25-minute blocks that progress 68 → 70 → 72%, with 5 easy minutes between to stand, stretch and eat. Fueling cues every 20 minutes. Aim for 60-90 g of carbs an hour.",
+        [
+            W(1200, 0.5, 0.66, ev=((10, "2 hours of Z2. Bottles and food within reach?"),)),
+            S(1500, 0.68, ev=((0, "Block 1 of 3: 68%. Settle in"), (600, "Fuel: drink + 20-30 g carbs"), (1200, "Fuel again"))),
+            S(300, 0.6, ev=((0, "Easy 5: stand for 30 s, stretch, eat"),)),
+            S(1500, 0.7, ev=((0, "Block 2 of 3: 70%"), (300, "Fuel: drink + carbs"), (1500 - 300, "Fuel"))),
+            S(300, 0.6, ev=((0, "Easy 5: stand, stretch, eat"),)),
+            S(1500, 0.72, ev=((0, "Block 3 of 3: 72%. Stay smooth as fatigue builds"), (600, "Fuel"), (1200, "Last fuel. Finish strong but in control"))),
+            C(900, 0.64, 0.5),
+        ],
+    ),
+]
+
+
+def check_z2(name, blocks):
+    """Main-set targets must sit in Z2; warmup/cooldown may go down to EASY."""
+    for b in blocks:
+        kind = b[0]
+        if kind == "IntervalsT":
+            powers = (b[3], b[5])
+            floor = Z2_LO
+        else:
+            powers = (b[2], b[3])
+            floor = EASY if kind in ("Warmup", "Cooldown") else Z2_LO
+        for p in powers:
+            assert floor <= p <= Z2_HI, f"{name}: {kind} at {p:.0%} is outside Z2"
+
+
 def main():
     AUTHOR_FEATURED = "Whorl"
     AUTHOR_CLASSIC = "Whorl"
@@ -463,6 +576,17 @@ def main():
         with open(os.path.join(OUT, "classics", slug(name) + ".zwo"), "w") as f:
             f.write(to_xml(name, purpose + ADDED, blocks, ["classic"], CATEGORY[name]))
         print(f"classics  {name:32} {dur // 60:>3} min  avg {avg}%  {lo}-{hi}%")
+
+    AUTHOR = "ZWO Ride"
+    os.makedirs(os.path.join(OUT, "endurance"), exist_ok=True)
+    lengths = {"Z2 Cadence Builder": 75, "Z2 Floats": 80, "Z2 Ladder": 90, "Z2 Waves": 105, "Z2 Long Steady": 120}
+    for name, purpose, blocks in ENDURANCE:
+        check_z2(name, blocks)
+        dur, avg, lo, hi = summary(blocks)
+        assert dur == lengths[name] * 60, f"{name}: {dur / 60:g} min, expected {lengths[name]}"
+        with open(os.path.join(OUT, "endurance", slug(name) + ".zwo"), "w") as f:
+            f.write(to_xml(name, purpose, blocks, ["endurance", "z2"], "Endurance"))
+        print(f"endurance {name:32} {dur // 60:>3} min  avg {avg}%  {lo}-{hi}%")
 
 
 if __name__ == "__main__":

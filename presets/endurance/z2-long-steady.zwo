@@ -1,0 +1,38 @@
+<workout_file>
+    <author>ZWO Ride</author>
+    <name>Z2 Long Steady</name>
+    <description>Two hours of classic long-ride zone 2: three 25-minute blocks that progress 68 → 70 → 72%, with 5 easy minutes between to stand, stretch and eat. Fueling cues every 20 minutes. Aim for 60-90 g of carbs an hour.</description>
+    <category>Endurance</category>
+    <sportType>bike</sportType>
+    <tags>
+        <tag name="endurance"/>
+        <tag name="z2"/>
+    </tags>
+    <workout>
+        <Warmup Duration="1200" PowerLow="0.5" PowerHigh="0.66">
+            <textevent timeoffset="10" message="2 hours of Z2. Bottles and food within reach?"/>
+        </Warmup>
+        <SteadyState Duration="1500" Power="0.68">
+            <textevent timeoffset="0" message="Block 1 of 3: 68%. Settle in"/>
+            <textevent timeoffset="600" message="Fuel: drink + 20-30 g carbs"/>
+            <textevent timeoffset="1200" message="Fuel again"/>
+        </SteadyState>
+        <SteadyState Duration="300" Power="0.6">
+            <textevent timeoffset="0" message="Easy 5: stand for 30 s, stretch, eat"/>
+        </SteadyState>
+        <SteadyState Duration="1500" Power="0.7">
+            <textevent timeoffset="0" message="Block 2 of 3: 70%"/>
+            <textevent timeoffset="300" message="Fuel: drink + carbs"/>
+            <textevent timeoffset="1200" message="Fuel"/>
+        </SteadyState>
+        <SteadyState Duration="300" Power="0.6">
+            <textevent timeoffset="0" message="Easy 5: stand, stretch, eat"/>
+        </SteadyState>
+        <SteadyState Duration="1500" Power="0.72">
+            <textevent timeoffset="0" message="Block 3 of 3: 72%. Stay smooth as fatigue builds"/>
+            <textevent timeoffset="600" message="Fuel"/>
+            <textevent timeoffset="1200" message="Last fuel. Finish strong but in control"/>
+        </SteadyState>
+        <Cooldown Duration="900" PowerLow="0.64" PowerHigh="0.5"/>
+    </workout>
+</workout_file>

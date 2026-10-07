@@ -1,0 +1,45 @@
+<workout_file>
+    <author>ZWO Ride</author>
+    <name>Z2 Waves</name>
+    <description>Long, gentle rollers: power ramps from 60% up to 74% over 6 minutes and back down over 6, six times, with 3 easy-Z2 minutes between. It rides like rolling terrain without ever leaving zone 2.</description>
+    <category>Endurance</category>
+    <sportType>bike</sportType>
+    <tags>
+        <tag name="endurance"/>
+        <tag name="z2"/>
+    </tags>
+    <workout>
+        <Warmup Duration="600" PowerLow="0.5" PowerHigh="0.62"/>
+        <Ramp Duration="360" PowerLow="0.6" PowerHigh="0.74">
+            <textevent timeoffset="0" message="Wave 1 of 6: climb gradually"/>
+        </Ramp>
+        <Ramp Duration="360" PowerLow="0.74" PowerHigh="0.6"/>
+        <SteadyState Duration="180" Power="0.64"/>
+        <Ramp Duration="360" PowerLow="0.6" PowerHigh="0.74">
+            <textevent timeoffset="0" message="Wave 2 of 6: climb gradually"/>
+        </Ramp>
+        <Ramp Duration="360" PowerLow="0.74" PowerHigh="0.6"/>
+        <SteadyState Duration="180" Power="0.64"/>
+        <Ramp Duration="360" PowerLow="0.6" PowerHigh="0.74">
+            <textevent timeoffset="0" message="Wave 3 of 6: climb gradually"/>
+        </Ramp>
+        <Ramp Duration="360" PowerLow="0.74" PowerHigh="0.6"/>
+        <SteadyState Duration="180" Power="0.64"/>
+        <Ramp Duration="360" PowerLow="0.6" PowerHigh="0.74">
+            <textevent timeoffset="0" message="Wave 4 of 6: climb gradually"/>
+        </Ramp>
+        <Ramp Duration="360" PowerLow="0.74" PowerHigh="0.6"/>
+        <SteadyState Duration="180" Power="0.64"/>
+        <Ramp Duration="360" PowerLow="0.6" PowerHigh="0.74">
+            <textevent timeoffset="0" message="Wave 5 of 6: climb gradually"/>
+        </Ramp>
+        <Ramp Duration="360" PowerLow="0.74" PowerHigh="0.6"/>
+        <SteadyState Duration="180" Power="0.64"/>
+        <Ramp Duration="360" PowerLow="0.6" PowerHigh="0.74">
+            <textevent timeoffset="0" message="Wave 6 of 6: climb gradually"/>
+        </Ramp>
+        <Ramp Duration="360" PowerLow="0.74" PowerHigh="0.6"/>
+        <SteadyState Duration="180" Power="0.64"/>
+        <Cooldown Duration="300" PowerLow="0.6" PowerHigh="0.5"/>
+    </workout>
+</workout_file>

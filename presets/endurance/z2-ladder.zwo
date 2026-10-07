@@ -1,0 +1,28 @@
+<workout_file>
+    <author>ZWO Ride</author>
+    <name>Z2 Ladder</name>
+    <description>A 70-minute ladder through zone 2: 10-minute steps climb 62 → 66 → 70 → 74%, then come back down. Each step is small enough that the top still feels controlled.</description>
+    <category>Endurance</category>
+    <sportType>bike</sportType>
+    <tags>
+        <tag name="endurance"/>
+        <tag name="z2"/>
+    </tags>
+    <workout>
+        <Warmup Duration="600" PowerLow="0.5" PowerHigh="0.62"/>
+        <SteadyState Duration="600" Power="0.62">
+            <textevent timeoffset="0" message="Ladder up: 4 steps, 10 min each"/>
+        </SteadyState>
+        <SteadyState Duration="600" Power="0.66"/>
+        <SteadyState Duration="600" Power="0.7"/>
+        <SteadyState Duration="600" Power="0.74">
+            <textevent timeoffset="0" message="Top step: upper Z2. Smooth, not straining"/>
+        </SteadyState>
+        <SteadyState Duration="600" Power="0.7">
+            <textevent timeoffset="0" message="Halfway. Back down the ladder"/>
+        </SteadyState>
+        <SteadyState Duration="600" Power="0.66"/>
+        <SteadyState Duration="600" Power="0.62"/>
+        <Cooldown Duration="600" PowerLow="0.6" PowerHigh="0.5"/>
+    </workout>
+</workout_file>
