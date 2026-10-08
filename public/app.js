@@ -174,7 +174,7 @@ const collectionLabel = (c) => COLLECTION_LABELS[c] || c.charAt(0).toUpperCase()
 
 let library = []; // { key, id, collection, workout, timeline, stats, category }
 let selectedKey = store.get("selectedKey", null);
-const browse = { collection: "all", category: "all", length: "any", q: "" };
+const browse = { collection: "all", category: "all", durMin: 0, durMax: null, q: "" };
 let homeTab = store.get("homeTab", "browse");
 
 function toItem(r, collection) {
@@ -245,17 +245,77 @@ function renderHome() {
 
 // ---- browse filters ----
 
-const LENGTHS = {
-  any: ["Any length", () => true],
-  short: ["Under 45 min", (s) => s < 45 * 60],
-  mid: ["45–75 min", (s) => s >= 45 * 60 && s <= 75 * 60],
-  long: ["Over 75 min", (s) => s > 75 * 60],
-};
+// ---- duration slider: two thumbs on one track, in minutes ----
+
+const DUR_STEP = 5;
+let durLimit = 120; // slider end, rounded up from the longest preset
+
+// With the max thumb at the end of the track there's no upper bound, so a
+// 3h45 ride still shows when the slider only goes to 4h.
+function durInRange(seconds) {
+  const min = seconds / 60;
+  return min >= browse.durMin && (browse.durMax === null || min <= browse.durMax);
+}
+
+function fmtMinutes(m) {
+  return m < 60 ? `${m} min` : `${Math.floor(m / 60)}:${String(m % 60).padStart(2, "0")}`;
+}
+
+function renderDurSlider() {
+  const lo = $("fDurMin");
+  const hi = $("fDurMax");
+  for (const input of [lo, hi]) {
+    input.max = durLimit;
+    input.step = DUR_STEP;
+  }
+  const max = browse.durMax ?? durLimit;
+  lo.value = browse.durMin;
+  hi.value = max;
+  $("fDurFill").style.left = `${(browse.durMin / durLimit) * 100}%`;
+  $("fDurFill").style.width = `${((max - browse.durMin) / durLimit) * 100}%`;
+  // When both thumbs sit at the far end, the min thumb must be on top or it can't be grabbed.
+  lo.style.zIndex = browse.durMin > durLimit / 2 ? 3 : 2;
+  const any = browse.durMin === 0 && browse.durMax === null;
+  $("fDurVal").textContent = any
+    ? "Any length"
+    : browse.durMax === null
+      ? `${fmtMinutes(browse.durMin)} +`
+      : browse.durMin === 0
+        ? `Up to ${fmtMinutes(browse.durMax)}`
+        : browse.durMin === browse.durMax
+          ? fmtMinutes(browse.durMin)
+          : `${fmtMinutes(browse.durMin)} – ${fmtMinutes(browse.durMax)}`;
+  $("fDurReset").hidden = any;
+  $("fDurEnds").innerHTML = `<span>0</span><span>${fmtMinutes(durLimit)}+</span>`;
+}
+
+function onDurInput(which) {
+  let lo = Number($("fDurMin").value);
+  let hi = Number($("fDurMax").value);
+  // Thumbs can meet but never cross: the one being dragged stops at the other.
+  if (lo > hi) {
+    if (which === "min") lo = hi;
+    else hi = lo;
+  }
+  browse.durMin = lo;
+  browse.durMax = hi >= durLimit ? null : hi;
+  renderDurSlider();
+  renderHome();
+}
+
+$("fDurMin").addEventListener("input", () => onDurInput("min"));
+$("fDurMax").addEventListener("input", () => onDurInput("max"));
+$("fDurReset").addEventListener("click", () => {
+  browse.durMin = 0;
+  browse.durMax = null;
+  renderDurSlider();
+  renderHome();
+});
 
 function matchesBrowse(w) {
   if (browse.collection !== "all" && w.collection !== browse.collection) return false;
   if (browse.category !== "all" && w.category !== browse.category) return false;
-  if (!LENGTHS[browse.length][1](w.stats.duration)) return false;
+  if (!durInRange(w.stats.duration)) return false;
   if (browse.q) {
     const hay = `${w.workout.name} ${w.workout.description} ${w.workout.tags.join(" ")}`.toLowerCase();
     if (!browse.q.split(/\s+/).every((word) => hay.includes(word))) return false;
@@ -301,16 +361,11 @@ function renderBrowseFilters() {
       renderHome();
     },
   );
-  chips(
-    $("fLength"),
-    Object.entries(LENGTHS).map(([k, [label]]) => [k, label]),
-    browse.length,
-    (v) => {
-      browse.length = v;
-      renderBrowseFilters();
-      renderHome();
-    },
-  );
+  const longest = Math.max(60, ...presets.map((w) => w.stats.duration / 60));
+  durLimit = Math.ceil(longest / 15) * 15;
+  browse.durMin = Math.min(browse.durMin, durLimit);
+  if (browse.durMax !== null && browse.durMax >= durLimit) browse.durMax = null;
+  renderDurSlider();
 }
 
 $("fSearch").addEventListener("input", (e) => {
