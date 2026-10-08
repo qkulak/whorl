@@ -1,0 +1,66 @@
+<workout_file>
+    <author>ZWO Ride</author>
+    <name>Sweet Spot Progression 3x13 (75min)</name>
+    <description>Three 13-minute sweet spot blocks that step up inside each block: 5 min at 88%, 5 min at 90%, then 3 min at 93%, so the hardest part comes when you're most tired. 4 min easy between. A 10-minute warmup and three 30-second FTP openers get the legs ready. 39 minutes of sweet spot in total.</description>
+    <category>Sweet Spot</category>
+    <sportType>bike</sportType>
+    <tags>
+        <tag name="sweetspot"/>
+    </tags>
+    <workout>
+        <Warmup Duration="600" PowerLow="0.5" PowerHigh="0.75" Cadence="85">
+            <textevent timeoffset="10" message="75 min sweet spot: warm up, openers, then 3 progressive 13-min blocks"/>
+        </Warmup>
+        <SteadyState Duration="30" Power="1" Cadence="100">
+            <textevent timeoffset="0" message="Opener: 30 s at FTP, high cadence"/>
+        </SteadyState>
+        <SteadyState Duration="90" Power="0.6" Cadence="88"/>
+        <SteadyState Duration="30" Power="1" Cadence="100">
+            <textevent timeoffset="0" message="Opener: 30 s at FTP, high cadence"/>
+        </SteadyState>
+        <SteadyState Duration="90" Power="0.6" Cadence="88"/>
+        <SteadyState Duration="30" Power="1" Cadence="100">
+            <textevent timeoffset="0" message="Opener: 30 s at FTP, high cadence"/>
+        </SteadyState>
+        <SteadyState Duration="90" Power="0.6" Cadence="88"/>
+        <SteadyState Duration="300" Power="0.88" Cadence="90">
+            <textevent timeoffset="0" message="Block 1 of 3: 13 min of sweet spot, stepping up every few minutes. Settle at 88%"/>
+        </SteadyState>
+        <SteadyState Duration="300" Power="0.9" Cadence="90">
+            <textevent timeoffset="0" message="Step up to 90%. Smooth pedaling, steady breathing"/>
+        </SteadyState>
+        <SteadyState Duration="180" Power="0.93" Cadence="92">
+            <textevent timeoffset="0" message="Top of sweet spot: 93% for 3 min. Hold form"/>
+            <textevent timeoffset="150" message="30 seconds left in this block"/>
+        </SteadyState>
+        <SteadyState Duration="240" Power="0.55" Cadence="85">
+            <textevent timeoffset="0" message="4 min easy. Drink"/>
+        </SteadyState>
+        <SteadyState Duration="300" Power="0.88" Cadence="90">
+            <textevent timeoffset="0" message="Block 2 of 3: 13 min of sweet spot, stepping up every few minutes. Settle at 88%"/>
+        </SteadyState>
+        <SteadyState Duration="300" Power="0.9" Cadence="90">
+            <textevent timeoffset="0" message="Step up to 90%. Smooth pedaling, steady breathing"/>
+        </SteadyState>
+        <SteadyState Duration="180" Power="0.93" Cadence="92">
+            <textevent timeoffset="0" message="Top of sweet spot: 93% for 3 min. Hold form"/>
+            <textevent timeoffset="150" message="30 seconds left in this block"/>
+        </SteadyState>
+        <SteadyState Duration="240" Power="0.55" Cadence="85">
+            <textevent timeoffset="0" message="4 min easy. One block left"/>
+        </SteadyState>
+        <SteadyState Duration="300" Power="0.88" Cadence="90">
+            <textevent timeoffset="0" message="Block 3 of 3: 13 min of sweet spot, stepping up every few minutes. Settle at 88%"/>
+        </SteadyState>
+        <SteadyState Duration="300" Power="0.9" Cadence="90">
+            <textevent timeoffset="0" message="Step up to 90%. Smooth pedaling, steady breathing"/>
+        </SteadyState>
+        <SteadyState Duration="180" Power="0.93" Cadence="92">
+            <textevent timeoffset="0" message="Top of sweet spot: 93% for 3 min. Hold form"/>
+            <textevent timeoffset="150" message="30 seconds left in this block"/>
+        </SteadyState>
+        <Cooldown Duration="720" PowerLow="0.6" PowerHigh="0.4" Cadence="85">
+            <textevent timeoffset="0" message="Done. 12 min cooldown"/>
+        </Cooldown>
+    </workout>
+</workout_file>
