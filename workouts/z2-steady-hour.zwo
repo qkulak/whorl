@@ -1,0 +1,37 @@
+<workout_file>
+    <author>Quinvy</author>
+    <name>Z2 Steady Hour</name>
+    <description>An hour of zone 2 that creeps upward without ever reaching tempo: 15 min at 65%, 15 min at 68% with two short high-cadence spin-ups, then 12 min at 71%. 42 minutes of steady aerobic work between a 10-minute warmup and an 8-minute cooldown.</description>
+    <category>Endurance</category>
+    <sportType>bike</sportType>
+    <tags>
+        <tag name="endurance"/>
+        <tag name="z2"/>
+    </tags>
+    <workout>
+        <Warmup Duration="600" PowerLow="0.5" PowerHigh="0.65" Cadence="85">
+            <textevent timeoffset="10" message="60 min zone 2: three steady blocks that drift up from 65% to 71%"/>
+        </Warmup>
+        <SteadyState Duration="900" Power="0.65" Cadence="88">
+            <textevent timeoffset="0" message="Block 1 of 3: settle in at 65%. Drink"/>
+        </SteadyState>
+        <SteadyState Duration="300" Power="0.68" Cadence="90">
+            <textevent timeoffset="0" message="Block 2 of 3: up a touch to 68%. Drink"/>
+        </SteadyState>
+        <SteadyState Duration="30" Power="0.68" Cadence="100">
+            <textevent timeoffset="0" message="Spin-up: 30 s at 100+ rpm, same power"/>
+        </SteadyState>
+        <SteadyState Duration="270" Power="0.68" Cadence="90"/>
+        <SteadyState Duration="30" Power="0.68" Cadence="100">
+            <textevent timeoffset="0" message="Spin-up: 30 s at 100+ rpm, same power"/>
+        </SteadyState>
+        <SteadyState Duration="270" Power="0.68" Cadence="90"/>
+        <SteadyState Duration="720" Power="0.71" Cadence="90">
+            <textevent timeoffset="0" message="Block 3 of 3: top of zone 2 at 71%. Drink"/>
+            <textevent timeoffset="300" message="Keep breathing conversational"/>
+        </SteadyState>
+        <Cooldown Duration="480" PowerLow="0.65" PowerHigh="0.45" Cadence="85">
+            <textevent timeoffset="0" message="Done. 8 min cooldown"/>
+        </Cooldown>
+    </workout>
+</workout_file>
