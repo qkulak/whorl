@@ -2,9 +2,9 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "zworide",
+      "name": "quinvy",
       "runtimeExecutable": "python3",
-      "runtimeArgs": ["/Users/quintonkulak/Documents/GitHub/zworide/server.py"],
+      "runtimeArgs": ["/Users/quintonkulak/Documents/GitHub/quinvy/server.py"],
       "port": 8010
     }
   ]

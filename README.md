@@ -1,4 +1,4 @@
-# ZWO Ride
+# Quinvy
 
 A local web app for building `.zwo` workouts and riding them on a smart trainer in ERG mode, with a scrolling workout chart. The chart shows the targets you've ridden and the ones still to come, with your actual power traced over them.
 

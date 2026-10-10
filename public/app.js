@@ -1,4 +1,4 @@
-// ZWO RIDE — library, builder, and the ride screen.
+// QUINVY — library, builder, and the ride screen.
 
 import {
   BLOCK_TYPES,
@@ -24,10 +24,23 @@ const STALE_MS = 3000; // a reading older than this counts as "no data"
 const AUTO_PAUSE_S = 3;
 const TICK_MS = 250;
 
+// Settings saved under the app's old name (zworide.*) move over once, so a
+// rename doesn't reset FTP and preferences.
+try {
+  for (const k of Object.keys(localStorage)) {
+    if (!k.startsWith("zworide.")) continue;
+    const next = `quinvy.${k.slice("zworide.".length)}`;
+    if (localStorage.getItem(next) === null) localStorage.setItem(next, localStorage.getItem(k));
+    localStorage.removeItem(k);
+  }
+} catch {
+  /* storage unavailable — nothing to migrate */
+}
+
 const store = {
   get(k, d) {
     try {
-      const v = localStorage.getItem(`zworide.${k}`);
+      const v = localStorage.getItem(`quinvy.${k}`);
       return v === null ? d : JSON.parse(v);
     } catch {
       return d;
@@ -35,7 +48,7 @@ const store = {
   },
   set(k, v) {
     try {
-      localStorage.setItem(`zworide.${k}`, JSON.stringify(v));
+      localStorage.setItem(`quinvy.${k}`, JSON.stringify(v));
     } catch {
       /* private mode — prefs just won't stick */
     }

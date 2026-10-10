@@ -1,4 +1,4 @@
-"""ZWO Ride — workout library API + static file server. Zero dependencies — python3 server.py"""
+"""Quinvy — workout library API + static file server. Zero dependencies — python3 server.py"""
 import json
 import os
 import re
@@ -162,7 +162,7 @@ if __name__ == "__main__":
     os.makedirs(WORKOUT_DIR, exist_ok=True)
     os.makedirs(UPLOAD_DIR, exist_ok=True)
     os.makedirs(RIDE_DIR, exist_ok=True)
-    print(f"ZWO Ride — http://localhost:{PORT}")
+    print(f"Quinvy — http://localhost:{PORT}")
     print(f"Workouts → {WORKOUT_DIR}")
     print(f"Presets  → {PRESET_DIR}")
     print(f"Rides    → {RIDE_DIR}")

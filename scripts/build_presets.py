@@ -577,7 +577,7 @@ def main():
             f.write(to_xml(name, purpose + ADDED, blocks, ["classic"], CATEGORY[name]))
         print(f"classics  {name:32} {dur // 60:>3} min  avg {avg}%  {lo}-{hi}%")
 
-    AUTHOR = "ZWO Ride"
+    AUTHOR = "Quinvy"
     os.makedirs(os.path.join(OUT, "endurance"), exist_ok=True)
     lengths = {"Z2 Cadence Builder": 75, "Z2 Floats": 80, "Z2 Ladder": 90, "Z2 Waves": 105, "Z2 Long Steady": 120}
     for name, purpose, blocks in ENDURANCE:
