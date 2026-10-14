@@ -1,0 +1,69 @@
+<workout_file>
+    <author>Quinvy</author>
+    <name>Threshold Build 3x15 (90min)</name>
+    <description>Three 15-minute threshold blocks that step up inside each block: 5 min at 95%, 5 min at 98%, then 5 min at 100%, so the hardest part comes when you're most tired. 5 min easy between. A 12-minute warmup and three 1-minute openers get the legs ready. 45 minutes at threshold in total.</description>
+    <category>Threshold</category>
+    <sportType>bike</sportType>
+    <tags>
+        <tag name="threshold"/>
+    </tags>
+    <workout>
+        <Warmup Duration="720" PowerLow="0.5" PowerHigh="0.75" Cadence="85">
+            <textevent timeoffset="10" message="90 min threshold: warm up, openers, then 3 building 15-min blocks"/>
+        </Warmup>
+        <SteadyState Duration="60" Power="1.05" Cadence="100">
+            <textevent timeoffset="0" message="Opener: 1 min at 105%, high cadence"/>
+        </SteadyState>
+        <SteadyState Duration="60" Power="0.6" Cadence="85"/>
+        <SteadyState Duration="60" Power="1.05" Cadence="100">
+            <textevent timeoffset="0" message="Opener: 1 min at 105%, high cadence"/>
+        </SteadyState>
+        <SteadyState Duration="60" Power="0.6" Cadence="85"/>
+        <SteadyState Duration="60" Power="1.05" Cadence="100">
+            <textevent timeoffset="0" message="Opener: 1 min at 105%, high cadence"/>
+        </SteadyState>
+        <SteadyState Duration="60" Power="0.6" Cadence="85"/>
+        <SteadyState Duration="180" Power="0.55" Cadence="85">
+            <textevent timeoffset="0" message="3 min easy before the first block"/>
+        </SteadyState>
+        <SteadyState Duration="300" Power="0.95" Cadence="92">
+            <textevent timeoffset="0" message="Block 1 of 3: 15 min at threshold, stepping up every 5 min. Settle at 95%"/>
+        </SteadyState>
+        <SteadyState Duration="300" Power="0.98" Cadence="92">
+            <textevent timeoffset="0" message="Step up to 98%. Relax your shoulders, steady breathing"/>
+        </SteadyState>
+        <SteadyState Duration="300" Power="1" Cadence="92">
+            <textevent timeoffset="0" message="Top step: 100% FTP for 5 min. Hold it"/>
+            <textevent timeoffset="270" message="30 seconds left in this block"/>
+        </SteadyState>
+        <SteadyState Duration="300" Power="0.55" Cadence="85">
+            <textevent timeoffset="0" message="5 min easy. Drink"/>
+        </SteadyState>
+        <SteadyState Duration="300" Power="0.95" Cadence="92">
+            <textevent timeoffset="0" message="Block 2 of 3: 15 min at threshold, stepping up every 5 min. Settle at 95%"/>
+        </SteadyState>
+        <SteadyState Duration="300" Power="0.98" Cadence="92">
+            <textevent timeoffset="0" message="Step up to 98%. Relax your shoulders, steady breathing"/>
+        </SteadyState>
+        <SteadyState Duration="300" Power="1" Cadence="92">
+            <textevent timeoffset="0" message="Top step: 100% FTP for 5 min. Hold it"/>
+            <textevent timeoffset="270" message="30 seconds left in this block"/>
+        </SteadyState>
+        <SteadyState Duration="300" Power="0.55" Cadence="85">
+            <textevent timeoffset="0" message="5 min easy. Drink. One block left"/>
+        </SteadyState>
+        <SteadyState Duration="300" Power="0.95" Cadence="92">
+            <textevent timeoffset="0" message="Block 3 of 3: 15 min at threshold, stepping up every 5 min. Settle at 95%"/>
+        </SteadyState>
+        <SteadyState Duration="300" Power="0.98" Cadence="92">
+            <textevent timeoffset="0" message="Step up to 98%. Relax your shoulders, steady breathing"/>
+        </SteadyState>
+        <SteadyState Duration="300" Power="1" Cadence="92">
+            <textevent timeoffset="0" message="Top step: 100% FTP for 5 min. Hold it"/>
+            <textevent timeoffset="270" message="30 seconds left in this block"/>
+        </SteadyState>
+        <Cooldown Duration="840" PowerLow="0.6" PowerHigh="0.4" Cadence="85">
+            <textevent timeoffset="0" message="Done. 14 min cooldown"/>
+        </Cooldown>
+    </workout>
+</workout_file>
