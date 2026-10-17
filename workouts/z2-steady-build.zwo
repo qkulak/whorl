@@ -1,0 +1,32 @@
+<workout_file>
+    <author>Quinvy</author>
+    <name>Z2 Steady Build</name>
+    <description>Zone 2 that builds gently at a steady 90 rpm: 15 min at 66%, 15 min at 69%, then 15 min at the top of zone 2 at 72%, before easing back to 68% for 10 min. 55 minutes of aerobic work between a 10-minute warmup and a 10-minute cooldown, and it never reaches tempo.</description>
+    <category>Endurance</category>
+    <sportType>bike</sportType>
+    <tags>
+        <tag name="endurance"/>
+        <tag name="z2"/>
+    </tags>
+    <workout>
+        <Warmup Duration="600" PowerLow="0.5" PowerHigh="0.65" Cadence="90">
+            <textevent timeoffset="10" message="Zone 2 at 90 rpm: three steady blocks that build from 66% to 72%, then ease back"/>
+        </Warmup>
+        <SteadyState Duration="900" Power="0.66" Cadence="90">
+            <textevent timeoffset="0" message="Block 1 of 3: settle in at 66%. Drink"/>
+        </SteadyState>
+        <SteadyState Duration="900" Power="0.69" Cadence="90">
+            <textevent timeoffset="0" message="Block 2 of 3: up a touch to 69%. Drink"/>
+        </SteadyState>
+        <SteadyState Duration="900" Power="0.72" Cadence="90">
+            <textevent timeoffset="0" message="Block 3 of 3: top of zone 2 at 72%. Drink"/>
+            <textevent timeoffset="450" message="Keep breathing conversational"/>
+        </SteadyState>
+        <SteadyState Duration="600" Power="0.68" Cadence="90">
+            <textevent timeoffset="0" message="Ease back to 68% for 10 min. Drink"/>
+        </SteadyState>
+        <Cooldown Duration="600" PowerLow="0.62" PowerHigh="0.45" Cadence="90">
+            <textevent timeoffset="0" message="Done. 10 min cooldown"/>
+        </Cooldown>
+    </workout>
+</workout_file>
