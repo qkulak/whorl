@@ -1,0 +1,25 @@
+<workout_file>
+    <author>Quinvy</author>
+    <name>Z2 Add-On</name>
+    <description>An extra 15 minutes of zone 2 to tack onto the end of another ride, so there's no warmup: it starts straight at 65% and steps up to 68% and then 71% every 5 minutes. Finishes with a 5-minute easy spin-down.</description>
+    <category>Endurance</category>
+    <sportType>bike</sportType>
+    <tags>
+        <tag name="endurance"/>
+        <tag name="z2"/>
+    </tags>
+    <workout>
+        <SteadyState Duration="300" Power="0.65" Cadence="88">
+            <textevent timeoffset="0" message="15 min zone 2 add-on. Settle in at 65%"/>
+        </SteadyState>
+        <SteadyState Duration="300" Power="0.68" Cadence="88">
+            <textevent timeoffset="0" message="Up a touch to 68%. Drink"/>
+        </SteadyState>
+        <SteadyState Duration="300" Power="0.71" Cadence="88">
+            <textevent timeoffset="0" message="Last 5 min at 71%. Keep breathing conversational"/>
+        </SteadyState>
+        <Cooldown Duration="300" PowerLow="0.6" PowerHigh="0.45" Cadence="85">
+            <textevent timeoffset="0" message="Done. 5 min easy spin-down"/>
+        </Cooldown>
+    </workout>
+</workout_file>
