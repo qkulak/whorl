@@ -1,11 +1,11 @@
 <workout_file>
-    <author>Whorl</author>
+    <author>Quinvy</author>
     <name>Threshold Snaps</name>
     <description>Two sets of short FTP efforts with short recoveries, all on an aerobic base.</description>
     <category>Threshold</category>
     <sportType>bike</sportType>
     <tags>
-            </tags>
+    </tags>
     <workout>
         <Warmup Duration="300" PowerLow="0.65" PowerHigh="0.7"/>
         <IntervalsT Repeat="6" OnDuration="30" OffDuration="30" OnPower="1.05" OffPower="0.65"/>

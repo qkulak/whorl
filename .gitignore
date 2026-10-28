@@ -4,3 +4,7 @@ rides/*
 .claude/settings.local.json
 presets/uploaded/*
 !presets/uploaded/.gitkeep
+favorites.json
+beta-password.txt
+invite-code.txt
+ride-index.json

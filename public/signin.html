@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Whorl</title>
+<link rel="icon" href="/brand/whorl-app-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:ital,wght@1,700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #1f3a2c;          /* forest, from the logo */
+    --panel: #183024;
+    --field: #12261c;
+    --line: rgba(239,233,226,.16);
+    --text: #efe9e2;
+    --muted: rgba(239,233,226,.6);
+    --primary: #efe9e2;
+    --on-primary: #1f3a2c;
+    --good: #2fc26b;
+    --bad: #ff3b3b;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0; display: grid; place-items: center; padding: 16px;
+    background: radial-gradient(ellipse at 50% 0%, #2a4a39 0%, var(--bg) 65%); background-color: var(--bg);
+    color: var(--text); font-family: Barlow, system-ui, -apple-system, sans-serif; font-size: 15px;
+  }
+  .box {
+    width: 100%; max-width: 380px; background: var(--panel); border: 1px solid var(--line);
+    border-radius: 18px; padding: 30px 28px 24px; text-align: center;
+  }
+  h1 { margin: 0 0 4px; line-height: 0; }
+  h1 img { height: 52px; width: auto; }
+  .sub { color: var(--muted); margin: 6px 0 20px; font-size: 16px; }
+  .sub b { color: var(--text); font-weight: 600; }
+  form { display: none; flex-direction: column; gap: 10px; text-align: left; }
+  form.on { display: flex; }
+  label { font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-bottom: -4px; }
+  input {
+    width: 100%; font: inherit; font-size: 16px; color: var(--text); background: var(--field);
+    border: 1px solid var(--line); border-radius: 10px; padding: 11px 14px;
+  }
+  input:focus { outline: 2px solid var(--text); outline-offset: -1px; }
+  input.code { text-align: center; letter-spacing: .3em; font-size: 20px; }
+  .hint { font-size: 13px; color: var(--muted); margin-top: -4px; }
+  button[type=submit] {
+    margin-top: 6px; font: inherit; font-weight: 700; letter-spacing: .08em; color: var(--on-primary);
+    background: var(--primary); border: none; border-radius: 999px; padding: 12px; cursor: pointer;
+  }
+  button[type=submit]:hover { background: #fff; }
+  button[type=submit]:disabled { opacity: .5; cursor: default; }
+  .links { display: flex; justify-content: space-between; gap: 12px; margin-top: 6px; font-size: 14px; }
+  .links.center { justify-content: center; }
+  .links button { background: none; border: none; padding: 0; font: inherit; color: var(--muted); cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+  .links button:hover { color: var(--text); }
+  .msg { min-height: 1.3em; margin: 14px 0 0; font-size: 14px; font-weight: 600; text-align: center; }
+  .msg.bad { color: var(--bad); }
+  .msg.good { color: var(--good); }
+  /* show/hide toggle inside password fields */
+  .pw-wrap { position: relative; }
+  .pw-wrap input { padding-right: 46px; }
+  .pw-eye {
+    position: absolute; right: 6px; top: 50%; transform: translateY(-50%); width: 34px; height: 34px;
+    display: grid; place-items: center; padding: 0; background: none; border: none; border-radius: 8px;
+    color: var(--muted); cursor: pointer;
+  }
+  .pw-eye:hover { color: var(--text); }
+  .pw-eye:focus-visible { outline: 2px solid var(--text); }
+  .pw-eye svg { width: 20px; height: 20px; }
+</style>
+</head>
+<body>
+  <div class="box">
+    <h1><img src="/brand/whorl-logo-cream.png" alt="whorl"></h1>
+    <p class="sub" id="sub"></p>
+
+    <form id="signin" data-sub="Sign in to the beta">
+      <label for="siEmail">Email</label>
+      <input type="email" id="siEmail" autocomplete="username" required>
+      <label for="siPassword">Password</label>
+      <input type="password" id="siPassword" autocomplete="current-password" required>
+      <button type="submit">SIGN IN</button>
+      <div class="links"><button type="button" data-go="signup">Create an account</button><button type="button" data-go="forgot">Forgot password?</button></div>
+    </form>
+
+    <form id="signup" data-sub="Create your beta account">
+      <label for="suEmail">Email</label>
+      <input type="email" id="suEmail" autocomplete="username" required>
+      <label for="suPassword">Password</label>
+      <input type="password" id="suPassword" autocomplete="new-password" minlength="8" required>
+      <div class="hint">At least 8 characters.</div>
+      <label for="suInvite">Invite code</label>
+      <input type="text" id="suInvite" autocomplete="off" autocapitalize="characters" required>
+      <button type="submit">CREATE ACCOUNT</button>
+      <div class="links center"><button type="button" data-go="signin">Already have an account? Sign in</button></div>
+    </form>
+
+    <form id="confirm" data-sub="">
+      <label for="cfCode">Code from the email</label>
+      <input type="text" id="cfCode" class="code" inputmode="numeric" autocomplete="one-time-code" maxlength="8" required>
+      <button type="submit">CONFIRM</button>
+      <div class="links"><button type="button" id="cfResend">Send a new code</button><button type="button" data-go="signin">Back to sign in</button></div>
+    </form>
+
+    <form id="forgot" data-sub="We'll email you a code to reset it">
+      <label for="fgEmail">Email</label>
+      <input type="email" id="fgEmail" autocomplete="username" required>
+      <button type="submit">SEND CODE</button>
+      <div class="links center"><button type="button" data-go="signin">Back to sign in</button></div>
+    </form>
+
+    <form id="reset" data-sub="">
+      <label for="rsCode">Code from the email</label>
+      <input type="text" id="rsCode" class="code" inputmode="numeric" autocomplete="one-time-code" maxlength="8" required>
+      <label for="rsPassword">New password</label>
+      <input type="password" id="rsPassword" autocomplete="new-password" minlength="8" required>
+      <div class="hint">At least 8 characters.</div>
+      <button type="submit">SET PASSWORD</button>
+      <div class="links center"><button type="button" data-go="signin">Back to sign in</button></div>
+    </form>
+
+    <div class="msg" id="msg"></div>
+  </div>
+
+<script>
+  const $ = (id) => document.getElementById(id);
+  // Show/hide eye inside every password field.
+  const EYE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>';
+  const EYE_OFF = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/><path d="M3 3l18 18"/></svg>';
+  document.querySelectorAll('input[type="password"]').forEach((input) => {
+    const wrap = document.createElement("div");
+    wrap.className = "pw-wrap";
+    input.replaceWith(wrap);
+    const eye = document.createElement("button");
+    eye.type = "button";
+    eye.className = "pw-eye";
+    const set = (shown) => {
+      input.type = shown ? "text" : "password";
+      eye.innerHTML = shown ? EYE_OFF : EYE;
+      eye.setAttribute("aria-label", shown ? "Hide password" : "Show password");
+      eye.setAttribute("aria-pressed", String(shown));
+    };
+    eye.addEventListener("click", () => {
+      set(input.type === "password");
+      input.focus();
+    });
+    set(false);
+    wrap.append(input, eye);
+  });
+
+  // Remembered between steps, so confirming a new account can sign straight in.
+  const pending = { email: "", password: "" };
+
+  function show(view, message, tone) {
+    document.querySelectorAll("form").forEach((f) => f.classList.toggle("on", f.id === view));
+    const form = $(view);
+    const email = pending.email ? `<b></b>` : "";
+    $("sub").innerHTML =
+      view === "confirm" ? `We emailed a code to ${email}` :
+      view === "reset" ? `Enter the code we emailed to ${email}` : form.dataset.sub;
+    const b = $("sub").querySelector("b");
+    if (b) b.textContent = pending.email;
+    setMsg(message || "", tone);
+    if (view === "signin" && pending.email) $("siEmail").value = pending.email;
+    if (view === "forgot" && pending.email) $("fgEmail").value = pending.email;
+    const inputs = [...form.querySelectorAll("input")];
+    (inputs.find((i) => !i.value) || inputs[0]).focus();
+  }
+
+  function setMsg(text, tone = "bad") {
+    $("msg").textContent = text;
+    $("msg").className = "msg " + tone;
+  }
+
+  async function call(action, body, form) {
+    const btn = form?.querySelector("button[type=submit]");
+    if (btn) btn.disabled = true;
+    setMsg("");
+    try {
+      const res = await fetch(`/auth/${action}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      const out = await res.json().catch(() => ({}));
+      if (!res.ok) throw Object.assign(new Error(out.error || "Something went wrong. Try again."), { code: out.code });
+      return out;
+    } finally {
+      if (btn) btn.disabled = false;
+    }
+  }
+
+  async function signIn(email, password, form) {
+    await call("signin", { email, password }, form);
+    location.href = "/";
+  }
+
+  document.querySelectorAll("[data-go]").forEach((b) => b.addEventListener("click", () => show(b.dataset.go)));
+
+  $("signin").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    pending.email = $("siEmail").value.trim();
+    pending.password = $("siPassword").value;
+    try {
+      await signIn(pending.email, pending.password, e.target);
+    } catch (err) {
+      if (err.code === "UserNotConfirmedException") show("confirm", err.message, "good");
+      else setMsg(err.message);
+    }
+  });
+
+  $("signup").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    pending.email = $("suEmail").value.trim();
+    pending.password = $("suPassword").value;
+    try {
+      await call("signup", { email: pending.email, password: pending.password, inviteCode: $("suInvite").value }, e.target);
+      show("confirm");
+    } catch (err) {
+      setMsg(err.message);
+    }
+  });
+
+  $("confirm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    try {
+      await call("confirm", { email: pending.email, code: $("cfCode").value }, e.target);
+      if (pending.password) await signIn(pending.email, pending.password, e.target);
+      else show("signin", "Email confirmed. Sign in to continue.", "good");
+    } catch (err) {
+      setMsg(err.message);
+    }
+  });
+
+  $("cfResend").addEventListener("click", async () => {
+    try {
+      await call("resend", { email: pending.email });
+      setMsg("New code sent. Check your email.", "good");
+    } catch (err) {
+      setMsg(err.message);
+    }
+  });
+
+  $("forgot").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    pending.email = $("fgEmail").value.trim();
+    pending.password = "";
+    try {
+      await call("forgot", { email: pending.email }, e.target);
+      show("reset");
+    } catch (err) {
+      setMsg(err.message);
+    }
+  });
+
+  $("reset").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    try {
+      await call("reset", { email: pending.email, code: $("rsCode").value, password: $("rsPassword").value }, e.target);
+      $("siPassword").value = "";
+      show("signin", "Password changed. Sign in with your new one.", "good");
+    } catch (err) {
+      setMsg(err.message);
+    }
+  });
+
+  show("signin");
+</script>
+</body>
+</html>

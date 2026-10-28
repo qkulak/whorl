@@ -1,11 +1,11 @@
 <workout_file>
-    <author>Whorl</author>
+    <author>Quinvy</author>
     <name>Minute On, Minute Off</name>
     <description>VO2 max: one minute hard, one minute easy in zone 1, in two sets. The second set is a notch harder.</description>
     <category>VO2 Max</category>
     <sportType>bike</sportType>
     <tags>
-            </tags>
+    </tags>
     <workout>
         <Warmup Duration="600" PowerLow="0.45" PowerHigh="0.75"/>
         <SteadyState Duration="300" Power="0.55"/>

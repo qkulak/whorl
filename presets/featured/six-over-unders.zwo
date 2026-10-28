@@ -1,11 +1,11 @@
 <workout_file>
-    <author>Whorl</author>
+    <author>Quinvy</author>
     <name>Six Over-Unders</name>
     <description>Six 4-minute threshold intervals that alternate just below and just above FTP, with aerobic recoveries. Builds lactate clearance.</description>
     <category>Threshold</category>
     <sportType>bike</sportType>
     <tags>
-            </tags>
+    </tags>
     <workout>
         <Warmup Duration="600" PowerLow="0.45" PowerHigh="0.75"/>
         <SteadyState Duration="60" Power="0.95">

@@ -1,11 +1,11 @@
 <workout_file>
-    <author>Whorl</author>
+    <author>Quinvy</author>
     <name>Steady Cruise</name>
     <description>Longer tempo blocks for pacing and muscular endurance, finishing with a push at the top of tempo.</description>
     <category>Tempo</category>
     <sportType>bike</sportType>
     <tags>
-            </tags>
+    </tags>
     <workout>
         <Warmup Duration="480" PowerLow="0.5" PowerHigh="0.75"/>
         <SteadyState Duration="480" Power="0.85"/>

@@ -1,11 +1,11 @@
 <workout_file>
-    <author>Whorl</author>
+    <author>Quinvy</author>
     <name>Low-Cadence Climber</name>
     <description>Climbing strength: long sweet-spot efforts at 55-65 rpm, each ending with a surge over FTP.</description>
     <category>Sweet Spot</category>
     <sportType>bike</sportType>
     <tags>
-            </tags>
+    </tags>
     <workout>
         <Warmup Duration="600" PowerLow="0.55" PowerHigh="0.75" Cadence="85"/>
         <SteadyState Duration="360" Power="0.9" Cadence="60"/>

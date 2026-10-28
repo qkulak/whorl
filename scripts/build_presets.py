@@ -1,23 +1,20 @@
-"""Generate the bundled preset workouts in presets/featured and presets/classics.
+"""Generate the bundled preset workouts in presets/featured, presets/classics
+and presets/endurance.
 
     python3 scripts/build_presets.py
 
-FEATURED collection
-    Each workout is given a name, duration and AVG / MIN / MAX %FTP, and the
-segment-by-segment profile is designed inside the
-    app. These are rebuilt to hit the published numbers exactly, using whatever
-    interval outline the public pages give (e.g. "6 x 4 min over-unders").
-    Each file says so in its description. The script asserts the published
-    numbers, so a tweak that drifts from them fails loudly.
+Featured collection
+    Named workouts, each built to a fixed duration and average / min / max
+    %FTP. The script asserts those numbers, so a tweak that drifts from them
+    fails loudly.
 
 Z2 Endurance collection
     Original zone 2 rides from 75 min to 2 h, each with a different structure.
     Main-set targets are asserted to stay inside zone 2.
 
 Classics collection
-    Fully specified protocols from published coaching protocols (sweet spot, VO2
-    max). The articles give the main set only, so warmup and cooldown are added
-    and noted.
+    Standard training protocols (sweet spot, VO2 max). Each is defined by its
+    main set, so warmup and cooldown are added and noted.
 """
 import os
 from xml.sax.saxutils import quoteattr, escape
@@ -150,15 +147,11 @@ CATEGORY = {
 }
 
 # ======================================================================
-# Featured — built to a fixed duration and AVG / MIN / MAX %FTP
+# Featured — each built to a fixed duration and AVG / MIN / MAX %FTP
 # ======================================================================
 
-APPROX = (
-    ""
-)
-
 FEATURED = [
-    # name, published (duration_s, avg, min, max) or None, purpose, blocks
+    # name, target (duration_s, avg, min, max) with None for "don't check", purpose, blocks
     (
         "Rolling Country",
         (3300, 66, 55, 75),
@@ -348,12 +341,8 @@ FEATURED = [
     ),
 ]
 
-# Built segment by segment, so these
-# are exact rather than rebuilt from summary stats.
-EXACT = {"Zone 2 Staircase"}
-
 # ======================================================================
-# Classics — protocols as specified in published coaching protocols
+# Classics — standard protocols, main set as usually prescribed
 # ======================================================================
 
 WU = W(600, 0.45, 0.75)
@@ -545,39 +534,26 @@ def check_z2(name, blocks):
 
 
 def main():
-    AUTHOR_FEATURED = "Whorl"
-    AUTHOR_CLASSIC = "Whorl"
     global AUTHOR
+    AUTHOR = "Quinvy"
 
-    AUTHOR = AUTHOR_FEATURED
-    for name, published, purpose, blocks in FEATURED:
+    os.makedirs(os.path.join(OUT, "featured"), exist_ok=True)
+    for name, target, purpose, blocks in FEATURED:
         dur, avg, lo, hi = summary(blocks)
-        want_dur, want_avg, want_lo, want_hi = published
+        want_dur, want_avg, want_lo, want_hi = target
         checks = [("duration", dur, want_dur), ("avg", avg, want_avg), ("min", lo, want_lo), ("max", hi, want_hi)]
         for label, got, want in checks:
-            assert want is None or got == want, f"{name}: {label} {got} != published {want}"
-        m, s = divmod(want_dur, 60)
-        h, m = divmod(m, 60)
-        dur_txt = f"{h}:{m:02d}:{s:02d}" if h else f"{m}:{s:02d}"
-        if name in EXACT:
-            note = ""
-        elif want_avg and want_lo:
-            note = APPROX.format(dur=dur_txt, lo=want_lo, hi=want_hi, avg=want_avg)
-        else:
-            note = ""
-        AUTHOR = "Featured" if name in EXACT else AUTHOR_FEATURED
+            assert want is None or got == want, f"{name}: {label} {got} != target {want}"
         with open(os.path.join(OUT, "featured", slug(name) + ".zwo"), "w") as f:
-            f.write(to_xml(name, purpose + note, blocks, [], CATEGORY[name]))
-        print(f"featured     {name:32} {dur // 60:>3} min  avg {avg}%  {lo}-{hi}%")
+            f.write(to_xml(name, purpose, blocks, [], CATEGORY[name]))
+        print(f"featured  {name:32} {dur // 60:>3} min  avg {avg}%  {lo}-{hi}%")
 
-    AUTHOR = AUTHOR_CLASSIC
     for name, purpose, blocks in CLASSICS:
         dur, avg, lo, hi = summary(blocks)
         with open(os.path.join(OUT, "classics", slug(name) + ".zwo"), "w") as f:
             f.write(to_xml(name, purpose + ADDED, blocks, ["classic"], CATEGORY[name]))
         print(f"classics  {name:32} {dur // 60:>3} min  avg {avg}%  {lo}-{hi}%")
 
-    AUTHOR = "Quinvy"
     os.makedirs(os.path.join(OUT, "endurance"), exist_ok=True)
     lengths = {"Z2 Cadence Builder": 75, "Z2 Floats": 80, "Z2 Ladder": 90, "Z2 Waves": 105, "Z2 Long Steady": 120}
     for name, purpose, blocks in ENDURANCE:

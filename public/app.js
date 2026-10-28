@@ -15,10 +15,20 @@ import {
   fmtTime,
   parseTime,
 } from "./zwo.js";
-import { drawWorkout } from "./chart.js";
+import { drawWorkout, drawRide } from "./chart.js";
 import { Trainer, connectHeartRate } from "./trainer.js";
 
 const $ = (id) => document.getElementById(id);
+
+// fetch for the app's own API: a 401 means the session ran out, so go sign in.
+async function api(url, opts) {
+  const res = await fetch(url, opts);
+  if (res.status === 401) {
+    location.href = "/login";
+    throw new Error("signed out");
+  }
+  return res;
+}
 const FTP_STEP = 5;
 const STALE_MS = 3000; // a reading older than this counts as "no data"
 const AUTO_PAUSE_S = 3;
@@ -52,13 +62,31 @@ function show(view) {
 
 const ftpInput = $("ftp");
 ftpInput.value = store.get("ftp", 200);
-ftpInput.addEventListener("change", () => {
-  const v = Math.round(Number(ftpInput.value));
-  if (v >= 50 && v <= 600) store.set("ftp", v);
-  else ftpInput.value = store.get("ftp", 200);
-  drawLibraryCharts();
-});
 const homeFtp = () => Number(ftpInput.value) || 200;
+
+// FTP can be set at the top of Browse or in a workout's details; both stay in step,
+// and every chart redraws so the watts match. An invalid number goes back to the last good one.
+function setFtp(value) {
+  let v = Math.round(Number(value));
+  if (v >= 50 && v <= 600) store.set("ftp", v);
+  else v = store.get("ftp", 200);
+  ftpInput.value = v;
+  $("dFtpVal").value = v;
+  drawLibraryCharts();
+  if (detailsItem) {
+    renderDetailsMeta();
+    drawDetails();
+  }
+}
+ftpInput.addEventListener("change", () => setFtp(ftpInput.value));
+$("dFtpVal").addEventListener("change", () => setFtp($("dFtpVal").value));
+// Redraw while typing, but only once it's a sensible number, so "2" on the way to "245" doesn't snap back.
+$("dFtpVal").addEventListener("input", () => {
+  const v = Number($("dFtpVal").value);
+  if (v >= 50 && v <= 600) setFtp(v);
+});
+$("dFtpDown").addEventListener("click", () => setFtp(homeFtp() - FTP_STEP));
+$("dFtpUp").addEventListener("click", () => setFtp(homeFtp() + FTP_STEP));
 
 $("setErg").checked = store.get("erg", true);
 $("setBeep").checked = store.get("beep", true);
@@ -100,8 +128,22 @@ trainer.addEventListener("status", ({ detail }) => {
   $("btnTrainer").textContent = detail.connected ? "Reconnect" : "Connect";
   $("btnSim").disabled = detail.connected;
   renderErgState();
+  mirrorSensors();
 });
 trainer.addEventListener("error", ({ detail }) => toast(`Trainer: ${detail.message}`));
+
+// The workout details window shows the same trainer / heart rate status as the
+// cards at the top of Browse, and its Connect buttons press the same buttons.
+function mirrorSensors() {
+  $("dTrDot").classList.toggle("on", $("trDot").classList.contains("on"));
+  $("dTrName").textContent = $("trName").textContent;
+  $("dTrSub").textContent = $("trSub").textContent;
+  $("dTrainer").textContent = $("btnTrainer").textContent;
+  $("dHrDot").classList.toggle("on", $("hrDot").classList.contains("on"));
+  $("dHrName").textContent = $("hrName").textContent;
+}
+$("dTrainer").addEventListener("click", () => $("btnTrainer").click());
+$("dHr").addEventListener("click", () => $("btnHr").click());
 
 function needBluetooth() {
   if (navigator.bluetooth) return true;
@@ -112,11 +154,13 @@ function needBluetooth() {
 $("btnTrainer").addEventListener("click", async () => {
   if (!needBluetooth()) return;
   $("trSub").textContent = "connecting…";
+  mirrorSensors();
   try {
     await trainer.connect();
   } catch (e) {
     $("trSub").textContent = e.name === "NotFoundError" ? "FTMS smart trainer or power meter" : `error: ${e.message}`;
   }
+  mirrorSensors();
 });
 
 $("btnHr").addEventListener("click", async () => {
@@ -131,6 +175,7 @@ $("btnHr").addEventListener("click", async () => {
         hrStrapConnected = false;
         $("hrDot").classList.remove("on");
         $("hrName").textContent = "Disconnected";
+        mirrorSensors();
       },
     );
     hrStrapConnected = true;
@@ -139,6 +184,7 @@ $("btnHr").addEventListener("click", async () => {
   } catch (e) {
     if (e.name !== "NotFoundError") $("hrName").textContent = `error: ${e.message}`;
   }
+  mirrorSensors();
 });
 
 $("btnSim").addEventListener("click", () => {
@@ -159,11 +205,13 @@ function currentHr() {
 }
 
 // ======================================================================
-// Library — "Browse" (presets/<collection>/) and "My workouts" (workouts/)
+// Library — "Browse" lists everything: presets/<collection>/ plus the rider's
+// own workouts/ (the "My workouts" collection). "Favorites" lists the starred ones.
 // ======================================================================
 
 const COLLECTION_LABELS = {
   mine: "My workouts",
+  originals: "Originals",
   featured: "Featured",
   classics: "Classics",
   endurance: "Z2 Endurance",
@@ -171,11 +219,17 @@ const COLLECTION_LABELS = {
   uploaded: "Uploaded",
 };
 const collectionLabel = (c) => COLLECTION_LABELS[c] || c.charAt(0).toUpperCase() + c.slice(1);
+// Collections that don't put a tag on their cards; they still have a filter chip.
+const UNTAGGED = new Set(["featured", "plan"]);
+const collectionBadge = (c) => (UNTAGGED.has(c) ? "" : `<span class="badge">${collectionLabel(c)}</span>`);
 
 let library = []; // { key, id, collection, workout, timeline, stats, category }
 let selectedKey = store.get("selectedKey", null);
 const browse = { collection: "all", category: "all", durMin: 0, durMax: null, q: "" };
+let favorites = new Set(); // library keys, kept in favorites.json by the server
+let rides = null; // History: ride summaries from the server, newest first; null until loaded
 let homeTab = store.get("homeTab", "browse");
+if (homeTab !== "favorites" && homeTab !== "history") homeTab = "browse"; // "mine" was the old My workouts tab
 
 function toItem(r, collection) {
   const workout = parseZwo(r.xml);
@@ -192,9 +246,9 @@ function toItem(r, collection) {
 }
 
 async function loadLibrary() {
-  const [mine, presets] = await Promise.all(
-    ["/api/workouts", "/api/presets"].map((u) =>
-      fetch(u)
+  const [mine, presets, favs] = await Promise.all(
+    ["/api/workouts", "/api/presets", "/api/favorites"].map((u) =>
+      api(u)
         .then((r) => r.json())
         .catch((e) => {
           console.warn(`${u} failed`, e);
@@ -202,6 +256,7 @@ async function loadLibrary() {
         }),
     ),
   );
+  favorites = new Set(favs);
   library = [];
   for (const [r, collection] of [...mine.map((r) => [r, "mine"]), ...presets.map((r) => [r, r.collection])]) {
     try {
@@ -223,22 +278,23 @@ function setHomeTab(tab) {
   store.set("homeTab", tab);
   document.querySelectorAll(".tab").forEach((t) => t.classList.toggle("on", t.dataset.tab === tab));
   $("browsePane").hidden = tab !== "browse";
-  $("minePane").hidden = tab !== "mine";
+  $("favPane").hidden = tab !== "favorites";
+  $("historyPane").hidden = tab !== "history";
   renderHome();
+  renderHistory();
 }
 document.querySelectorAll(".tab").forEach((t) => t.addEventListener("click", () => setHomeTab(t.dataset.tab)));
 
 function renderHome() {
-  const presets = library.filter((w) => w.collection !== "mine");
-  const mine = library.filter((w) => w.collection === "mine");
-  $("tabBrowseCount").textContent = presets.length;
-  $("tabMineCount").textContent = mine.length;
+  const favs = library.filter((w) => favorites.has(w.key));
+  $("tabBrowseCount").textContent = library.length;
+  $("tabFavCount").textContent = favs.length;
   if (homeTab === "browse") {
-    const shown = presets.filter(matchesBrowse);
-    $("browseCount").textContent = `${shown.length} of ${presets.length} workouts`;
+    const shown = library.filter(matchesBrowse);
+    $("browseCount").textContent = `${shown.length} of ${library.length} workouts`;
     renderCards($("browseGrid"), shown, "No workouts match these filters.");
-  } else {
-    renderCards($("mineGrid"), mine, "Nothing here yet. Build one, or copy a workout from Browse to edit it.");
+  } else if (homeTab === "favorites") {
+    renderCards($("favGrid"), favs, "No favorites yet. Tap ☆ on a workout in Browse to add it here.");
   }
   updateStartBar();
 }
@@ -248,7 +304,7 @@ function renderHome() {
 // ---- duration slider: two thumbs on one track, in minutes ----
 
 const DUR_STEP = 5;
-let durLimit = 120; // slider end, rounded up from the longest preset
+let durLimit = 120; // slider end, rounded up from the longest workout
 
 // With the max thumb at the end of the track there's no upper bound, so a
 // 3h45 ride still shows when the slider only goes to 4h.
@@ -334,15 +390,33 @@ function chips(el, options, current, onPick) {
   }
 }
 
+// Workout types as bars that rise with intensity, in the same colours as the charts.
+function typeFilter(el, cats, current, onPick) {
+  el.innerHTML = "";
+  el.classList.toggle("all", current === "all");
+  const bar = (c, h) => `<i style="--c:${CATEGORY_COLORS[c]}; height:${h}px"></i>`;
+  const options = [
+    ["all", "All types", CATEGORIES.map((c, i) => bar(c, 10 + i * 5)).join("")],
+    ...cats.map((c) => [c, c, bar(c, 16 + CATEGORIES.indexOf(c) * 5)]),
+  ];
+  for (const [value, label, bars] of options) {
+    const b = document.createElement("button");
+    b.className = "type" + (value === "all" ? " all" : "") + (value === current ? " on" : "");
+    b.setAttribute("aria-pressed", String(value === current));
+    b.innerHTML = `<span class="stem">${bars}</span>${label}`;
+    b.addEventListener("click", () => onPick(value));
+    el.appendChild(b);
+  }
+}
+
 function renderBrowseFilters() {
-  const presets = library.filter((w) => w.collection !== "mine");
-  const collections = [...new Set(presets.map((w) => w.collection))].sort(
+  const collections = [...new Set(library.map((w) => w.collection))].sort(
     (a, b) => Object.keys(COLLECTION_LABELS).indexOf(a) - Object.keys(COLLECTION_LABELS).indexOf(b),
   );
   if (browse.collection !== "all" && !collections.includes(browse.collection)) browse.collection = "all";
   chips(
     $("fCollection"),
-    [["all", "All", presets.length], ...collections.map((c) => [c, collectionLabel(c), presets.filter((w) => w.collection === c).length])],
+    [["all", "All", library.length], ...collections.map((c) => [c, collectionLabel(c), library.filter((w) => w.collection === c).length])],
     browse.collection,
     (v) => {
       browse.collection = v;
@@ -350,18 +424,13 @@ function renderBrowseFilters() {
       renderHome();
     },
   );
-  const cats = CATEGORIES.filter((c) => presets.some((w) => w.category === c));
-  chips(
-    $("fCategory"),
-    [["all", "All types"], ...cats.map((c) => [c, `<i class="cat-dot" style="background:${CATEGORY_COLORS[c]}"></i>${c}`])],
-    browse.category,
-    (v) => {
-      browse.category = v;
-      renderBrowseFilters();
-      renderHome();
-    },
-  );
-  const longest = Math.max(60, ...presets.map((w) => w.stats.duration / 60));
+  const cats = CATEGORIES.filter((c) => library.some((w) => w.category === c));
+  typeFilter($("fCategory"), cats, browse.category, (v) => {
+    browse.category = v;
+    renderBrowseFilters();
+    renderHome();
+  });
+  const longest = Math.max(60, ...library.map((w) => w.stats.duration / 60));
   durLimit = Math.ceil(longest / 15) * 15;
   browse.durMin = Math.min(browse.durMin, durLimit);
   if (browse.durMax !== null && browse.durMax >= durLimit) browse.durMax = null;
@@ -397,10 +466,12 @@ function renderCards(el, items, emptyText) {
     const s = item.stats;
     const isMine = item.collection === "mine";
     const canDelete = isMine || item.collection === "uploaded";
+    const fav = favorites.has(item.key);
     card.innerHTML = `
       <div class="wo-badges">
         <span class="badge cat" style="--c:${CATEGORY_COLORS[item.category]}">${item.category}</span>
-        ${isMine ? "" : `<span class="badge">${collectionLabel(item.collection)}</span>`}
+        ${collectionBadge(item.collection)}
+        <button class="star${fav ? " on" : ""}" data-act="fav" title="${fav ? "Remove from favorites" : "Add to favorites"}">${fav ? "★" : "☆"}</button>
       </div>
       <div class="wo-title"></div>
       <div class="wo-meta"><span><b>${fmtTime(s.duration)}</b></span><span>TSS <b>${Math.round(s.tss)}</b></span><span>IF <b>${s.IF.toFixed(2)}</b></span></div>
@@ -425,6 +496,7 @@ function renderCards(el, items, emptyText) {
 }
 
 function cardAction(item, act) {
+  if (act === "fav") return toggleFavorite(item);
   if (act === "edit") return openBuilder(item);
   if (act === "download") return downloadZwo(item.workout);
   if (act === "delete") return deleteWorkout(item);
@@ -432,6 +504,33 @@ function cardAction(item, act) {
     selectWorkout(item.key);
     closeDetails();
     return startRide();
+  }
+}
+
+// ---- favorites ----
+
+async function saveFavorites() {
+  const res = await api("/api/favorites", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ keys: [...favorites] }),
+  }).catch(() => null);
+  return !!(res && res.ok);
+}
+
+async function toggleFavorite(item) {
+  const on = !favorites.has(item.key);
+  if (on) favorites.add(item.key);
+  else favorites.delete(item.key);
+  renderHome();
+  renderDetailsStar();
+  if (!(await saveFavorites())) {
+    // Put it back the way it was so the screen matches what's saved.
+    if (on) favorites.delete(item.key);
+    else favorites.add(item.key);
+    renderHome();
+    renderDetailsStar();
+    alert("Couldn't save favorites. Is the server running?");
   }
 }
 
@@ -466,22 +565,32 @@ let detailsItem = null;
 function openDetails(item) {
   detailsItem = item;
   const w = item.workout;
-  const s = item.stats;
   $("dTitle").textContent = w.name;
-  $("dBadges").innerHTML = `<span class="badge cat" style="--c:${CATEGORY_COLORS[item.category]}">${item.category}</span><span class="badge">${collectionLabel(item.collection)}</span>`;
-  $("dMeta").innerHTML = `<span>Duration <b>${fmtTime(s.duration)}</b></span><span>TSS <b>${Math.round(s.tss)}</b></span><span>IF <b>${s.IF.toFixed(2)}</b></span><span>Author <b class="plain"></b></span>`;
-  $("dMeta").querySelector(".plain").textContent = w.author || "—";
+  $("dBadges").innerHTML = `<span class="badge cat" style="--c:${CATEGORY_COLORS[item.category]}">${item.category}</span>${collectionBadge(item.collection)}`;
+  renderDetailsMeta();
+  $("dFtpVal").value = homeFtp();
+  mirrorSensors();
   $("dDesc").textContent = w.description || "No description.";
-  // Coached files often say "Set FTP to 185" — offer to apply it.
-  const wanted = Number(/set ftp to (\d{2,3})/i.exec(w.description)?.[1]);
-  $("dFtp").hidden = !wanted || wanted === homeFtp();
-  $("dFtp").textContent = `Use FTP ${wanted} W`;
-  $("dFtp").dataset.ftp = wanted || "";
   $("dEdit").textContent = item.collection === "mine" ? "Edit" : "Copy & edit";
   $("dDelete").hidden = !(item.collection === "mine" || item.collection === "uploaded");
+  renderDetailsStar();
   $("details").classList.add("show");
   hideTip();
   requestAnimationFrame(() => drawDetails());
+}
+
+function renderDetailsMeta() {
+  const s = detailsItem.stats;
+  $("dMeta").innerHTML = `<span>Duration <b>${fmtTime(s.duration)}</b></span><span>TSS <b>${Math.round(s.tss)}</b></span><span>IF <b>${s.IF.toFixed(2)}</b></span><span>NP <b>${Math.round(s.IF * homeFtp())} W</b></span><span>Author <b class="plain"></b></span>`;
+  $("dMeta").querySelector(".plain").textContent = detailsItem.workout.author || "—";
+}
+
+function renderDetailsStar() {
+  if (!detailsItem) return;
+  const fav = favorites.has(detailsItem.key);
+  $("dStar").classList.toggle("on", fav);
+  $("dStar").textContent = fav ? "★" : "☆";
+  $("dStar").title = fav ? "Remove from favorites" : "Add to favorites";
 }
 
 function closeDetails() {
@@ -570,12 +679,7 @@ $("dChart").addEventListener("pointerdown", showTip);
 $("dChart").addEventListener("pointerleave", hideTip);
 
 $("dClose").addEventListener("click", closeDetails);
-$("dFtp").addEventListener("click", () => {
-  ftpInput.value = $("dFtp").dataset.ftp;
-  ftpInput.dispatchEvent(new Event("change"));
-  $("dFtp").hidden = true;
-  drawDetails();
-});
+$("dStar").addEventListener("click", () => detailsItem && toggleFavorite(detailsItem));
 $("details").addEventListener("click", (e) => {
   if (e.target === $("details")) closeDetails();
 });
@@ -601,7 +705,8 @@ async function deleteWorkout(item) {
   const where = item.collection === "mine" ? "My workouts" : "the uploaded library";
   if (!confirm(`Delete "${item.workout.name}" from ${where}?`)) return;
   const url = item.collection === "mine" ? `/api/workouts/${encodeURIComponent(item.id)}` : `/api/presets/${item.id}`;
-  await fetch(url, { method: "DELETE" });
+  await api(url, { method: "DELETE" });
+  if (favorites.delete(item.key)) await saveFavorites();
   await loadLibrary();
 }
 
@@ -618,8 +723,8 @@ function downloadZwo(workout) {
   setTimeout(() => URL.revokeObjectURL(a.href), 1000);
 }
 
-// Uploads land in Browse (presets/uploaded/); imports on My workouts land in workouts/.
-async function uploadFiles(files, target) {
+// Uploads land in Browse's Uploaded collection (presets/uploaded/).
+async function uploadFiles(files) {
   let ok = 0;
   let lastKey = null;
   const failed = [];
@@ -627,16 +732,14 @@ async function uploadFiles(files, target) {
     const xml = await file.text();
     try {
       parseZwo(xml); // validate before it lands in the folder
-      const res = await fetch(target === "browse" ? "/api/presets" : "/api/workouts", {
+      const res = await api("/api/presets", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(
-          target === "browse" ? { filename: file.name, xml } : { name: file.name.replace(/\.(zwo|xml)$/i, ""), xml },
-        ),
+        body: JSON.stringify({ filename: file.name, xml }),
       });
       const out = await res.json();
       if (!out.ok) throw new Error(out.error);
-      lastKey = target === "browse" ? `uploaded:${out.id}` : `mine:${out.id}`;
+      lastKey = `uploaded:${out.id}`;
       ok++;
     } catch (e) {
       failed.push(`${file.name}: ${e.message}`);
@@ -644,23 +747,17 @@ async function uploadFiles(files, target) {
   }
   if (failed.length) alert(`Couldn't add:\n${failed.join("\n")}`);
   if (!ok) return;
-  if (target === "browse") {
-    browse.collection = "uploaded";
-    browse.category = "all";
-  }
+  browse.collection = "uploaded";
+  browse.category = "all";
   await loadLibrary();
+  setHomeTab("browse");
   if (ok === 1) selectWorkout(lastKey);
 }
 
-for (const [inputId, target] of [
-  ["uploadFile", "browse"],
-  ["importFile", "mine"],
-]) {
-  $(inputId).addEventListener("change", (e) => {
-    uploadFiles([...e.target.files], target);
-    e.target.value = "";
-  });
-}
+$("uploadFile").addEventListener("change", (e) => {
+  uploadFiles([...e.target.files]);
+  e.target.value = "";
+});
 $("home").addEventListener("dragover", (e) => {
   e.preventDefault();
   $("home").classList.add("dropping");
@@ -671,10 +768,7 @@ $("home").addEventListener("dragleave", (e) => {
 $("home").addEventListener("drop", (e) => {
   e.preventDefault();
   $("home").classList.remove("dropping");
-  uploadFiles(
-    [...e.dataTransfer.files].filter((f) => /\.(zwo|xml)$/i.test(f.name)),
-    homeTab === "browse" ? "browse" : "mine",
-  );
+  uploadFiles([...e.dataTransfer.files].filter((f) => /\.(zwo|xml)$/i.test(f.name)));
 });
 
 $("btnNew").addEventListener("click", () => openBuilder(null));
@@ -871,16 +965,19 @@ $("bSave").addEventListener("click", async () => {
     return alert("Give the workout a name first.");
   }
   if (!w.blocks.length) return alert("Add at least one block.");
-  const res = await fetch("/api/workouts", {
+  const res = await api("/api/workouts", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ id: builder.id, name: w.name, xml: serializeZwo(w) }),
   });
   const out = await res.json();
   if (!out.ok) return alert(`Save failed: ${out.error}`);
+  // Land on Browse filtered to My workouts, so the saved workout is in view.
+  browse.collection = "mine";
+  browse.category = "all";
   await loadLibrary();
   selectWorkout(`mine:${out.id}`);
-  setHomeTab("mine");
+  setHomeTab("browse");
   show("home");
 });
 
@@ -949,6 +1046,7 @@ function startRide() {
     zeroSince: null,
     segIdx: -1,
     lastBeepSec: null,
+    cadWarned: null, // segment index already announced as "coming up"
     nextEvent: 0,
     lastTargetAt: 0,
     trainerMode: null, // "erg" | "free"
@@ -962,6 +1060,7 @@ function startRide() {
   $("rStripTotal").textContent = fmtTime(ride.timeline.duration);
   $("rDone").classList.remove("show");
   $("rMenu").classList.remove("open");
+  hideCadence();
   closeConfirm(false);
   buildZoneBar();
   renderFtp();
@@ -1011,6 +1110,16 @@ function showPause() {
     $("rPausedSub").textContent = "Press resume (or space) when you're ready";
     $("rResume").textContent = "RESUME";
   }
+  syncPauseMenu();
+}
+
+// Paused mid-ride (not the READY screen), the ride menu opens beside the pause
+// screen, so resume, restart/skip interval, end ride and the settings are all there.
+function syncPauseMenu() {
+  const paused = ride?.pauseReason === "auto" || ride?.pauseReason === "manual";
+  const open = paused && !pendingConfirm && !$("rDone").classList.contains("show");
+  $("rMenu").classList.toggle("open", open);
+  $("rPaused").classList.toggle("with-menu", open);
 }
 
 function tick() {
@@ -1062,6 +1171,7 @@ function updateSegment() {
   const i = segmentAt(ride.timeline, ride.pos);
   if (i !== ride.segIdx) {
     const first = ride.segIdx === -1;
+    const prev = ride.timeline.segments[ride.segIdx];
     ride.segIdx = i;
     ride.lastTargetAt = 0; // push the new target immediately
     if (!first && ride.running) {
@@ -1069,6 +1179,7 @@ function updateSegment() {
       $("rInterval").classList.remove("flash");
       void $("rInterval").offsetWidth;
       $("rInterval").classList.add("flash");
+      announceCadence(prev, ride.timeline.segments[i]);
     }
   }
   const seg = ride.timeline.segments[i];
@@ -1077,10 +1188,17 @@ function updateSegment() {
   // 3-2-1 countdown into a change of target
   const left = Math.ceil(seg.start + seg.duration - ride.pos);
   const next = ride.timeline.segments[i + 1];
-  const changes = next && (next.free !== seg.free || Math.abs(next.from - seg.to) > 0.01);
+  const cadChange = next && cadenceShift(seg, next);
+  const changes = next && (next.free !== seg.free || Math.abs(next.from - seg.to) > 0.01 || cadChange);
   if (changes && left <= 3 && left >= 1 && left !== ride.lastBeepSec) {
     ride.lastBeepSec = left;
     beep(880, 110);
+  }
+
+  // Heads-up before a big cadence change, counting down to it.
+  if (cadChange?.big && left <= CAD_WARN_S && left >= 1) {
+    ride.cadWarned = i + 1;
+    showCadence(cadChange, `${cadChange.dir === "up" ? "Spin up" : "Slow down"} in ${left}`, false);
   }
 
   // Workout text events
@@ -1089,6 +1207,70 @@ function updateSegment() {
     toast(evs[ride.nextEvent].message);
     ride.nextEvent++;
   }
+}
+
+// ---- cadence call-outs: any change of cadence target pops up mid-screen ----
+
+const CAD_WARN_S = 5;
+const CAD_BIG_RPM = 8;
+const CAD_HOLD_MS = 6000;
+let cadTimer = null;
+
+// What changes between two segments' cadence targets, or null if nothing does.
+function cadenceShift(from, to) {
+  const a = from?.cadence ?? null;
+  const b = to?.cadence ?? null;
+  if (a === b) return null;
+  if (b === null) return { rpm: null, dir: "free", big: false };
+  if (a === null) return { rpm: b, dir: "new", big: false };
+  return { rpm: b, dir: b > a ? "up" : "down", big: Math.abs(b - a) >= CAD_BIG_RPM };
+}
+
+function showCadence(shift, label, now) {
+  const el = $("rCadAlert");
+  el.classList.toggle("up", shift.dir === "up");
+  el.classList.toggle("down", shift.dir === "down" || shift.dir === "free");
+  $("rCadArrow").textContent = shift.dir === "up" ? "▲" : shift.dir === "new" ? "●" : "▼";
+  $("rCadLbl").textContent = label;
+  $("rCadVal").textContent = shift.rpm ?? "Your call";
+  el.querySelector("small").hidden = shift.rpm === null;
+  el.classList.add("show");
+  if (now) {
+    el.classList.remove("now");
+    void el.offsetWidth;
+    el.classList.add("now");
+  }
+  clearTimeout(cadTimer);
+  cadTimer = setTimeout(hideCadence, now ? CAD_HOLD_MS : 1500);
+}
+
+function hideCadence() {
+  clearTimeout(cadTimer);
+  $("rCadAlert").classList.remove("show", "now");
+}
+
+function announceCadence(prev, seg) {
+  const shift = cadenceShift(prev, seg);
+  if (!shift) {
+    // Moved on without a cadence change: drop any leftover heads-up.
+    if (ride.cadWarned !== null) hideCadence();
+    ride.cadWarned = null;
+    return;
+  }
+  ride.cadWarned = null;
+  const label =
+    shift.dir === "free"
+      ? "Cadence: back to your own"
+      : shift.big
+        ? shift.dir === "up"
+          ? "Spin up now"
+          : "Slow cadence now"
+        : "New cadence";
+  showCadence(shift, label, true);
+  // Two quick notes after the interval beep: rising to spin up, falling to slow down.
+  const notes = shift.dir === "up" ? [988, 1480] : shift.dir === "new" ? [1175, 1175] : [1480, 988];
+  setTimeout(() => beep(notes[0], 120), 420);
+  setTimeout(() => beep(notes[1], 180), 580);
 }
 
 function driveTrainer() {
@@ -1181,7 +1363,7 @@ function render() {
   // bottom strip
   $("rStripPos").textContent = fmtTime(r.pos);
   $("rPct").textContent = `${Math.floor((r.pos / dur) * 100)}%`;
-  drawWorkout($("rStrip"), { timeline: r.timeline, ftp: r.ftp, position: r.pos, samples: r.trace });
+  drawWorkout($("rStrip"), { timeline: r.timeline, ftp: r.ftp, position: r.pos, samples: r.trace, labels: true });
 
   // main rolling window: ~20% history, the rest what's coming
   const span = Math.min(720, dur);
@@ -1231,6 +1413,7 @@ function seek(to) {
   ride.nextEvent = ride.timeline.events.findIndex((e) => e.t > ride.pos);
   if (ride.nextEvent < 0) ride.nextEvent = ride.timeline.events.length;
   ride.lastBeepSec = null;
+  hideCadence();
   updateSegment();
   driveTrainer();
   render();
@@ -1255,6 +1438,7 @@ function closeConfirm(accepted) {
   pendingConfirm = null;
   $("rConfirm").classList.remove("show");
   if (accepted && action && ride) action();
+  syncPauseMenu();
 }
 
 $("rConfirmYes").addEventListener("click", () => closeConfirm(true));
@@ -1321,9 +1505,9 @@ function finishRide() {
   clearInterval(tickTimer);
   ride.running = false;
   trainer.setFreeRide();
-  $("rMenu").classList.remove("open");
-  $("rPaused").classList.remove("show");
   closeConfirm(false);
+  $("rMenu").classList.remove("open");
+  $("rPaused").classList.remove("show", "with-menu");
   render();
   const s = (ride.summary = summarize());
   const cells = [
@@ -1354,11 +1538,12 @@ function exitRide() {
 $("rSaveRide").addEventListener("click", async () => {
   if (ride.log.length) {
     try {
-      await fetch("/api/rides", {
+      await api("/api/rides", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           workout: ride.item.workout.name,
+          workout_key: ride.item.key,
           workout_file: ride.item.id,
           started_at: ride.startedAt,
           finished_at: new Date().toISOString(),
@@ -1371,6 +1556,7 @@ $("rSaveRide").addEventListener("click", async () => {
       alert(`Couldn't save the ride: ${e.message}`);
       return;
     }
+    loadRides();
   }
   exitRide();
 });
@@ -1386,7 +1572,6 @@ $("rResume").addEventListener("click", resume);
 $("rPause").addEventListener("click", () => {
   if (ride?.pauseReason) resume();
   else pause("manual");
-  $("rMenu").classList.remove("open");
 });
 $("rEnd").addEventListener("click", () =>
   askConfirm({
@@ -1439,10 +1624,279 @@ window.addEventListener("resize", () => {
   else {
     drawLibraryCharts();
     drawDetails();
+    drawRideView();
   }
 });
 window.addEventListener("beforeunload", (e) => {
   if (ride && ride.log.length && !$("rDone").classList.contains("show")) e.preventDefault();
 });
 
+// ======================================================================
+// Account: who's signed in, sign out, delete account
+// ======================================================================
+
+async function loadAccount() {
+  const me = await api("/auth/me")
+    .then((r) => r.json())
+    .catch(() => ({ mode: "open" }));
+  // Open mode has nobody to sign out; the shared password has no account to delete.
+  $("account").hidden = me.mode === "open";
+  $("acctEmail").textContent = me.email || "";
+  $("acctDelete").hidden = me.mode !== "accounts";
+}
+
+// Show/hide eye inside the password field.
+const EYE =
+  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>';
+const EYE_OFF = EYE.replace("</svg>", '<path d="M3 3l18 18"/></svg>');
+function showPassword(input, eye, shown) {
+  input.type = shown ? "text" : "password";
+  eye.innerHTML = shown ? EYE_OFF : EYE;
+  eye.setAttribute("aria-label", shown ? "Hide password" : "Show password");
+  eye.setAttribute("aria-pressed", String(shown));
+}
+showPassword($("daPassword"), $("daEye"), false);
+$("daEye").addEventListener("click", () => {
+  showPassword($("daPassword"), $("daEye"), $("daPassword").type === "password");
+  $("daPassword").focus();
+});
+
+function closeDeleteAccount() {
+  $("delAcct").classList.remove("show");
+  $("daPassword").value = "";
+  showPassword($("daPassword"), $("daEye"), false);
+}
+
+$("acctDelete").addEventListener("click", () => {
+  $("daError").textContent = "";
+  $("delAcct").classList.add("show");
+  $("daPassword").focus();
+});
+$("daClose").addEventListener("click", closeDeleteAccount);
+$("daCancel").addEventListener("click", closeDeleteAccount);
+$("delAcct").addEventListener("click", (e) => {
+  if (e.target === $("delAcct")) closeDeleteAccount();
+});
+$("daPassword").addEventListener("keydown", (e) => {
+  if (e.key === "Enter") $("daConfirm").click();
+});
+$("daConfirm").addEventListener("click", async () => {
+  $("daError").textContent = "";
+  $("daConfirm").disabled = true;
+  try {
+    const res = await api("/auth/delete-account", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ password: $("daPassword").value }),
+    });
+    const out = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(out.error || "Couldn't delete the account. Try again.");
+    location.href = "/login";
+  } catch (e) {
+    $("daError").textContent = e.message;
+  } finally {
+    $("daConfirm").disabled = false;
+  }
+});
+
+// ======================================================================
+// History: every saved ride, newest first
+// ======================================================================
+
+async function loadRides() {
+  try {
+    rides = await api("/api/rides").then((r) => r.json());
+  } catch (e) {
+    console.warn("rides failed", e);
+    rides ??= [];
+  }
+  renderHistory();
+}
+
+function fmtHours(secs) {
+  const h = Math.floor(secs / 3600);
+  const m = Math.round((secs % 3600) / 60);
+  return h ? `${h}h ${String(m).padStart(2, "0")}m` : `${m} min`;
+}
+
+function fmtWhen(iso) {
+  const d = new Date(iso);
+  if (isNaN(d)) return "";
+  return d.toLocaleString(undefined, { weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
+}
+
+function renderHistory() {
+  $("tabHistCount").textContent = rides ? rides.length : "";
+  if (homeTab !== "history" || !rides) return;
+  const now = Date.now();
+  const total = (days) => {
+    const rs = rides.filter((r) => days === null || now - Date.parse(r.started_at) <= days * 864e5);
+    const sum = (k) => rs.reduce((a, r) => a + (r[k] || 0), 0);
+    return { n: rs.length, secs: sum("riding_s"), tss: sum("tss"), kj: sum("kj") };
+  };
+  $("histTotals").innerHTML = [
+    ["Last 7 days", total(7)],
+    ["Last 30 days", total(30)],
+    ["All time", total(null)],
+  ]
+    .map(
+      ([label, t]) => `<div class="hist-total"><h3>${label}</h3><div class="big">${fmtHours(t.secs)}</div>` +
+        `<div class="sub">${t.n} ride${t.n === 1 ? "" : "s"} · TSS ${Math.round(t.tss)} · ${t.kj} kJ</div></div>`,
+    )
+    .join("");
+
+  const list = $("histList");
+  list.innerHTML = "";
+  if (!rides.length) {
+    list.innerHTML = `<div class="empty">No rides yet. Finish a ride and choose <b>Save &amp; exit</b>, and it'll show up here.</div>`;
+    return;
+  }
+  for (const r of rides) {
+    const row = document.createElement("button");
+    row.className = "hist-row" + ((r.riding_s || 0) < 60 ? " short" : "");
+    row.innerHTML = `
+      <div class="hist-when"><div class="hist-date"></div><div class="hist-name"></div></div>
+      <div class="hist-stats">
+        <span>Time<b>${fmtTime(r.riding_s || 0)}</b></span>
+        <span>Avg<b>${r.avg_power ?? "--"} W</b></span>
+        <span>NP<b>${r.np ?? "--"} W</b></span>
+        <span>TSS<b>${r.tss ?? "--"}</b></span>
+        <span class="hr">HR<b>${r.avg_hr ?? "--"}</b></span>
+      </div>`;
+    row.querySelector(".hist-date").textContent = fmtWhen(r.started_at);
+    row.querySelector(".hist-name").textContent = r.workout;
+    row.addEventListener("click", () => openRide(r));
+    list.appendChild(row);
+  }
+}
+
+// The workout a ride was done on, if it's still in the library: by its key, then
+// by file name, then by name (workouts have moved collections and been renamed
+// since some rides were saved).
+function workoutForRide(r) {
+  const file = r.workout_file || "";
+  const key = r.workout_key || (file.includes("/") ? `${file.split("/")[0]}:${file}` : `mine:${file}`);
+  const base = file.split("/").pop();
+  // Titles lost their lengths ("Zone 2 Staircase", "... (90min)"), so compare without them.
+  const plain = (name) =>
+    String(name || "")
+      .replace(/\([^)]*\)/g, " ")
+      .replace(/\s+-?\s*\d+(\.\d+)?\s*(h|hr|min)\b|\s+-\s*\d+h\d+m\b/gi, " ")
+      .replace(/\s+/g, " ")
+      .trim()
+      .toLowerCase();
+  return (
+    library.find((w) => w.key === key) ||
+    (base && library.find((w) => w.id.split("/").pop() === base)) ||
+    library.find((w) => w.workout.name === r.workout) ||
+    library.find((w) => plain(w.workout.name) === plain(r.workout)) ||
+    null
+  );
+}
+
+let rideView = null; // { summary, data, geom, hover }
+
+async function openRide(r) {
+  rideView = { summary: r, data: null, geom: null, hover: null };
+  $("rvDate").textContent = fmtWhen(r.started_at);
+  $("rvTitle").textContent = r.workout;
+  const cells = [
+    ["Time", fmtTime(r.riding_s || 0)],
+    ["Avg power", `${r.avg_power ?? "--"} W`],
+    ["NP", `${r.np ?? "--"} W`],
+    ["Max", `${r.max_power ?? "--"} W`],
+    ["TSS", r.tss ?? "--"],
+    ["IF", r.if != null ? Number(r.if).toFixed(2) : "--"],
+    ["Energy", `${r.kj ?? "--"} kJ`],
+    ["Avg HR", r.avg_hr ?? "--"],
+    ["Cadence", r.avg_cadence ?? "--"],
+    ["Completed", `${r.completed_pct ?? "--"}%`],
+    ["FTP", `${r.ftp ?? "--"} W`],
+  ];
+  $("rvStats").innerHTML = cells.map(([k, v]) => `<span>${k}<b>${v}</b></span>`).join("");
+  $("rvAgain").hidden = !workoutForRide(r);
+  $("rvLoading").hidden = false;
+  $("rvTip").classList.remove("show");
+  const c = $("rvChart");
+  c.getContext("2d").clearRect(0, 0, c.width, c.height);
+  $("rideView").classList.add("show");
+  try {
+    const res = await api(`/api/rides/${encodeURIComponent(r.id)}`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    if (rideView?.summary !== r) return; // closed or switched while loading
+    rideView.data = data;
+    $("rvLoading").hidden = true;
+    drawRideView();
+  } catch (e) {
+    $("rvLoading").textContent = "Couldn't load this ride.";
+  }
+}
+
+function drawRideView() {
+  if (!rideView?.data || !$("rideView").classList.contains("show")) return;
+  rideView.geom = drawRide($("rvChart"), {
+    samples: rideView.data.samples || [],
+    ftp: rideView.data.ftp || homeFtp(),
+    hover: rideView.hover,
+  });
+}
+
+function closeRide() {
+  $("rideView").classList.remove("show");
+  $("rvLoading").textContent = "Loading ride…";
+  rideView = null;
+}
+
+$("rvClose").addEventListener("click", closeRide);
+$("rideView").addEventListener("click", (e) => {
+  if (e.target === $("rideView")) closeRide();
+});
+
+// Hover (or drag a finger) across the chart to read the numbers at that moment.
+function rideTip(e) {
+  if (!rideView?.geom || !rideView.data) return;
+  const rect = $("rvChart").getBoundingClientRect();
+  const px = e.clientX - rect.left;
+  const i = rideView.geom.indexAt(px);
+  const smp = rideView.data.samples[i];
+  if (!smp) return;
+  rideView.hover = i;
+  drawRideView();
+  const tip = $("rvTip");
+  tip.innerHTML =
+    `<div class="tip-head">${fmtTime(smp.t ?? i)}</div>` +
+    `<div class="tip-w">${smp.w ?? "--"} W</div>` +
+    `<div class="tip-sub">target ${smp.target ?? "--"} W${smp.hr ? ` · ♥ ${smp.hr}` : ""}${smp.cad ? ` · ${smp.cad} rpm` : ""}</div>`;
+  tip.style.left = `${Math.max(70, Math.min(rect.width - 70, px))}px`;
+  tip.style.top = "64px";
+  tip.classList.add("show");
+}
+$("rvChart").addEventListener("pointermove", rideTip);
+$("rvChart").addEventListener("pointerdown", rideTip);
+$("rvChart").addEventListener("pointerleave", () => {
+  if (!rideView) return;
+  rideView.hover = null;
+  $("rvTip").classList.remove("show");
+  drawRideView();
+});
+
+$("rvAgain").addEventListener("click", () => {
+  const item = rideView && workoutForRide(rideView.summary);
+  if (!item) return;
+  closeRide();
+  selectWorkout(item.key);
+  openDetails(item);
+});
+
+$("rvDelete").addEventListener("click", async () => {
+  const r = rideView?.summary;
+  if (!r || !confirm(`Delete this ride (${r.workout}, ${fmtWhen(r.started_at)}) from your history?`)) return;
+  await api(`/api/rides/${encodeURIComponent(r.id)}`, { method: "DELETE" });
+  closeRide();
+  await loadRides();
+});
+
+loadAccount();
 loadLibrary();
+loadRides();

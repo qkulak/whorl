@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Whorl</title>
+<link rel="icon" href="/brand/whorl-app-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:ital,wght@1,700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #1f3a2c;          /* forest, from the logo */
+    --panel: #183024;
+    --field: #12261c;
+    --line: rgba(239,233,226,.16);
+    --text: #efe9e2;
+    --muted: rgba(239,233,226,.6);
+    --primary: #efe9e2;
+    --on-primary: #1f3a2c;
+    --bad: #ff3b3b;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0; display: grid; place-items: center; padding: 16px;
+    background: radial-gradient(ellipse at 50% 0%, #2a4a39 0%, var(--bg) 65%); background-color: var(--bg);
+    color: var(--text); font-family: Barlow, system-ui, -apple-system, sans-serif; font-size: 15px;
+  }
+  .box {
+    width: 100%; max-width: 380px; background: var(--panel); border: 1px solid var(--line);
+    border-radius: 18px; padding: 30px 28px 28px; text-align: center;
+  }
+  h1 { margin: 0 0 4px; line-height: 0; }
+  h1 img { height: 52px; width: auto; }
+  p { color: var(--muted); margin: 6px 0 22px; font-size: 16px; }
+  input {
+    width: 100%; font: inherit; font-size: 17px; color: var(--text); background: var(--field);
+    border: 1px solid var(--line); border-radius: 10px; padding: 11px 14px; text-align: center;
+  }
+  input:focus { outline: 2px solid var(--text); outline-offset: -1px; }
+  button {
+    width: 100%; margin-top: 12px; font: inherit; font-weight: 700; letter-spacing: .08em; color: var(--on-primary);
+    background: var(--primary); border: none; border-radius: 999px; padding: 12px; cursor: pointer;
+  }
+  button:hover { background: #fff; }
+  .error { color: var(--bad); font-weight: 600; margin: 12px 0 0; min-height: 1.2em; font-size: 14px; }
+  /* show/hide toggle inside password fields */
+  .pw-wrap { position: relative; }
+  .pw-wrap input { padding-right: 46px; }
+  .pw-eye {
+    position: absolute; right: 6px; top: 50%; transform: translateY(-50%); width: 34px; height: 34px;
+    display: grid; place-items: center; padding: 0; background: none; border: none; border-radius: 8px;
+    color: var(--muted); cursor: pointer;
+  }
+  .pw-eye:hover { color: var(--text); }
+  .pw-eye:focus-visible { outline: 2px solid var(--text); }
+  .pw-eye svg { width: 20px; height: 20px; }
+  .pw-wrap input { padding-left: 46px; }
+  .pw-eye, .pw-eye:hover { margin: 0; background: none; } /* not the big cream button */
+</style>
+</head>
+<body>
+  <form class="box" method="post" action="/login">
+    <h1><img src="/brand/whorl-logo-cream.png" alt="whorl"></h1>
+    <p>Enter password for beta access</p>
+    <input type="password" name="password" placeholder="Password" autocomplete="current-password" autofocus required>
+    <button type="submit">ENTER</button>
+    <div class="error" id="error"></div>
+  </form>
+  <script>
+    // Show/hide eye inside every password field.
+    const EYE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>';
+    const EYE_OFF = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/><path d="M3 3l18 18"/></svg>';
+    document.querySelectorAll('input[type="password"]').forEach((input) => {
+      const wrap = document.createElement("div");
+      wrap.className = "pw-wrap";
+      input.replaceWith(wrap);
+      const eye = document.createElement("button");
+      eye.type = "button";
+      eye.className = "pw-eye";
+      const set = (shown) => {
+        input.type = shown ? "text" : "password";
+        eye.innerHTML = shown ? EYE_OFF : EYE;
+        eye.setAttribute("aria-label", shown ? "Hide password" : "Show password");
+        eye.setAttribute("aria-pressed", String(shown));
+      };
+      eye.addEventListener("click", () => {
+        set(input.type === "password");
+        input.focus();
+      });
+      set(false);
+      wrap.append(input, eye);
+    });
+
+    if (new URLSearchParams(location.search).has("error")) {
+      document.getElementById("error").textContent = "That password isn't right. Try again.";
+    }
+  </script>
+</body>
+</html>

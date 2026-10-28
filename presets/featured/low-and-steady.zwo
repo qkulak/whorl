@@ -1,11 +1,11 @@
 <workout_file>
-    <author>Whorl</author>
+    <author>Quinvy</author>
     <name>Low and Steady</name>
     <description>Steady low-zone-2 riding for fat oxidation. Nothing hard, just time in the aerobic zone.</description>
     <category>Endurance</category>
     <sportType>bike</sportType>
     <tags>
-            </tags>
+    </tags>
     <workout>
         <Warmup Duration="300" PowerLow="0.65" PowerHigh="0.7"/>
         <SteadyState Duration="600" Power="0.7"/>
