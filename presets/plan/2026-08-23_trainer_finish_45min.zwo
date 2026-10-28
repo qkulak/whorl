@@ -1,46 +1,22 @@
 <workout_file>
-    <author>Coach Claude</author>
-    <name>Trainer Finish — 45min Race Power into brick</name>
-    <description>Sun Aug 23, SECOND HALF. Load this after ~2hr easy outdoors. SET FTP TO 185.
-
-45min CONTINUOUS at 159W, FULL AERO. The workout ENDS there - no cooldown, no spin-down. Stop pedalling, unclip, shoes on, run.
-
-Race day T2 is about 2:30 and you start running at race pace straight off race power. Any spin-down teaches the legs to recover before running, which is the opposite of what a brick trains. Target under 5min from the workout ending to running. LAY THE RUN KIT OUT BEFORE YOU START.
-
-Split session: 2hr easy Z2 outside (stops are fine, nothing sustained needed), then inside for the quality where you can actually hold power and position. Get on the trainer within 10min of walking in so the legs stay warm. That ordering is the Santa Cruz sequence - long aerobic, race intensity on tired legs, run off the bike.
-
-CONTEXT: Saturday was 15mi at 7:25/mi with 56min in Z4 (load 255). Friday was 2hr. Expect heavy legs. GATE: if the first 15min of the 45 reads RPE 8+, cut it to 30min. That is the gate working, not the session failing.
-
-AERO: ~45min in position here versus 85min Friday. Cost of riding outside today, fine once. The Aug 29 simulation needs a scouted route where you can hold aero for three hours.
-
-FUEL: you should be 160g+ deep from the outdoor leg. Keep going, 80-90g/hr, race products only.
-
-BRICK: 25min at 7:10/mi. If 7:10 is not there off the bike, run 7:20-7:30 rather than forcing - the value is leg turnover, not the number. Then 90g carb + 40g protein.</description>
+    <author>Whorl</author>
+    <name>45min Race Pace Finish</name>
+    <description>A short warmup, then 45 minutes continuous at race pace (86% FTP) in aero, with no cooldown. Use it to finish a longer ride with quality, or as a bike-to-run brick: when it ends, head straight out for a short run.</description>
     <sportType>bike</sportType>
     <tags>
-        <tag name="racepower"/>
-        <tag name="aero"/>
-        <tag name="brick"/>
-        <tag name="703"/>
+        <tag name="racepower" />
+        <tag name="aero" />
+        <tag name="brick" />
+        <tag name="703" />
     </tags>
     <workout>
         <Warmup Duration="300" PowerLow="0.62" PowerHigh="0.74" Cadence="90">
-            <textevent timeoffset="10" message="5min to settle. Already 2hr in - just re-find the rhythm"/>
-            <textevent timeoffset="60" message="Run shoes and kit laid out NOW, before the block starts"/>
-            <textevent timeoffset="120" message="Into aero. Forearms flat, shoulders forward and down"/>
-            <textevent timeoffset="240" message="Eat before the block - last chance before the run"/>
+            <textevent timeoffset="10" message="50 min: 45 min continuous at race pace, in aero" />
         </Warmup>
-
         <SteadyState Duration="2700" Power="0.86" Cadence="88">
-            <textevent timeoffset="10" message="45min CONTINUOUS at 159W. FULL AERO. Settle, do not attack it"/>
-            <textevent timeoffset="600" message="10min in. RPE 8+? Cut to 30min. Otherwise carry on"/>
-            <textevent timeoffset="1200" message="20min. Neck and shoulders talking now, not legs. Stay down"/>
-            <textevent timeoffset="1350" message="Halfway. Closest thing to race hour two you will do"/>
-            <textevent timeoffset="1800" message="30min. Eat now - you want fuel in before the run"/>
-            <textevent timeoffset="2280" message="7min left. Hold the watts, hold the bars"/>
-            <textevent timeoffset="2520" message="3min. Stay in aero - do not sit up early"/>
-            <textevent timeoffset="2640" message="1min. When this ends: stop, unclip, shoes, GO"/>
-            <textevent timeoffset="2685" message="15s. 25min at 7:10/mi. First half mile feels awful, it passes"/>
+            <textevent timeoffset="0" message="45 min at 86% FTP in aero" />
+            <textevent timeoffset="1350" message="Halfway. Stay down in the bars" />
+            <textevent timeoffset="2640" message="Last minute. When it ends, head straight out for your run" />
         </SteadyState>
     </workout>
 </workout_file>

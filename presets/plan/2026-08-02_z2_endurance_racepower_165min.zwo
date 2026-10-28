@@ -1,89 +1,68 @@
 <workout_file>
-    <author>Coach Claude</author>
-    <name>Z2 Endurance + Race Power</name>
-    <description>Rain swap - long run moved to Saturday, so this is the bike day. 90min Z2 with cadence spin-ups, then 2x15min at Santa Cruz race power (~154W). Set FTP to 195. NO sweet spot, NO threshold - Tuesday is the FTP test and this ride must not blunt it. You are on top of a hard 21.9km tempo run (76min above 156bpm) from yesterday. GATE: check RHR on waking - 38 or under, ride as written; 40+, stop after the second endurance block (2hr) and skip the race-power work entirely. FUELING IS THE POINT: 70-90g carb/hr starting at minute 20, not when you feel empty. 500-750ml/hr with electrolytes. Fan on. Watch for HR climbing through the last hour at flat power - if it does despite eating on schedule, that is data worth having.</description>
+    <author>Whorl</author>
+    <name>Z2 Endurance + Race Pace 2x15</name>
+    <description>A long aerobic day: 90 minutes of zone 2 at 70% FTP in six blocks, each followed by a one-minute spin-up at 100 rpm, then two 15-minute blocks at race pace (79% FTP) with 5 minutes easy between, and a 20-minute cooldown. Start fueling early and keep it regular: 60–90 g of carbs an hour.</description>
     <sportType>bike</sportType>
     <tags>
-        <tag name="endurance"/>
-        <tag name="racepower"/>
-        <tag name="70.3"/>
+        <tag name="endurance" />
+        <tag name="racepower" />
+        <tag name="70.3" />
     </tags>
     <workout>
         <Warmup Duration="1200" PowerLow="0.51" PowerHigh="0.69" Cadence="90">
-            <textevent timeoffset="10" message="2h45: 90min Z2, then 2x15min at race power. Volume day, not a workout"/>
-            <textevent timeoffset="300" message="Legs are on a hard 21.9km tempo run from yesterday. Expect heavy - that is fine"/>
-            <textevent timeoffset="700" message="RHR 40+ this morning? Plan to stop at 2hr and skip the race blocks"/>
-            <textevent timeoffset="1100" message="Last 100s of warmup. Get the first bottle and food ready"/>
+            <textevent timeoffset="10" message="2h45: 90 min of zone 2, then two 15-min blocks at race pace" />
         </Warmup>
-
         <SteadyState Duration="840" Power="0.70" Cadence="90">
-            <textevent timeoffset="10" message="Endurance block 1 of 6. 137W, 90rpm. This should feel easy"/>
-            <textevent timeoffset="120" message="EAT NOW. First 20g of carbs in. Do not wait until you feel like it"/>
-            <textevent timeoffset="500" message="Drink. Target 500-750ml every hour"/>
+            <textevent timeoffset="0" message="14 min of zone 2 at 70% FTP" />
         </SteadyState>
         <SteadyState Duration="60" Power="0.70" Cadence="100">
-            <textevent timeoffset="5" message="Spin-up: 1min at 100rpm, SAME power. Smooth hips, no bouncing"/>
+            <textevent timeoffset="0" message="Spin-up: 60 s at 100 rpm, same power" />
         </SteadyState>
-
         <SteadyState Duration="840" Power="0.70" Cadence="90">
-            <textevent timeoffset="10" message="Block 2 of 6. Settle back to 90rpm, 137W"/>
-            <textevent timeoffset="420" message="Fuel again. You are aiming for 70-90g of carbs every hour"/>
+            <textevent timeoffset="0" message="14 min of zone 2 at 70% FTP" />
         </SteadyState>
         <SteadyState Duration="60" Power="0.70" Cadence="100">
-            <textevent timeoffset="5" message="Spin-up 2: 100rpm, same power, relaxed shoulders"/>
+            <textevent timeoffset="0" message="Spin-up: 60 s at 100 rpm, same power" />
         </SteadyState>
-
         <SteadyState Duration="840" Power="0.70" Cadence="90">
-            <textevent timeoffset="10" message="Block 3 of 6. One hour in. How is the HR sitting?"/>
-            <textevent timeoffset="420" message="Eat. Note your HR at this power - you will compare it at 2hr"/>
+            <textevent timeoffset="0" message="14 min of zone 2 at 70% FTP" />
         </SteadyState>
         <SteadyState Duration="60" Power="0.70" Cadence="100">
-            <textevent timeoffset="5" message="Spin-up 3: 100rpm"/>
+            <textevent timeoffset="0" message="Spin-up: 60 s at 100 rpm, same power" />
         </SteadyState>
-
         <SteadyState Duration="840" Power="0.70" Cadence="90">
-            <textevent timeoffset="10" message="Block 4 of 6. Halfway through the endurance work"/>
-            <textevent timeoffset="420" message="Fuel. Second bottle should be going down by now"/>
+            <textevent timeoffset="0" message="14 min of zone 2 at 70% FTP" />
         </SteadyState>
         <SteadyState Duration="60" Power="0.70" Cadence="100">
-            <textevent timeoffset="5" message="Spin-up 4: 100rpm, keep it smooth"/>
+            <textevent timeoffset="0" message="Spin-up: 60 s at 100 rpm, same power" />
         </SteadyState>
-
         <SteadyState Duration="840" Power="0.70" Cadence="90">
-            <textevent timeoffset="10" message="Block 5 of 6. This is the boring part. Boring is the objective"/>
-            <textevent timeoffset="420" message="Eat. Do not skip this one - the last hour depends on it"/>
+            <textevent timeoffset="0" message="14 min of zone 2 at 70% FTP" />
         </SteadyState>
         <SteadyState Duration="60" Power="0.70" Cadence="100">
-            <textevent timeoffset="5" message="Spin-up 5: 100rpm"/>
+            <textevent timeoffset="0" message="Spin-up: 60 s at 100 rpm, same power" />
         </SteadyState>
-
         <SteadyState Duration="840" Power="0.70" Cadence="90">
-            <textevent timeoffset="10" message="Block 6 of 6. Last endurance block before race power"/>
-            <textevent timeoffset="420" message="Fuel now so it is absorbed before the blocks"/>
-            <textevent timeoffset="750" message="DECISION POINT: RHR was 40+ or you are genuinely empty? Cool down here at 2hr"/>
+            <textevent timeoffset="0" message="14 min of zone 2 at 70% FTP" />
         </SteadyState>
         <SteadyState Duration="60" Power="0.70" Cadence="100">
-            <textevent timeoffset="5" message="Spin-up 6: last one. 100rpm"/>
+            <textevent timeoffset="0" message="Spin-up: 60 s at 100 rpm, same power" />
         </SteadyState>
-
         <SteadyState Duration="900" Power="0.79" Cadence="88">
-            <textevent timeoffset="10" message="Race power 1 of 2: 15min at ~154W. Aero. Sustainable, NOT hard"/>
-            <textevent timeoffset="450" message="Halfway. This is Santa Cruz wattage. RPE should be 6, no higher"/>
-            <textevent timeoffset="840" message="1min left. Smooth to the end"/>
+            <textevent timeoffset="0" message="Block 1 of 2: 15 min at 79% FTP" />
+            <textevent timeoffset="450" message="Halfway. Smooth and steady" />
+            <textevent timeoffset="840" message="Last minute. Hold it to the end" />
         </SteadyState>
         <SteadyState Duration="300" Power="0.60" Cadence="90">
-            <textevent timeoffset="10" message="5min easy. Drink, fuel. One more block"/>
+            <textevent timeoffset="0" message="5 min easy. Drink and refuel" />
         </SteadyState>
         <SteadyState Duration="900" Power="0.79" Cadence="88">
-            <textevent timeoffset="10" message="Race power 2 of 2: 15min at ~154W, hold aero"/>
-            <textevent timeoffset="450" message="Halfway. HR much higher than block 1? Note it - that is the decoupling read"/>
-            <textevent timeoffset="780" message="2min. Do NOT lift the power. Tuesday is the test, not today"/>
+            <textevent timeoffset="0" message="Block 2 of 2: 15 min at 79% FTP" />
+            <textevent timeoffset="450" message="Halfway. Smooth and steady" />
+            <textevent timeoffset="840" message="Last minute. Hold it to the end" />
         </SteadyState>
-
         <Cooldown Duration="1200" PowerLow="0.62" PowerHigh="0.45" Cadence="90">
-            <textevent timeoffset="10" message="20min spin down. Work is done"/>
-            <textevent timeoffset="600" message="Within the hour: 80-100g carbs + 30-40g protein. Non-negotiable this week"/>
-            <textevent timeoffset="1100" message="Monday is FULL REST. Tuesday is the FTP test"/>
+            <textevent timeoffset="0" message="Done. 20 min cooldown" />
         </Cooldown>
     </workout>
 </workout_file>

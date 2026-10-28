@@ -1,86 +1,45 @@
 <workout_file>
-    <author>Coach Claude</author>
-    <name>Long Ride + 45min Race Power</name>
-    <description>Sun Aug 23. SET FTP TO 185.
-
-45min CONTINUOUS at 159W, then a 25min brick at 7:10/mi. Athlete's call to keep the full session rather than the softened version - and continuous is the better stimulus, since the race is 2h36 unbroken rather than intervals.
-
-CONTEXT: Saturday was 15mi at 7:25/mi with 56min in Z4 (load 255). Friday was 2hr. Expect heavy legs. GATE: if the first 15min of the 45 reads RPE 8+, cut it to 30min. That is not failure, that is the gate working.
-
-INDOOR because the drivetrain is still stuck. A 3hr outdoor ride locked in one gear on rolling terrain is not worth it. GET THE SHIFTING FIXED THIS WEEK - the Aug 29 race simulation has to be outdoors.
-
-AERO IS THE POINT of the back half. You logged 85min in position Friday. Beat it today. Race day is 2h36 and that is where the last 2-3 minutes of the sub-5 bike split comes from.
-
-GATE AT 45 MINUTES: if the legs are heavy, cut to 2h15 total and keep the 15min brick. Yesterday earns you that.
-
-FUEL: 80-90g carb/hr, race nutrition only. This is gut training for race day's 90g/hr - three hours is the best chance you get to practise it before Aug 29.
-
-HIDE THE HR FIELD. Watts and RPE.
-
-NO COOLDOWN - deliberately. Race day T2 is ~2:30 and you run at race pace off race power; a spin-down teaches the legs to recover before running, which is the opposite of what a brick trains. The 60s at the end is unclip time and the shoe change is your transition.
-
-AFTER: 25min brick at 7:10/mi, running inside 5min of stopping. If 7:10 is not there, run 7:20-7:30 rather than forcing it - the brick's value is leg turnover off the bike, not the number. Then 90g carb + 40g protein.</description>
+    <author>Whorl</author>
+    <name>Long Ride + 45min Race Pace</name>
+    <description>Three hours: about two hours of zone 2 at 75% FTP in four blocks, each followed by a one-minute spin-up at 102 rpm, then 45 minutes continuous at race pace (86% FTP) in aero. It ends without a cooldown, so it also works as a brick: head straight out for a short run.</description>
     <sportType>bike</sportType>
     <tags>
-        <tag name="endurance"/>
-        <tag name="racepower"/>
-        <tag name="703"/>
+        <tag name="endurance" />
+        <tag name="racepower" />
+        <tag name="703" />
     </tags>
     <workout>
         <Warmup Duration="900" PowerLow="0.50" PowerHigh="0.73" Cadence="90">
-            <textevent timeoffset="10" message="3hr: 2h10 Z2, then 45min CONTINUOUS at 159W aero. 25min brick after"/>
-            <textevent timeoffset="120" message="Yesterday was 15mi at 7:25. Expect heavy. Gate at 45min"/>
-            <textevent timeoffset="400" message="Start eating at minute 20 and every 20min after. 80-90g/hr"/>
-            <textevent timeoffset="780" message="HIDE THE HR FIELD"/>
+            <textevent timeoffset="10" message="3 hours: two hours of zone 2, then 45 min continuous at race pace" />
         </Warmup>
-
         <SteadyState Duration="1800" Power="0.75" Cadence="90">
-            <textevent timeoffset="10" message="Z2 block 1 of 4. 139W. Should feel genuinely easy"/>
-            <textevent timeoffset="300" message="EAT NOW. First 25g in"/>
-            <textevent timeoffset="1500" message="45min gate: legs heavy? Cut to 2h15 total and keep the brick"/>
+            <textevent timeoffset="0" message="30 min of zone 2 at 75% FTP" />
         </SteadyState>
         <SteadyState Duration="60" Power="0.75" Cadence="102">
-            <textevent timeoffset="5" message="1min at 102rpm, same power. Smooth hips"/>
+            <textevent timeoffset="0" message="Spin-up: 60 s at 102 rpm, same power" />
         </SteadyState>
-
         <SteadyState Duration="1740" Power="0.75" Cadence="90">
-            <textevent timeoffset="10" message="Block 2 of 4. Get into aero and hold it as long as you can"/>
-            <textevent timeoffset="600" message="Eat. Drink 500-750ml an hour"/>
-            <textevent timeoffset="1500" message="1hr15 in. Fuelling on schedule?"/>
+            <textevent timeoffset="0" message="29 min of zone 2 at 75% FTP" />
         </SteadyState>
         <SteadyState Duration="60" Power="0.75" Cadence="102">
-            <textevent timeoffset="5" message="Spin-up 2. 102rpm"/>
+            <textevent timeoffset="0" message="Spin-up: 60 s at 102 rpm, same power" />
         </SteadyState>
-
         <SteadyState Duration="1740" Power="0.75" Cadence="90">
-            <textevent timeoffset="10" message="Block 3 of 4. Aero again. Log total time down today"/>
-            <textevent timeoffset="600" message="Eat. You should be past 100g by now"/>
-            <textevent timeoffset="1400" message="Halfway to the race-power set. Keep the position honest"/>
+            <textevent timeoffset="0" message="29 min of zone 2 at 75% FTP" />
         </SteadyState>
         <SteadyState Duration="60" Power="0.75" Cadence="102">
-            <textevent timeoffset="5" message="Spin-up 3"/>
+            <textevent timeoffset="0" message="Spin-up: 60 s at 102 rpm, same power" />
         </SteadyState>
-
         <SteadyState Duration="1740" Power="0.75" Cadence="90">
-            <textevent timeoffset="10" message="Block 4 of 4. Last Z2 block before the work"/>
-            <textevent timeoffset="600" message="Eat now - you want fuel on board before the race-power blocks"/>
-            <textevent timeoffset="1560" message="45min continuous next. 159W, full aero, RPE 6. Settle in"/>
+            <textevent timeoffset="0" message="29 min of zone 2 at 75% FTP" />
         </SteadyState>
-
         <SteadyState Duration="2700" Power="0.86" Cadence="88">
-            <textevent timeoffset="10" message="45min CONTINUOUS at 159W. FULL AERO. Settle, do not attack it"/>
-            <textevent timeoffset="600" message="10min in. RPE 8+? Cut this to 30min. Otherwise carry on"/>
-            <textevent timeoffset="1200" message="20min. Neck and shoulders talking yet? Stay down"/>
-            <textevent timeoffset="1350" message="Halfway. This is the closest thing to race hour two you will do"/>
-            <textevent timeoffset="1800" message="30min. Eat - you want fuel in before the run"/>
-            <textevent timeoffset="2280" message="7min left. Hold the watts, hold the bars"/>
-            <textevent timeoffset="2580" message="2min. Finish it in position"/>
+            <textevent timeoffset="0" message="45 min at 86% FTP in aero" />
+            <textevent timeoffset="1350" message="Halfway. Stay down in the bars" />
+            <textevent timeoffset="2640" message="Last minute. Hold it to the end" />
         </SteadyState>
-
         <SteadyState Duration="60" Power="0.45" Cadence="80">
-            <textevent timeoffset="5" message="GO. Unclip, shoes on, out the door. This is T2 - under 5min"/>
-            <textevent timeoffset="30" message="25min at 7:10/mi. If not there, 7:20-7:30. LOG total aero time and grams of carb"/>
+            <textevent timeoffset="0" message="Done. Unclip and head out for your run" />
         </SteadyState>
-
     </workout>
 </workout_file>

@@ -197,6 +197,12 @@ $("btnHr").addEventListener("click", async () => {
   mirrorSensors();
 });
 
+$("btnSettings").addEventListener("click", () => $("settings").classList.add("show"));
+$("setClose").addEventListener("click", () => $("settings").classList.remove("show"));
+$("settings").addEventListener("click", (e) => {
+  if (e.target === $("settings")) $("settings").classList.remove("show");
+});
+
 $("btnSim").addEventListener("click", () => {
   trainer.simulate();
   $("btnSim").disabled = true;
@@ -504,7 +510,6 @@ function renderCards(el, items, emptyText) {
 function cardAction(item, act) {
   if (act === "fav") return toggleFavorite(item);
   if (act === "edit") return openBuilder(item);
-  if (act === "download") return downloadZwo(item.workout);
   if (act === "delete") return deleteWorkout(item);
   if (act === "ride") {
     closeDetails();
@@ -674,12 +679,11 @@ $("details").addEventListener("click", (e) => {
 for (const [id, act] of [
   ["dRide", "ride"],
   ["dEdit", "edit"],
-  ["dDownload", "download"],
   ["dDelete", "delete"],
 ]) {
   $(id).addEventListener("click", () => {
     const item = detailsItem;
-    if (act !== "download" && act !== "ride") closeDetails();
+    if (act !== "ride") closeDetails();
     cardAction(item, act);
   });
 }
@@ -1563,7 +1567,11 @@ $("rSkip").addEventListener("click", skipForward);
 $("rBack").addEventListener("click", restartInterval);
 $("rSkipBtn").addEventListener("click", skipForward);
 $("rRestartBtn").addEventListener("click", restartInterval);
-$("rBeepToggle").addEventListener("change", (e) => (ride.beep = e.target.checked));
+$("rBeepToggle").addEventListener("change", (e) => {
+  ride.beep = e.target.checked;
+  store.set("beep", ride.beep);
+  $("setBeep").checked = ride.beep;
+});
 
 document.addEventListener("keydown", (e) => {
   if (!ride || !$("ride").classList.contains("active") || $("rDone").classList.contains("show")) return;

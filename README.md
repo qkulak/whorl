@@ -45,7 +45,7 @@ Later runs only push new code and settings. They keep the session secret, so nob
 
 ## Ride
 
-1. **Connect** your trainer. Smart trainers that speak FTMS get full ERG control. A power-only device still works, but it can't set resistance. Heart rate is optional. No hardware handy? Click **Simulate trainer**.
+1. **Connect** your trainer. Smart trainers that speak FTMS get full ERG control. A power-only device still works, but it can't set resistance. Heart rate is optional. No hardware handy? Open **Settings** at the top right and choose **Simulate**. Settings is also where interval beeps are switched on or off.
 2. Set your **FTP**. Every target in a `.zwo` is a % of FTP.
 3. Tap a workout in **Browse** or **Favorites** and hit **START RIDE** in its window. FTP and the trainer and heart-rate **Connect** buttons are right there too. The clock starts when you start pedaling.
 
@@ -82,7 +82,7 @@ Finished rides can be saved to `rides/` as JSON (per-second power, HR, cadence, 
 | Featured | `presets/featured/` | 15 named workouts across every intensity, from Rolling Country to Spark Plugs. Each is built to a fixed duration and min/max/average % FTP. |
 | Classics | `presets/classics/` | Standard protocols (2×20 sweet spot, Rønnestad 30/15s, 5×4 VO2…) plus the original samples. |
 | Z2 Endurance | `presets/endurance/` | Five original zone 2 rides from 1:15 to 2:00 (cadence builder, floats, ladder, waves, long steady). The generator asserts that every main-set target stays in Z2 (56–75% FTP). |
-| Training plan | `presets/plan/` | The bike workouts from `trainingplancalc`. |
+| Training plan | `presets/plan/` | Race-prep bike sessions: race-pace and aero blocks, threshold and FTP checks, long rides, openers and bricks. |
 | My workouts | `workouts/` | Workouts you build or copy & edit (see **Build**). |
 | Uploaded | `presets/uploaded/` | Anything you add with **⇪ Upload .zwo** (or by dragging files onto Browse). |
 

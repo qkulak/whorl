@@ -1,96 +1,91 @@
 <workout_file>
-    <author>Coach Claude</author>
-    <name>70.3 Race Power + Endurance</name>
-    <description>Full indoor day (rain scrapped the outside ride). 3x18min at Santa Cruz race power (~156W) then Z2 endurance with cadence drills. Set FTP to 190. Blocks should feel boring-sustainable - HR 140-150, RPE 6, aero, 85-90rpm. GUT CHECK: day after a hard 16.5mi run - if warmup legs are wrecked, trim blocks to 3x15 or drop to all-Z2. Fan on, 60-90g carb/hr, drink to thirst + electrolytes. Protect Wednesday's track.</description>
+    <author>Whorl</author>
+    <name>Race Pace 3x18 + Cadence Drills</name>
+    <description>Two and a half hours: three 18-minute blocks at race pace (82% FTP) with 7 minutes easy between, then zone 2 with cadence drills (3 minutes at 98 rpm, then 3 at 63 rpm, four times) and a rolling finish of short seated rises before the cooldown.</description>
     <sportType>bike</sportType>
     <tags>
-        <tag name="raceeffort"/>
-        <tag name="endurance"/>
-        <tag name="70.3"/>
+        <tag name="raceeffort" />
+        <tag name="endurance" />
+        <tag name="70.3" />
     </tags>
     <workout>
         <Warmup Duration="900" PowerLow="0.50" PowerHigh="0.79" Cadence="90">
-            <textevent timeoffset="10" message="2.5hr: 3x18 at race power (156W), then Z2 + cadence drills"/>
-            <textevent timeoffset="600" message="Gut check: legs wrecked from yesterday? Trim to 3x15 or all-Z2"/>
-            <textevent timeoffset="810" message="Aero for the last 90s of warmup"/>
+            <textevent timeoffset="10" message="2.5 hours: three 18-min race-pace blocks, then zone 2 with cadence drills" />
         </Warmup>
         <SteadyState Duration="600" Power="0.63" Cadence="90">
-            <textevent timeoffset="10" message="10min settle. Easy spin, get comfortable, drink"/>
+            <textevent timeoffset="0" message="10 min of zone 2 at 63% FTP" />
         </SteadyState>
         <SteadyState Duration="1080" Power="0.82" Cadence="88">
-            <textevent timeoffset="10" message="Block 1 of 3: 18min at 156W, aero. EASY-sustainable, not hard"/>
-            <textevent timeoffset="540" message="Halfway. HR 140-150, RPE 6. Higher = ease off, blame heat+fatigue"/>
-            <textevent timeoffset="1020" message="1min left, smooth"/>
+            <textevent timeoffset="0" message="Block 1 of 3: 18 min at 82% FTP" />
+            <textevent timeoffset="540" message="Halfway. Smooth and steady" />
+            <textevent timeoffset="1020" message="Last minute. Hold it to the end" />
         </SteadyState>
         <SteadyState Duration="420" Power="0.60" Cadence="90">
-            <textevent timeoffset="10" message="7min Z2 recovery. Drink, fuel"/>
+            <textevent timeoffset="0" message="7 min easy. Drink and refuel" />
         </SteadyState>
         <SteadyState Duration="1080" Power="0.82" Cadence="88">
-            <textevent timeoffset="10" message="Block 2 of 3: 156W, hold aero and form"/>
-            <textevent timeoffset="540" message="Halfway. This is your Santa Cruz wattage - boring is the goal"/>
-            <textevent timeoffset="1020" message="1min left, locked in"/>
+            <textevent timeoffset="0" message="Block 2 of 3: 18 min at 82% FTP" />
+            <textevent timeoffset="540" message="Halfway. Smooth and steady" />
+            <textevent timeoffset="1020" message="Last minute. Hold it to the end" />
         </SteadyState>
         <SteadyState Duration="420" Power="0.60" Cadence="90">
-            <textevent timeoffset="10" message="7min Z2 recovery. Keep drinking"/>
+            <textevent timeoffset="0" message="7 min easy. Drink and refuel" />
         </SteadyState>
         <SteadyState Duration="1080" Power="0.82" Cadence="88">
-            <textevent timeoffset="10" message="Block 3 of 3: last one at 156W, strong and smooth"/>
-            <textevent timeoffset="540" message="Halfway. RPE past 7? Sit up, finish easy - no ego"/>
-            <textevent timeoffset="1020" message="1min. Work is nearly done"/>
+            <textevent timeoffset="0" message="Block 3 of 3: 18 min at 82% FTP" />
+            <textevent timeoffset="540" message="Halfway. Smooth and steady" />
+            <textevent timeoffset="1020" message="Last minute. Hold it to the end" />
         </SteadyState>
         <SteadyState Duration="600" Power="0.65" Cadence="88">
-            <textevent timeoffset="10" message="Endurance block: 47min Z2. First 10min relaxed at 88rpm"/>
+            <textevent timeoffset="0" message="10 min easy. Drink and refuel" />
         </SteadyState>
         <SteadyState Duration="180" Power="0.65" Cadence="98">
-            <textevent timeoffset="10" message="Drill 1a: 3min HIGH cadence 95-100rpm, same easy power, smooth hips"/>
+            <textevent timeoffset="0" message="3 min at 98 rpm. Light, smooth spin" />
         </SteadyState>
         <SteadyState Duration="180" Power="0.65" Cadence="63">
-            <textevent timeoffset="10" message="Drill 1b: 3min LOW cadence 60-65rpm, push torque, no mashing"/>
+            <textevent timeoffset="0" message="3 min at 63 rpm. Seated, smooth pressure" />
         </SteadyState>
         <SteadyState Duration="180" Power="0.65" Cadence="98">
-            <textevent timeoffset="10" message="Drill 2a: 3min HIGH cadence 95-100rpm"/>
+            <textevent timeoffset="0" message="3 min at 98 rpm. Light, smooth spin" />
         </SteadyState>
         <SteadyState Duration="180" Power="0.65" Cadence="63">
-            <textevent timeoffset="10" message="Drill 2b: 3min LOW cadence 60-65rpm torque"/>
+            <textevent timeoffset="0" message="3 min at 63 rpm. Seated, smooth pressure" />
         </SteadyState>
         <SteadyState Duration="180" Power="0.65" Cadence="98">
-            <textevent timeoffset="10" message="Drill 3a: 3min HIGH cadence 95-100rpm"/>
+            <textevent timeoffset="0" message="3 min at 98 rpm. Light, smooth spin" />
         </SteadyState>
         <SteadyState Duration="180" Power="0.65" Cadence="63">
-            <textevent timeoffset="10" message="Drill 3b: 3min LOW cadence 60-65rpm torque"/>
+            <textevent timeoffset="0" message="3 min at 63 rpm. Seated, smooth pressure" />
         </SteadyState>
         <SteadyState Duration="180" Power="0.65" Cadence="98">
-            <textevent timeoffset="10" message="Drill 4a: 3min HIGH cadence 95-100rpm"/>
+            <textevent timeoffset="0" message="3 min at 98 rpm. Light, smooth spin" />
         </SteadyState>
         <SteadyState Duration="180" Power="0.65" Cadence="63">
-            <textevent timeoffset="10" message="Drill 4b: 3min LOW cadence 60-65rpm torque"/>
+            <textevent timeoffset="0" message="3 min at 63 rpm. Seated, smooth pressure" />
         </SteadyState>
         <SteadyState Duration="120" Power="0.66" Cadence="92">
-            <textevent timeoffset="10" message="Rolling roads: 13min of gentle undulations to finish. Base roller, 92rpm"/>
-        </SteadyState>
+            </SteadyState>
         <SteadyState Duration="60" Power="0.72" Cadence="72">
-            <textevent timeoffset="5" message="Short rise: seated climb feel, 72rpm, stay relaxed"/>
+            <textevent timeoffset="0" message="Short rise: 72 rpm, seated and smooth" />
         </SteadyState>
         <SteadyState Duration="120" Power="0.60" Cadence="98">
-            <textevent timeoffset="5" message="Over the top: spin it out, 98rpm easy"/>
+            <textevent timeoffset="0" message="2 min at 98 rpm. Light, smooth spin" />
         </SteadyState>
         <SteadyState Duration="60" Power="0.72" Cadence="72">
-            <textevent timeoffset="5" message="Rise 2: seated, 72rpm, smooth pressure"/>
+            <textevent timeoffset="0" message="Short rise: 72 rpm, seated and smooth" />
         </SteadyState>
         <SteadyState Duration="120" Power="0.62" Cadence="90">
-            <textevent timeoffset="5" message="Rolling base, 90rpm"/>
-        </SteadyState>
+            </SteadyState>
         <SteadyState Duration="60" Power="0.74" Cadence="70">
-            <textevent timeoffset="5" message="Rise 3, last little kicker: 70rpm torque, stay seated"/>
+            <textevent timeoffset="0" message="Short rise: 70 rpm, seated and smooth" />
         </SteadyState>
         <SteadyState Duration="120" Power="0.58" Cadence="100">
-            <textevent timeoffset="5" message="Descent: high cadence 100rpm, legs light"/>
+            <textevent timeoffset="0" message="2 min at 100 rpm. Light, smooth spin" />
         </SteadyState>
         <SteadyState Duration="120" Power="0.64" Cadence="88">
-            <textevent timeoffset="5" message="Settle at 88rpm before cooldown, work is done"/>
-        </SteadyState>
+            </SteadyState>
         <Cooldown Duration="600" PowerLow="0.60" PowerHigh="0.45" Cadence="90">
-            <textevent timeoffset="10" message="10min spin down. Refuel after. Track is Wednesday"/>
+            <textevent timeoffset="0" message="Done. 10 min cooldown" />
         </Cooldown>
     </workout>
 </workout_file>

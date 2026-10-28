@@ -1,67 +1,32 @@
 <workout_file>
-    <author>Coach Claude</author>
-    <name>Race Power 2x25 — Full Aero</name>
-    <description>Wed Aug 19 PM. Swapped in for the FTP test, which moves to Thursday so it lands on clean legs after a swim rather than after this morning's track (HR 168 avg for 24min).
-
-SET FTP TO 185. 2x25min at ~161W (158-165 band) with 8min easy between.
-
-THE POSITION IS THE SESSION. Power here is moderate on purpose - this is not a hard ride. What you are training is the ability to hold aero for 25 minutes without coming up, twice. On race day you need 2h36 of it, and what fails is never the legs. It is the neck, the shoulders, the hip flexors and the saddle. That adaptation only comes from time in position.
-
-This is also the highest-value thing you can do for sub-5. The bike split needs 2-3 minutes that fitness alone will not produce - it has to come off the aero side.
-
-DO NOT COME UP during the blocks. If you have to, note the minute. That number is the actual output of this session, and it should climb every week.
-
-EAT: 40-60g carb across the ride, and you have already eaten today. Keep it going - the last four days of proper fuelling are why your brick HR dropped 8 beats.
-
-HIDE THE HR FIELD. Watts and RPE only.
-
-TOMORROW IS THE FTP TEST. Do not overcook this. RPE 5.5-6.5 throughout.
-
-AFTER: 75-90g carb + 30-40g protein within 60min.</description>
+    <author>Whorl</author>
+    <name>Aero Race Pace 2x25</name>
+    <description>Two 25-minute blocks at race pace (87% FTP) with 8 minutes easy between. The power is moderate on purpose: the goal is holding your aero position for the full 25 minutes, twice, without sitting up.</description>
     <sportType>bike</sportType>
     <tags>
-        <tag name="racepower"/>
-        <tag name="aero"/>
-        <tag name="703"/>
+        <tag name="racepower" />
+        <tag name="aero" />
+        <tag name="703" />
     </tags>
     <workout>
         <Warmup Duration="960" PowerLow="0.50" PowerHigh="0.72" Cadence="90">
-            <textevent timeoffset="10" message="85min: 16 warmup, 2x25min at 161W in FULL AERO, 8min between"/>
-            <textevent timeoffset="180" message="HIDE THE HR FIELD. Watts and RPE only"/>
-            <textevent timeoffset="420" message="This is a position session, not a power session. RPE 5.5-6.5"/>
-            <textevent timeoffset="720" message="Get into aero now and stay there for the last 4min of warmup"/>
-            <textevent timeoffset="900" message="Check the setup: forearms flat, elbows narrow, back flat, head low"/>
+            <textevent timeoffset="10" message="85 min: two 25-min blocks at race pace, all in aero" />
         </Warmup>
-
         <SteadyState Duration="1500" Power="0.87" Cadence="88">
-            <textevent timeoffset="10" message="Block 1 of 2. 25min at 161W. AERO the whole way"/>
-            <textevent timeoffset="120" message="Shoulders forward and down, not shrugged up around your ears"/>
-            <textevent timeoffset="360" message="Look up with your EYES, not by lifting your head. Neck stays long"/>
-            <textevent timeoffset="750" message="Halfway. Where is the discomfort - neck, shoulders, hips, or saddle?"/>
-            <textevent timeoffset="1080" message="18min in. This is where race day starts to bite. Stay down"/>
-            <textevent timeoffset="1320" message="Hips rocking? Drop the cadence slightly rather than coming up"/>
-            <textevent timeoffset="1440" message="Last minute of block 1. Hold the position"/>
+            <textevent timeoffset="0" message="Block 1 of 2: 25 min at 87% FTP in aero" />
+            <textevent timeoffset="750" message="Halfway. Stay down in the bars" />
+            <textevent timeoffset="1440" message="Last minute. Hold it to the end" />
         </SteadyState>
-
         <SteadyState Duration="480" Power="0.55" Cadence="85">
-            <textevent timeoffset="10" message="8min easy. Sit up, drink, eat. Roll the shoulders out"/>
-            <textevent timeoffset="240" message="Did you stay down for all 25? If not, what minute did you come up?"/>
-            <textevent timeoffset="420" message="Back into aero for the last 60s before block 2"/>
+            <textevent timeoffset="0" message="8 min easy. Drink and refuel" />
         </SteadyState>
-
         <SteadyState Duration="1500" Power="0.87" Cadence="88">
-            <textevent timeoffset="10" message="Block 2 of 2. Same 161W, same position"/>
-            <textevent timeoffset="300" message="Second block is the one that matters - fatigue is what breaks position"/>
-            <textevent timeoffset="750" message="Halfway. Power steady? Position holding?"/>
-            <textevent timeoffset="1140" message="6min left. On race day you would have 90min still to go from here"/>
-            <textevent timeoffset="1440" message="Final minute. Finish in the bars"/>
+            <textevent timeoffset="0" message="Block 2 of 2: 25 min at 87% FTP in aero" />
+            <textevent timeoffset="750" message="Halfway. Stay down in the bars" />
+            <textevent timeoffset="1440" message="Last minute. Hold it to the end" />
         </SteadyState>
-
         <Cooldown Duration="660" PowerLow="0.62" PowerHigh="0.45" Cadence="85">
-            <textevent timeoffset="10" message="11min down. Sit up, stretch the neck and hip flexors"/>
-            <textevent timeoffset="240" message="LOG IT: longest unbroken time in aero, and what hurt first"/>
-            <textevent timeoffset="480" message="75-90g carb + 30-40g protein within the hour"/>
-            <textevent timeoffset="600" message="FTP test tomorrow PM, after the swim. Sleep well tonight"/>
+            <textevent timeoffset="0" message="Done. 11 min cooldown" />
         </Cooldown>
     </workout>
 </workout_file>

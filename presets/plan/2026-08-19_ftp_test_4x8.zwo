@@ -1,84 +1,50 @@
 <workout_file>
-    <author>Coach Claude</author>
-    <name>FTP Test — 4x8 Threshold</name>
-    <description>Wed Aug 19 PM. SET FTP TO 185. 4x8min at 185W with 4min recoveries.
-
-THIS IS THE FTP TEST. It decides race power for Santa Cruz and whether the sub-5 bike split is real. Everything else this week is secondary to getting a clean read.
-
-EAT FIRST. You ran 6x1000m this morning. 40-60g carbs at least 30min before you start — the warmup doubles as digestion time. Riding threshold on a depleted tank gives a false low reading and wrecks the test.
-
-HIDE THE HEART RATE FIELD. Observed HR has drifted ~20bpm since June and the cause is unresolved. HR tells you nothing today. Watts and RPE only.
-
-WHAT TO RECORD: RPE for each of the four blocks. That is the actual output of this session — more than the watts, which are fixed.
-
-READING IT:
-  All four at RPE 6-7          -> FTP is above 185. Go 195-200W next Wednesday.
-  Blocks 1-3 fine, 4 is RPE 9  -> FTP is right at 185. Hold current zones.
-  Cannot hold block 3          -> FTP is below 185, or this morning cost more than expected.
-
-CAVEAT: this is your second session today. A slightly depressed read is expected and does not by itself mean FTP is lower. Do not downgrade zones on one hard block.
-
-AFTER: 75-90g carb + 30-40g protein within 60min.</description>
+    <author>Whorl</author>
+    <name>FTP Check 4x8</name>
+    <description>Four 8-minute blocks at 100% FTP with 4 minutes easy between. Note how hard each block feels: if all four stay comfortably hard, your FTP is probably higher than the one you've set; if you can't finish the third, it's lower.</description>
     <sportType>bike</sportType>
     <tags>
-        <tag name="threshold"/>
-        <tag name="ftptest"/>
-        <tag name="703"/>
+        <tag name="threshold" />
+        <tag name="ftptest" />
+        <tag name="703" />
     </tags>
     <workout>
         <Warmup Duration="960" PowerLow="0.50" PowerHigh="0.75" Cadence="90">
-            <textevent timeoffset="10" message="75min: 16 warmup, 4x8min at 185W, 4min recoveries"/>
-            <textevent timeoffset="40" message="Did you eat? 40-60g carbs should be in. If not, drink mix now"/>
-            <textevent timeoffset="240" message="HIDE THE HR FIELD. Watts and RPE only today"/>
-            <textevent timeoffset="480" message="Legs from this morning's 6x1000 will feel heavy. That is expected"/>
-            <textevent timeoffset="660" message="Spin-up 1: 30s at 105rpm, same power"/>
-            <textevent timeoffset="760" message="Spin-up 2: 30s at 105rpm"/>
-            <textevent timeoffset="860" message="Spin-up 3: 30s at 105rpm, then settle. Block 1 next"/>
+            <textevent timeoffset="10" message="75 min: four 8-min blocks at FTP. Note how each one feels" />
         </Warmup>
-
         <SteadyState Duration="480" Power="1.00" Cadence="90">
-            <textevent timeoffset="10" message="Block 1 of 4: 8min at 185W. This should feel like RPE 6-7"/>
-            <textevent timeoffset="240" message="Halfway. Note the RPE now - you will compare it at block 4"/>
-            <textevent timeoffset="420" message="Last minute. Hold the watts, no fade"/>
+            <textevent timeoffset="0" message="Block 1 of 4: 8 min at 100% FTP" />
+            <textevent timeoffset="240" message="Halfway. Smooth and steady" />
+            <textevent timeoffset="420" message="Last minute. Hold it to the end" />
         </SteadyState>
         <SteadyState Duration="240" Power="0.55" Cadence="85">
-            <textevent timeoffset="10" message="4min easy. RPE for block 1? Remember the number"/>
-            <textevent timeoffset="150" message="Drink. Three to go"/>
+            <textevent timeoffset="0" message="4 min easy. Drink and refuel" />
         </SteadyState>
-
         <SteadyState Duration="480" Power="1.00" Cadence="90">
-            <textevent timeoffset="10" message="Block 2 of 4. Same 185W"/>
-            <textevent timeoffset="240" message="Halfway. Higher RPE than block 1? A little is normal"/>
-            <textevent timeoffset="420" message="Final minute of block 2"/>
+            <textevent timeoffset="0" message="Block 2 of 4: 8 min at 100% FTP" />
+            <textevent timeoffset="240" message="Halfway. Smooth and steady" />
+            <textevent timeoffset="420" message="Last minute. Hold it to the end" />
         </SteadyState>
         <SteadyState Duration="240" Power="0.55" Cadence="85">
-            <textevent timeoffset="10" message="4min easy. Eat something if the ride feels long"/>
+            <textevent timeoffset="0" message="4 min easy. Drink and refuel" />
         </SteadyState>
-
         <SteadyState Duration="480" Power="1.00" Cadence="90">
-            <textevent timeoffset="10" message="Block 3 of 4. This is where the test starts telling the truth"/>
-            <textevent timeoffset="240" message="Halfway. If this is RPE 6-7, your FTP is higher than 185"/>
-            <textevent timeoffset="420" message="One minute. Smooth"/>
+            <textevent timeoffset="0" message="Block 3 of 4: 8 min at 100% FTP" />
+            <textevent timeoffset="240" message="Halfway. Smooth and steady" />
+            <textevent timeoffset="420" message="Last minute. Hold it to the end" />
         </SteadyState>
         <SteadyState Duration="240" Power="0.55" Cadence="85">
-            <textevent timeoffset="10" message="Last recovery. One block left"/>
-            <textevent timeoffset="150" message="If block 3 was RPE 9+, it is fine to stop here. The data is already in"/>
+            <textevent timeoffset="0" message="4 min easy. Drink and refuel" />
         </SteadyState>
-
         <SteadyState Duration="480" Power="1.00" Cadence="90">
-            <textevent timeoffset="10" message="Block 4 of 4. The one that sets race power"/>
-            <textevent timeoffset="240" message="Halfway. Still 7/10? Then Santa Cruz race power moves up"/>
-            <textevent timeoffset="420" message="Final minute. Finish it"/>
+            <textevent timeoffset="0" message="Block 4 of 4: 8 min at 100% FTP" />
+            <textevent timeoffset="240" message="Halfway. Smooth and steady" />
+            <textevent timeoffset="420" message="Last minute. Hold it to the end" />
         </SteadyState>
-
         <SteadyState Duration="300" Power="0.70" Cadence="90">
-            <textevent timeoffset="10" message="5min Z2. Log the four RPE numbers before you forget them"/>
-        </SteadyState>
-
+            </SteadyState>
         <Cooldown Duration="600" PowerLow="0.62" PowerHigh="0.45" Cadence="85">
-            <textevent timeoffset="10" message="10min down"/>
-            <textevent timeoffset="300" message="75-90g carb + 30-40g protein within the hour"/>
-            <textevent timeoffset="540" message="Send me the four RPEs and the average watts you actually held"/>
+            <textevent timeoffset="0" message="Done. 10 min cooldown" />
         </Cooldown>
     </workout>
 </workout_file>

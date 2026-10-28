@@ -1,55 +1,49 @@
 <workout_file>
-    <author>Coach Claude</author>
-    <name>70.3 Race-Pace Endurance</name>
-    <description>Day-after-long-run aerobic ride with 3x18min at Santa Cruz race power (~156W). Set FTP to 190. Blocks should feel boring-sustainable, not hard - target HR 140-150, RPE 6/10, cadence 85-90 in aero. GUT CHECK: if legs are trashed from yesterday's run (HR-186 finish), skip the blocks entirely and ride the whole 2hr easy in Z2 (120-140W). Recovery aerobic volume still counts - the run is the priority this block.</description>
+    <author>Whorl</author>
+    <name>Race Pace Endurance 3x18</name>
+    <description>Two hours of endurance with three 18-minute blocks at race pace (82% FTP) and 11 minutes of easy zone 2 between them, then 14 minutes steady and a cooldown. Race pace should feel sustainable, not hard: if your breathing gets ragged, ease off.</description>
     <sportType>bike</sportType>
     <tags>
-        <tag name="raceeffort"/>
-        <tag name="endurance"/>
-        <tag name="70.3"/>
+        <tag name="raceeffort" />
+        <tag name="endurance" />
+        <tag name="70.3" />
     </tags>
     <workout>
         <Warmup Duration="900" PowerLow="0.50" PowerHigh="0.79">
-            <textevent timeoffset="10" message="2hr endurance: 3x18min at race power (~156W), Z2 between"/>
-            <textevent timeoffset="600" message="Gut check: legs trashed from yesterday? Bad = skip blocks, ride all easy"/>
-            <textevent timeoffset="810" message="Drop into aero for the last 90s"/>
+            <textevent timeoffset="10" message="2 hours: three 18-min blocks at race pace, zone 2 between" />
         </Warmup>
         <SteadyState Duration="300" Power="0.63">
-            <textevent timeoffset="10" message="5min settle. Easy spin, get comfortable, drink"/>
-        </SteadyState>
+            </SteadyState>
         <SteadyState Duration="1080" Power="0.82">
-            <textevent timeoffset="10" message="Block 1 of 3: 18min at 156W, aero. Should feel EASY-sustainable"/>
-            <textevent timeoffset="540" message="Halfway. HR should be 140-150, RPE 6. Higher = ease off, it's the heat/fatigue"/>
-            <textevent timeoffset="1020" message="Last minute, smooth and steady"/>
+            <textevent timeoffset="0" message="Block 1 of 3: 18 min at 82% FTP" />
+            <textevent timeoffset="540" message="Halfway. Smooth and steady" />
+            <textevent timeoffset="1020" message="Last minute. Hold it to the end" />
         </SteadyState>
         <SteadyState Duration="360" Power="0.60">
-            <textevent timeoffset="10" message="6min Z2 recovery. Spin easy, drink, fuel"/>
+            <textevent timeoffset="0" message="6 min easy. Drink and refuel" />
         </SteadyState>
         <SteadyState Duration="300" Power="0.65">
-            <textevent timeoffset="10" message="5min steady endurance, relaxed"/>
-        </SteadyState>
+            </SteadyState>
         <SteadyState Duration="1080" Power="0.82">
-            <textevent timeoffset="10" message="Block 2 of 3: same 156W, hold form in aero"/>
-            <textevent timeoffset="540" message="Halfway. Boring is the goal. This is your Santa Cruz wattage"/>
-            <textevent timeoffset="1020" message="Last minute, keep it locked in"/>
+            <textevent timeoffset="0" message="Block 2 of 3: 18 min at 82% FTP" />
+            <textevent timeoffset="540" message="Halfway. Smooth and steady" />
+            <textevent timeoffset="1020" message="Last minute. Hold it to the end" />
         </SteadyState>
         <SteadyState Duration="360" Power="0.60">
-            <textevent timeoffset="10" message="6min Z2 recovery. Keep drinking - fuel every block"/>
+            <textevent timeoffset="0" message="6 min easy. Drink and refuel" />
         </SteadyState>
         <SteadyState Duration="300" Power="0.65">
-            <textevent timeoffset="10" message="5min steady endurance"/>
-        </SteadyState>
+            </SteadyState>
         <SteadyState Duration="1080" Power="0.82">
-            <textevent timeoffset="10" message="Block 3 of 3: last one. 156W, strong and smooth"/>
-            <textevent timeoffset="540" message="Halfway. If RPE has crept past 7, sit up and finish easy - no ego"/>
-            <textevent timeoffset="1020" message="Work's nearly done. Hold to the end"/>
+            <textevent timeoffset="0" message="Block 3 of 3: 18 min at 82% FTP" />
+            <textevent timeoffset="540" message="Halfway. Smooth and steady" />
+            <textevent timeoffset="1020" message="Last minute. Hold it to the end" />
         </SteadyState>
         <SteadyState Duration="840" Power="0.63">
-            <textevent timeoffset="10" message="14min easy endurance. Conversational, spinny legs"/>
-            <textevent timeoffset="720" message="Almost there - keep it light"/>
+            <textevent timeoffset="0" message="14 min easy. Drink and refuel" />
         </SteadyState>
         <Cooldown Duration="600" PowerLow="0.58" PowerHigh="0.45">
-            <textevent timeoffset="10" message="10min spin down. Refuel after. Track is Wednesday"/>
+            <textevent timeoffset="0" message="Done. 10 min cooldown" />
         </Cooldown>
     </workout>
 </workout_file>

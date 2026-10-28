@@ -1,41 +1,39 @@
 <workout_file>
-    <author>Coach Claude</author>
-    <name>70.3 Race Effort 3x20</name>
-    <description>Santa Cruz 70.3 bike prep. Set FTP to 190 before starting. 3x20min at ~169W race effort in full aero position. Note HR and RPE for each block - this is your race-day pacing calibration. Fuel 70-90g carbs/hr. Followed by ~1:40 easy outside (HR 125-140) + 15-20min brick run.</description>
+    <author>Whorl</author>
+    <name>Aero Race Pace 3x20</name>
+    <description>Three 20-minute blocks at race pace (89% FTP) in your aero position, 6 minutes easy between. Note your heart rate and effort in each block: it's a good way to calibrate race-day pacing. Fuel 60–90 g of carbs an hour.</description>
     <sportType>bike</sportType>
     <tags>
-        <tag name="703"/>
-        <tag name="raceeffort"/>
+        <tag name="703" />
+        <tag name="raceeffort" />
     </tags>
     <workout>
         <Warmup Duration="900" PowerLow="0.52" PowerHigh="0.72">
-            <textevent timeoffset="10" message="90min: 15 warmup, then 3x20 at race effort (~169W)"/>
-            <textevent timeoffset="300" message="Start fueling now - 70-90g carbs/hr all ride"/>
-            <textevent timeoffset="780" message="Get into aero position for the last 2min of warmup"/>
+            <textevent timeoffset="10" message="90 min: three 20-min blocks at race pace, in aero" />
         </Warmup>
         <SteadyState Duration="1200" Power="0.89">
-            <textevent timeoffset="10" message="Block 1 of 3: 20min at 169W. Full aero, hold the position"/>
-            <textevent timeoffset="600" message="Halfway. Check: HR? RPE? Remember these numbers"/>
-            <textevent timeoffset="1140" message="Last minute. Smooth, no surge at the end"/>
+            <textevent timeoffset="0" message="Block 1 of 3: 20 min at 89% FTP in aero" />
+            <textevent timeoffset="600" message="Halfway. Stay down in the bars" />
+            <textevent timeoffset="1140" message="Last minute. Hold it to the end" />
         </SteadyState>
         <SteadyState Duration="360" Power="0.65">
-            <textevent timeoffset="10" message="6min easy. Sit up, drink, eat"/>
+            <textevent timeoffset="0" message="6 min easy. Drink and refuel" />
         </SteadyState>
         <SteadyState Duration="1200" Power="0.89">
-            <textevent timeoffset="10" message="Block 2 of 3: back to aero for 20min"/>
-            <textevent timeoffset="600" message="Halfway. HR vs block 1? A few beats higher is normal"/>
-            <textevent timeoffset="1140" message="1min left. Steady to the line"/>
+            <textevent timeoffset="0" message="Block 2 of 3: 20 min at 89% FTP in aero" />
+            <textevent timeoffset="600" message="Halfway. Stay down in the bars" />
+            <textevent timeoffset="1140" message="Last minute. Hold it to the end" />
         </SteadyState>
         <SteadyState Duration="360" Power="0.65">
-            <textevent timeoffset="10" message="6min easy. Fuel again now"/>
+            <textevent timeoffset="0" message="6 min easy. Drink and refuel" />
         </SteadyState>
         <SteadyState Duration="1200" Power="0.89">
-            <textevent timeoffset="10" message="Block 3 of 3: this is the one that counts. Aero"/>
-            <textevent timeoffset="600" message="Halfway. If RPE is over 7/10 here, race watts are lower - good data"/>
-            <textevent timeoffset="1140" message="Final minute. Done after this"/>
+            <textevent timeoffset="0" message="Block 3 of 3: 20 min at 89% FTP in aero" />
+            <textevent timeoffset="600" message="Halfway. Stay down in the bars" />
+            <textevent timeoffset="1140" message="Last minute. Hold it to the end" />
         </SteadyState>
         <Cooldown Duration="180" PowerLow="0.60" PowerHigh="0.50">
-            <textevent timeoffset="10" message="3min spin. Quick swap outside - keep it under 15min"/>
+            <textevent timeoffset="0" message="Done. 3 min cooldown" />
         </Cooldown>
     </workout>
 </workout_file>

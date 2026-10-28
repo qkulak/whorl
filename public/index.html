@@ -74,7 +74,12 @@
   .brand h1 { margin: 0; line-height: 0; }
   .brand h1 img { height: 40px; width: auto; }
   .brand span { color: var(--muted); }
-  .account { margin-left: auto; display: flex; align-items: center; gap: 8px; align-self: center; flex-wrap: wrap; }
+  .top-actions { margin-left: auto; display: flex; align-items: center; gap: 8px; align-self: center; flex-wrap: wrap; }
+  .account { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .set-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 12px 0; border-top: 1px solid var(--line); cursor: default; }
+  .set-row b { display: block; font-size: 16px; }
+  .set-row small { display: block; color: var(--muted); font-size: 13px; margin-top: 2px; }
+  label.set-row { cursor: pointer; }
   .account .who { color: var(--muted); font-size: 14px; margin-right: 4px; }
   .account a.btn { text-decoration: none; color: var(--text); }
 
@@ -459,6 +464,8 @@
   }
   .overlay.show { display: grid; }
   #rPaused { background: color-mix(in srgb, var(--forest) 90%, transparent); }
+  #rDone { background: color-mix(in srgb, var(--forest) 90%, transparent); }
+  #rDone .box { background: var(--forest); border-color: var(--line-2); }
   .overlay.with-menu { padding-right: min(360px, 90vw); } /* keep the pause box clear of the ride menu */
   @media (max-width: 760px) { .overlay.with-menu .box { display: none; } } /* menu has its own resume */
   .overlay .box { text-align: center; }
@@ -512,10 +519,13 @@
 <section id="home" class="view active">
   <div class="brand">
     <h1><img src="/brand/whorl-logo-cream.png" alt="whorl"></h1>
-    <div class="account" id="account" hidden>
-      <span class="who" id="acctEmail"></span>
-      <a class="btn small ghost" href="/logout">Sign out</a>
-      <button class="btn small ghost danger" id="acctDelete" hidden>Delete account</button>
+    <div class="top-actions">
+      <button class="btn small ghost" id="btnSettings">Settings</button>
+      <div class="account" id="account" hidden>
+        <span class="who" id="acctEmail"></span>
+        <a class="btn small ghost" href="/logout">Sign out</a>
+        <button class="btn small ghost danger" id="acctDelete" hidden>Delete account</button>
+      </div>
     </div>
   </div>
 
@@ -541,13 +551,6 @@
       <div class="ftp-row">
         <input type="number" id="ftp" min="50" max="600" step="1">
         <span class="conn-sub">watts — every target is a % of this</span>
-      </div>
-    </div>
-    <div class="card">
-      <h3>Mode</h3>
-      <div style="display:flex; flex-direction:column; gap:8px">
-        <label class="toggle"><input type="checkbox" id="setBeep" checked><i></i> Interval beeps</label>
-        <button class="btn small ghost" id="btnSim" style="align-self:flex-start">Simulate trainer</button>
       </div>
     </div>
   </div>
@@ -625,6 +628,23 @@
     </div>
   </div>
 
+  <div class="modal" id="settings">
+    <div class="modal-box narrow">
+      <div class="modal-head">
+        <h2>Settings</h2>
+        <button class="icon-btn" id="setClose">✕</button>
+      </div>
+      <label class="set-row">
+        <span><b>Interval beeps</b><small>Countdown beeps before each change of target or cadence</small></span>
+        <span class="toggle"><input type="checkbox" id="setBeep" checked><i></i></span>
+      </label>
+      <div class="set-row">
+        <span><b>Simulate trainer</b><small>Try a ride without any hardware</small></span>
+        <button class="btn small" id="btnSim">Simulate</button>
+      </div>
+    </div>
+  </div>
+
   <div class="modal" id="delAcct">
     <div class="modal-box narrow">
       <div class="modal-head">
@@ -684,7 +704,6 @@
       </div>
       <div class="modal-foot">
         <button class="btn ghost danger" id="dDelete">Delete</button>
-        <button class="btn" id="dDownload">Download .zwo</button>
         <button class="btn" id="dEdit">Copy &amp; edit</button>
         <button class="btn primary echo" id="dRide">
           <svg viewBox="32 26 48 48" aria-hidden="true"><path transform="rotate(25 56 50)" d="M50 50A6 6 0 0 1 62 50A12 12 0 0 1 38 50A18 18 0 0 1 74 50" fill="none" stroke="currentColor" stroke-width="6.5" stroke-linecap="round"/></svg>
