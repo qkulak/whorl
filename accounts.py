@@ -135,7 +135,7 @@ def handle_trigger(event):
     """Cognito pre sign-up trigger: only riders with the invite code get an account.
     Accounts you add yourself (AdminCreateUser) don't need one."""
     if event.get("triggerSource") == "PreSignUp_SignUp":
-        expected = _norm(os.environ.get("QUINVY_INVITE_CODE"))
+        expected = _norm(os.environ.get("WHORL_INVITE_CODE"))
         given = _norm((event.get("request", {}).get("clientMetadata") or {}).get("inviteCode"))
         if not expected or not hmac.compare_digest(given, expected):
             raise Exception("That invite code isn't right.")

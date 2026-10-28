@@ -1,8 +1,8 @@
-"""Where Quinvy keeps the files riders change: their workouts, uploads,
+"""Where Whorl keeps the files riders change: their workouts, uploads,
 favorites and saved rides.
 
 Keys are slash-separated paths such as "workouts/z2-lifts.zwo". Locally they
-are files under the project folder; on Lambda (QUINVY_BUCKET set) they are
+are files under the project folder; on Lambda (WHORL_BUCKET set) they are
 objects in that S3 bucket. The bundled presets never change, so they are read
 straight from disk in both cases and don't go through here.
 """
@@ -108,5 +108,5 @@ class S3Store:
 
 
 def open_store(root):
-    bucket = os.environ.get("QUINVY_BUCKET")
+    bucket = os.environ.get("WHORL_BUCKET")
     return S3Store(bucket) if bucket else LocalStore(root)

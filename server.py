@@ -1,16 +1,16 @@
-"""Quinvy — workout library API + static file server. Zero dependencies — python3 server.py
+"""Whorl — workout library API + static file server. Zero dependencies — python3 server.py
 
 The same Handler also runs on AWS Lambda (see lambda_function.py), where the
 files riders change live in S3 instead of the project folder (see storage.py).
 
 Who can get in, in order of precedence:
-  accounts  QUINVY_COGNITO_POOL + QUINVY_COGNITO_CLIENT set: riders sign in with
+  accounts  WHORL_COGNITO_POOL + WHORL_COGNITO_CLIENT set: riders sign in with
             email and password (accounts.py), and each one's workouts, uploads,
             favorites and rides are private, under users/<id>/ in the store.
-  password  QUINVY_PASSWORD or beta-password.txt: one shared password, one
+  password  WHORL_PASSWORD or beta-password.txt: one shared password, one
             shared library.
   open      neither: anyone who can reach the server, one shared library.
-            Never on AWS (QUINVY_BUCKET set): there it's "closed" instead, and
+            Never on AWS (WHORL_BUCKET set): there it's "closed" instead, and
             every request gets a 503 until sign-in is configured.
 """
 import base64
@@ -39,15 +39,15 @@ RIDES = "rides/"
 RIDE_INDEX = "ride-index.json"  # each ride's summary, so History doesn't read every full ride
 FAVORITES = "favorites.json"
 PORT = 8010
-# 0.0.0.0 accepts connections from other machines; QUINVY_HOST=127.0.0.1 keeps it local.
-HOST = os.environ.get("QUINVY_HOST", "0.0.0.0")
+# 0.0.0.0 accepts connections from other machines; WHORL_HOST=127.0.0.1 keeps it local.
+HOST = os.environ.get("WHORL_HOST", "0.0.0.0")
 
 PASSWORD_FILE = os.path.join(ROOT, "beta-password.txt")
 
 
 def load_password():
-    if os.environ.get("QUINVY_PASSWORD"):
-        return os.environ["QUINVY_PASSWORD"]
+    if os.environ.get("WHORL_PASSWORD"):
+        return os.environ["WHORL_PASSWORD"]
     try:
         with open(PASSWORD_FILE, encoding="utf-8") as f:
             return f.read().strip() or None
@@ -56,20 +56,20 @@ def load_password():
 
 
 ACCOUNTS = None
-if os.environ.get("QUINVY_COGNITO_POOL") and os.environ.get("QUINVY_COGNITO_CLIENT"):
-    ACCOUNTS = Accounts(os.environ["QUINVY_COGNITO_POOL"], os.environ["QUINVY_COGNITO_CLIENT"])
+if os.environ.get("WHORL_COGNITO_POOL") and os.environ.get("WHORL_COGNITO_CLIENT"):
+    ACCOUNTS = Accounts(os.environ["WHORL_COGNITO_POOL"], os.environ["WHORL_COGNITO_CLIENT"])
     MODE = "accounts"
     PASSWORD = None
-    SESSION_KEY = os.environ.get("QUINVY_SESSION_SECRET", "").encode()
+    SESSION_KEY = os.environ.get("WHORL_SESSION_SECRET", "").encode()
     if len(SESSION_KEY) < 32:
-        raise SystemExit("QUINVY_SESSION_SECRET must be set (32+ characters) when accounts are on")
+        raise SystemExit("WHORL_SESSION_SECRET must be set (32+ characters) when accounts are on")
 else:
     PASSWORD = load_password()
-    MODE = "password" if PASSWORD else "closed" if os.environ.get("QUINVY_BUCKET") else "open"
+    MODE = "password" if PASSWORD else "closed" if os.environ.get("WHORL_BUCKET") else "open"
     # Signed with the password, so changing the password signs everyone out.
     SESSION_KEY = (PASSWORD or "").encode()
 
-SESSION_COOKIE = "quinvy_session"
+SESSION_COOKIE = "whorl_session"
 SESSION_DAYS = 30
 PAGES = {"password": "login.html", "accounts": "signin.html"}
 PUBLIC_FILES = {"/brand/whorl-logo-cream.png", "/brand/whorl-app-icon.png"}  # served before sign-in
@@ -273,7 +273,7 @@ class Handler(SimpleHTTPRequestHandler):
         route = self._route()
         self.user, self.space = {}, ""
         if MODE == "closed":
-            self._json(503, {"error": "Quinvy is being set up. Try again in a minute."})
+            self._json(503, {"error": "Whorl is being set up. Try again in a minute."})
             return True
         if MODE == "open":
             if route in ("/login", "/logout"):
@@ -478,7 +478,7 @@ class Handler(SimpleHTTPRequestHandler):
 
 
 if __name__ == "__main__":
-    print(f"Quinvy — http://localhost:{PORT}" + (" (also reachable from other machines)" if HOST == "0.0.0.0" else ""))
+    print(f"Whorl — http://localhost:{PORT}" + (" (also reachable from other machines)" if HOST == "0.0.0.0" else ""))
     where = f"s3://{STORE.bucket}/" if hasattr(STORE, "bucket") else ROOT + "/"
     print(f"Workouts → {where}{'users/<id>/' if MODE == 'accounts' else ''}{WORKOUTS}")
     print(f"Presets  → {PRESET_DIR}/")
@@ -486,7 +486,7 @@ if __name__ == "__main__":
         {
             "accounts": "Sign-in → accounts (Cognito)",
             "password": "Sign-in → shared beta password",
-            "open": "Sign-in → off (set QUINVY_PASSWORD or beta-password.txt to require a password)",
+            "open": "Sign-in → off (set WHORL_PASSWORD or beta-password.txt to require a password)",
         }[MODE]
     )
     HTTPServer((HOST, PORT), Handler).serve_forever()

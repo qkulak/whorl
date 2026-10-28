@@ -1,4 +1,4 @@
-# Quinvy
+# Whorl
 
 A local web app for building `.zwo` workouts and riding them on a smart trainer in ERG mode, with a scrolling workout chart. The chart shows the targets you've ridden and the ones still to come, with your actual power traced over them.
 
@@ -21,7 +21,7 @@ Open http://localhost:8010 in **Chrome or Edge** (Web Bluetooth isn't in Safari/
 
 ### Beta password (local)
 
-To put a local server behind one shared password (handy on your home network), put it in `beta-password.txt` next to `server.py` (git ignores that file), or start the server with `QUINVY_PASSWORD='your-password' python3 server.py`. The environment variable wins if both are set. Visitors see "Enter password for beta access", a correct password keeps them signed in for 30 days, and changing the password signs everyone out. With neither set, the app is open. The hosted app uses accounts instead (below).
+To put a local server behind one shared password (handy on your home network), put it in `beta-password.txt` next to `server.py` (git ignores that file), or start the server with `WHORL_PASSWORD='your-password' python3 server.py`. The environment variable wins if both are set. Visitors see "Enter password for beta access", a correct password keeps them signed in for 30 days, and changing the password signs everyone out. With neither set, the app is open. The hosted app uses accounts instead (below).
 
 ## Deploy (AWS)
 
@@ -31,7 +31,7 @@ To put a local server behind one shared password (handy on your home network), p
 
 This runs the app on AWS Lambda behind a public HTTPS Function URL. The same `server.py` code handles requests there through `lambda_function.py`, and the bundled presets ship inside the function.
 
-**Accounts.** Riders sign up with email and password. Accounts live in an Amazon Cognito user pool (`quinvy`, Lite tier: free up to 10,000 monthly active users). Signing up needs the **invite code**, from `invite-code.txt` (git-ignored) or `QUINVY_INVITE_CODE`; deploying without one is refused. Cognito's pre sign-up trigger checks the code, so it can't be skipped by calling Cognito directly. To change the code, edit the file and re-run `./deploy.sh`; existing accounts aren't affected. Cognito emails a code to confirm each new address, and the same flow handles "Forgot password?". Its built-in email sender allows about 50 emails a day, which is enough for a beta. `accounts.py` makes those calls over plain HTTPS, with no AWS SDK.
+**Accounts.** Riders sign up with email and password. Accounts live in an Amazon Cognito user pool (`quinvy`, named before the app became Whorl; Lite tier: free up to 10,000 monthly active users). Signing up needs the **invite code**, from `invite-code.txt` (git-ignored) or `WHORL_INVITE_CODE`; deploying without one is refused. Cognito's pre sign-up trigger checks the code, so it can't be skipped by calling Cognito directly. To change the code, edit the file and re-run `./deploy.sh`; existing accounts aren't affected. Cognito emails a code to confirm each new address, and the same flow handles "Forgot password?". Its built-in email sender allows about 50 emails a day, which is enough for a beta. `accounts.py` makes those calls over plain HTTPS, with no AWS SDK.
 
 **Private data.** Each rider's workouts, uploads, favorites and saved rides are stored only for them, in a private, versioned S3 bucket (`quinvy-data-<account-id>`) under `users/<their id>/`. Deleted or overwritten files can be restored for 30 days. The presets are shared and read-only. **Delete account** in the app header asks for the password again, then removes the account and all of its data.
 
@@ -41,7 +41,7 @@ This runs the app on AWS Lambda behind a public HTTPS Function URL. The same `se
 - the function and its URL
 - the user pool and its app client
 
-Later runs only push new code and settings. They keep the session secret, so nobody gets signed out, and they never touch riders' data. It uses the `quin` AWS profile and `us-east-1` unless `AWS_PROFILE` / `AWS_REGION` say otherwise. Creating the public URL needs AWS CLI support for `--invoked-via-function-url`; the script says so if yours is too old. On AWS the server refuses to run without sign-in configured: it answers 503 rather than opening up. `storage.py` switches between the local folders and S3, based on whether `QUINVY_BUCKET` is set.
+Later runs only push new code and settings. They keep the session secret, so nobody gets signed out, and they never touch riders' data. It uses the `quin` AWS profile and `us-east-1` unless `AWS_PROFILE` / `AWS_REGION` say otherwise. Creating the public URL needs AWS CLI support for `--invoked-via-function-url`; the script says so if yours is too old. On AWS the server refuses to run without sign-in configured: it answers 503 rather than opening up. `storage.py` switches between the local folders and S3, based on whether `WHORL_BUCKET` is set.
 
 ## Ride
 
@@ -78,7 +78,7 @@ Finished rides can be saved to `rides/` as JSON (per-second power, HR, cadence, 
 
 | Collection | Folder | What it is |
 |---|---|---|
-| Originals | `presets/originals/` | Workouts built for Quinvy: Z2 Steady Hour, Z2 Steady Build, Z2 Lifts, Z2 Add-On, Sweet Spot Progression 3x13 and Threshold Build 3x15. |
+| Originals | `presets/originals/` | Workouts built for Whorl: Z2 Steady Hour, Z2 Steady Build, Z2 Lifts, Z2 Add-On, Sweet Spot Progression 3x13 and Threshold Build 3x15. |
 | Featured | `presets/featured/` | 15 named workouts across every intensity, from Rolling Country to Spark Plugs. Each is built to a fixed duration and min/max/average % FTP. |
 | Classics | `presets/classics/` | Standard protocols (2×20 sweet spot, Rønnestad 30/15s, 5×4 VO2…) plus the original samples. |
 | Z2 Endurance | `presets/endurance/` | Five original zone 2 rides from 1:15 to 2:00 (cadence builder, floats, ladder, waves, long steady). The generator asserts that every main-set target stays in Z2 (56–75% FTP). |
@@ -102,4 +102,4 @@ Use **+ New workout** on Browse, or **Copy & edit** on any preset (the preset it
 
 - A trainer only allows one controlling connection. If it doesn't show up in the picker, close Zwift or anything else connected to it.
 - Text events (`<textevent>`) in a `.zwo` show up as on-screen messages at their time offsets.
-- The server accepts connections from other machines (it binds to 0.0.0.0). Set `QUINVY_HOST=127.0.0.1` to keep it on this computer only. It speaks plain HTTP, so put it behind HTTPS before it's on the internet: Web Bluetooth needs HTTPS, and so does sending the beta password safely.
+- The server accepts connections from other machines (it binds to 0.0.0.0). Set `WHORL_HOST=127.0.0.1` to keep it on this computer only. It speaks plain HTTP, so put it behind HTTPS before it's on the internet: Web Bluetooth needs HTTPS, and so does sending the beta password safely.

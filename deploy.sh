@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Deploy Quinvy to AWS: the app runs on Lambda behind a public Function URL,
+# Deploy Whorl to AWS: the app runs on Lambda behind a public Function URL,
 # riders sign in with accounts kept in a Cognito user pool, and each rider's
 # workouts, uploads, favorites and rides live in S3 under users/<id>/.
 #
@@ -7,7 +7,7 @@
 #
 # Safe to re-run: the first run creates everything, later runs push new code.
 # AWS_PROFILE defaults to "quin" and AWS_REGION to us-east-1. The invite code
-# new riders need to sign up comes from QUINVY_INVITE_CODE or invite-code.txt,
+# new riders need to sign up comes from WHORL_INVITE_CODE or invite-code.txt,
 # and is required; change it and re-run to change it on the live site.
 set -euo pipefail
 cd "$(dirname "$0")"
@@ -15,15 +15,18 @@ cd "$(dirname "$0")"
 export AWS_PROFILE="${AWS_PROFILE:-quin}"
 export AWS_REGION="${AWS_REGION:-us-east-1}"
 export AWS_PAGER=""
+# The AWS resources keep the names they were created with (the app was called
+# Quinvy then). Renaming them here would make this script create new, empty
+# ones: a new URL, a new bucket without riders' data, a pool without accounts.
 FUNCTION=quinvy
 ROLE=quinvy-lambda
 POOL_NAME=quinvy
 CLIENT_NAME=quinvy-web
 
-INVITE_CODE="${QUINVY_INVITE_CODE:-$(cat invite-code.txt 2>/dev/null || true)}"
+INVITE_CODE="${WHORL_INVITE_CODE:-$(cat invite-code.txt 2>/dev/null || true)}"
 INVITE_CODE="$(printf %s "$INVITE_CODE" | tr -d '\r\n')"
 if [ -z "$INVITE_CODE" ]; then
-  echo "No invite code: put one in invite-code.txt or set QUINVY_INVITE_CODE." >&2
+  echo "No invite code: put one in invite-code.txt or set WHORL_INVITE_CODE." >&2
   exit 1
 fi
 
@@ -77,13 +80,13 @@ done
 # Sessions are signed with this secret. Keep the live one so a deploy doesn't
 # sign everyone out; make one on the first deploy.
 SESSION_SECRET=$(aws lambda get-function-configuration --function-name "$FUNCTION" \
-  --query Environment.Variables.QUINVY_SESSION_SECRET --output text 2>/dev/null || true)
+  --query Environment.Variables.WHORL_SESSION_SECRET --output text 2>/dev/null || true)
 if [ -z "$SESSION_SECRET" ] || [ "$SESSION_SECRET" = None ]; then
   SESSION_SECRET=$(python3 -c 'import secrets; print(secrets.token_hex(32))')
 fi
 write_env() { # pool id, client id (empty until the pool exists)
-  python3 -c 'import json, sys; b, s, i, p, c = sys.argv[1:]; v = {"QUINVY_BUCKET": b, "QUINVY_SESSION_SECRET": s, "QUINVY_INVITE_CODE": i}
-if p and c: v.update(QUINVY_COGNITO_POOL=p, QUINVY_COGNITO_CLIENT=c)
+  python3 -c 'import json, sys; b, s, i, p, c = sys.argv[1:]; v = {"WHORL_BUCKET": b, "WHORL_SESSION_SECRET": s, "WHORL_INVITE_CODE": i}
+if p and c: v.update(WHORL_COGNITO_POOL=p, WHORL_COGNITO_CLIENT=c)
 print(json.dumps({"Variables": v}))' "$BUCKET" "$SESSION_SECRET" "$INVITE_CODE" "$1" "$2" >"$BUILD/env.json"
 }
 POOL_ID=$(aws cognito-idp list-user-pools --max-results 60 --query "UserPools[?Name=='$POOL_NAME'].Id | [0]" --output text)
@@ -129,7 +132,7 @@ if [ -z "$POOL_ID" ]; then
     --policies 'PasswordPolicy={MinimumLength=8,RequireUppercase=false,RequireLowercase=false,RequireNumbers=false,RequireSymbols=false}' \
     --account-recovery-setting 'RecoveryMechanisms=[{Priority=1,Name=verified_email}]' \
     --admin-create-user-config AllowAdminCreateUserOnly=false \
-    --verification-message-template '{"DefaultEmailOption":"CONFIRM_WITH_CODE","EmailSubject":"Your Quinvy code","EmailMessage":"Your Quinvy code is {####}"}' \
+    --verification-message-template '{"DefaultEmailOption":"CONFIRM_WITH_CODE","EmailSubject":"Your Whorl code","EmailMessage":"Your Whorl code is {####}"}' \
     --lambda-config "PreSignUp=$FUNCTION_ARN" \
     --user-pool-tier LITE --deletion-protection ACTIVE \
     --query UserPool.Id --output text)
@@ -174,4 +177,4 @@ if ! grep -q '"public-function-url-invoke"' <<<"$POLICY"; then
 fi
 
 echo
-echo "Quinvy is live: $URL"
+echo "Whorl is live: $URL"

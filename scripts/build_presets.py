@@ -535,7 +535,7 @@ def check_z2(name, blocks):
 
 def main():
     global AUTHOR
-    AUTHOR = "Quinvy"
+    AUTHOR = "Whorl"
 
     os.makedirs(os.path.join(OUT, "featured"), exist_ok=True)
     for name, target, purpose, blocks in FEATURED:

@@ -2,7 +2,7 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "quinvy",
+      "name": "whorl",
       "runtimeExecutable": "python3",
       "runtimeArgs": ["/Users/quintonkulak/Documents/GitHub/quinvy/server.py"],
       "port": 8010

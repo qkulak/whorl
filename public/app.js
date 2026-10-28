@@ -1,4 +1,4 @@
-// QUINVY — library, builder, and the ride screen.
+// WHORL — library, builder, and the ride screen.
 
 import {
   BLOCK_TYPES,
@@ -34,10 +34,22 @@ const STALE_MS = 3000; // a reading older than this counts as "no data"
 const AUTO_PAUSE_S = 3;
 const TICK_MS = 250;
 
+// The app was called Quinvy: carry each saved setting (FTP, ERG, beeps, last tab…)
+// over to its whorl.* key once, so nobody's preferences reset with the rename.
+try {
+  for (const old of Object.keys(localStorage).filter((k) => k.startsWith("quinvy."))) {
+    const k = `whorl.${old.slice("quinvy.".length)}`;
+    if (localStorage.getItem(k) === null) localStorage.setItem(k, localStorage.getItem(old));
+    localStorage.removeItem(old);
+  }
+} catch {
+  /* storage unavailable — nothing to carry over */
+}
+
 const store = {
   get(k, d) {
     try {
-      const v = localStorage.getItem(`quinvy.${k}`);
+      const v = localStorage.getItem(`whorl.${k}`);
       return v === null ? d : JSON.parse(v);
     } catch {
       return d;
@@ -45,7 +57,7 @@ const store = {
   },
   set(k, v) {
     try {
-      localStorage.setItem(`quinvy.${k}`, JSON.stringify(v));
+      localStorage.setItem(`whorl.${k}`, JSON.stringify(v));
     } catch {
       /* private mode — prefs just won't stick */
     }
