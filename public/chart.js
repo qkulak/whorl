@@ -43,18 +43,19 @@ export function peakFraction(timeline) {
  *   labels     draw target labels + time axis
  *   selected   block index to highlight (builder)
  *   hover      segment index to outline (details tooltip)
+ *   small      smaller target labels (the ride screen's full-workout strip)
  *
  * Returns the geometry so callers can hit-test the pointer against bars.
  */
 export function drawWorkout(canvas, opts) {
   const { ctx, width, height } = fitCanvas(canvas);
-  const { timeline, ftp, labels = false, samples = [], selected = null, hover = null } = opts;
+  const { timeline, ftp, labels = false, small = false, samples = [], selected = null, hover = null } = opts;
   const t0 = opts.t0 ?? 0;
   const t1 = opts.t1 ?? Math.max(1, timeline.duration);
   const pos = opts.position ?? null;
 
   ctx.clearRect(0, 0, width, height);
-  const pad = labels ? { l: 0, r: 0, t: 52, b: 22 } : { l: 0, r: 0, t: 3, b: 0 };
+  const pad = labels ? { l: 0, r: 0, t: small ? 40 : 52, b: 22 } : { l: 0, r: 0, t: 3, b: 0 };
   const W = width - pad.l - pad.r;
   const H = height - pad.t - pad.b;
   const base = pad.t + H;
@@ -169,8 +170,8 @@ export function drawWorkout(canvas, opts) {
   // Target watts and duration over upcoming segments that have room for them.
   if (labels) {
     ctx.textAlign = "center";
-    const wattFont = '700 22px "Barlow Condensed", "Arial Narrow", system-ui, sans-serif';
-    const durFont = "600 15px Barlow, system-ui, sans-serif";
+    const wattFont = `700 ${small ? 16 : 22}px "Barlow Condensed", "Arial Narrow", system-ui, sans-serif`;
+    const durFont = `600 ${small ? 12 : 15}px Barlow, system-ui, sans-serif`;
     for (const s of timeline.segments) {
       const xa = Math.max(x(s.start), cut, pad.l);
       const xb = Math.min(x(s.start + s.duration), pad.l + W);
@@ -191,7 +192,7 @@ export function drawWorkout(canvas, opts) {
       ctx.fillText(dur, cx, top - 6);
       ctx.font = wattFont;
       ctx.fillStyle = "#efe9e2";
-      ctx.fillText(watts, cx, top - 25);
+      ctx.fillText(watts, cx, top - (small ? 19 : 25));
     }
   }
 

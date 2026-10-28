@@ -100,9 +100,7 @@ $("dFtpVal").addEventListener("input", () => {
 $("dFtpDown").addEventListener("click", () => setFtp(homeFtp() - FTP_STEP));
 $("dFtpUp").addEventListener("click", () => setFtp(homeFtp() + FTP_STEP));
 
-$("setErg").checked = store.get("erg", true);
 $("setBeep").checked = store.get("beep", true);
-$("setErg").addEventListener("change", (e) => store.set("erg", e.target.checked));
 $("setBeep").addEventListener("change", (e) => store.set("beep", e.target.checked));
 
 // ======================================================================
@@ -236,7 +234,6 @@ const UNTAGGED = new Set(["featured", "plan"]);
 const collectionBadge = (c) => (UNTAGGED.has(c) ? "" : `<span class="badge">${collectionLabel(c)}</span>`);
 
 let library = []; // { key, id, collection, workout, timeline, stats, category }
-let selectedKey = store.get("selectedKey", null);
 const browse = { collection: "all", category: "all", durMin: 0, durMax: null, q: "" };
 let favorites = new Set(); // library keys, kept in favorites.json by the server
 let rides = null; // History: ride summaries from the server, newest first; null until loaded
@@ -278,7 +275,6 @@ async function loadLibrary() {
     }
   }
   library.sort((a, b) => a.workout.name.localeCompare(b.workout.name));
-  if (!library.some((w) => w.key === selectedKey)) selectedKey = null;
   renderBrowseFilters();
   renderHome();
 }
@@ -308,7 +304,6 @@ function renderHome() {
   } else if (homeTab === "favorites") {
     renderCards($("favGrid"), favs, "No favorites yet. Tap ☆ on a workout in Browse to add it here.");
   }
-  updateStartBar();
 }
 
 // ---- browse filters ----
@@ -473,7 +468,7 @@ function renderCards(el, items, emptyText) {
   if (!items.length) el.firstChild.textContent = emptyText;
   for (const item of items) {
     const card = document.createElement("div");
-    card.className = "wo" + (item.key === selectedKey ? " sel" : "");
+    card.className = "wo";
     card.dataset.key = item.key;
     const s = item.stats;
     const isMine = item.collection === "mine";
@@ -499,7 +494,6 @@ function renderCards(el, items, emptyText) {
     card.addEventListener("click", (e) => {
       const act = e.target.closest("[data-act]")?.dataset.act;
       if (act) return cardAction(item, act);
-      selectWorkout(item.key);
       openDetails(item);
     });
     el.appendChild(card);
@@ -513,9 +507,8 @@ function cardAction(item, act) {
   if (act === "download") return downloadZwo(item.workout);
   if (act === "delete") return deleteWorkout(item);
   if (act === "ride") {
-    selectWorkout(item.key);
     closeDetails();
-    return startRide();
+    return startRide(item);
   }
 }
 
@@ -551,23 +544,6 @@ function drawLibraryCharts() {
     const item = library.find((w) => w.key === card.dataset.key);
     if (item) drawWorkout(card.querySelector("canvas"), { timeline: item.timeline, ftp: homeFtp() });
   });
-}
-
-function selectWorkout(key) {
-  selectedKey = key;
-  store.set("selectedKey", key);
-  document.querySelectorAll(".home-grid .wo").forEach((c) => c.classList.toggle("sel", c.dataset.key === key));
-  updateStartBar();
-}
-
-function selectedItem() {
-  return library.find((w) => w.key === selectedKey) || null;
-}
-
-function updateStartBar() {
-  const item = selectedItem();
-  $("selName").textContent = item ? `${item.workout.name} · ${fmtTime(item.stats.duration)}` : "Pick a workout";
-  $("btnStart").disabled = !item;
 }
 
 // ---- details modal ----
@@ -738,7 +714,6 @@ function downloadZwo(workout) {
 // Uploads land in Browse's Uploaded collection (presets/uploaded/).
 async function uploadFiles(files) {
   let ok = 0;
-  let lastKey = null;
   const failed = [];
   for (const file of files) {
     const xml = await file.text();
@@ -751,7 +726,6 @@ async function uploadFiles(files) {
       });
       const out = await res.json();
       if (!out.ok) throw new Error(out.error);
-      lastKey = `uploaded:${out.id}`;
       ok++;
     } catch (e) {
       failed.push(`${file.name}: ${e.message}`);
@@ -763,7 +737,6 @@ async function uploadFiles(files) {
   browse.category = "all";
   await loadLibrary();
   setHomeTab("browse");
-  if (ok === 1) selectWorkout(lastKey);
 }
 
 $("uploadFile").addEventListener("change", (e) => {
@@ -784,7 +757,6 @@ $("home").addEventListener("drop", (e) => {
 });
 
 $("btnNew").addEventListener("click", () => openBuilder(null));
-$("btnStart").addEventListener("click", startRide);
 setHomeTab(homeTab);
 
 // ======================================================================
@@ -988,7 +960,6 @@ $("bSave").addEventListener("click", async () => {
   browse.collection = "mine";
   browse.category = "all";
   await loadLibrary();
-  selectWorkout(`mine:${out.id}`);
   setHomeTab("browse");
   show("home");
 });
@@ -1035,8 +1006,7 @@ document.addEventListener("visibilitychange", () => {
   if (ride && document.visibilityState === "visible") keepAwake();
 });
 
-function startRide() {
-  const item = selectedItem();
+function startRide(item) {
   if (!item) return;
   if (!trainer.device && !trainer.simulated) {
     if (!confirm("No trainer connected. Start anyway? (Use \"Simulate trainer\" to try it without hardware.)")) return;
@@ -1048,7 +1018,6 @@ function startRide() {
     item,
     timeline: item.timeline,
     ftp: homeFtp(),
-    erg: $("setErg").checked,
     beep: $("setBeep").checked,
     pos: 0,
     running: false,
@@ -1066,7 +1035,6 @@ function startRide() {
     log: [], // every riding second, for the summary
     startedAt: new Date().toISOString(),
   };
-  $("rErgToggle").checked = ride.erg;
   $("rBeepToggle").checked = ride.beep;
   $("rWoName").textContent = item.workout.name;
   $("rStripTotal").textContent = fmtTime(ride.timeline.duration);
@@ -1287,7 +1255,8 @@ function announceCadence(prev, seg) {
 
 function driveTrainer() {
   const target = currentTargetW();
-  if (!ride.erg || target === null) {
+  // Workouts always run in ERG; only free-ride blocks hand the resistance back.
+  if (target === null) {
     if (ride.trainerMode !== "free") {
       trainer.setFreeRide();
       ride.trainerMode = "free";
@@ -1375,7 +1344,7 @@ function render() {
   // bottom strip
   $("rStripPos").textContent = fmtTime(r.pos);
   $("rPct").textContent = `${Math.floor((r.pos / dur) * 100)}%`;
-  drawWorkout($("rStrip"), { timeline: r.timeline, ftp: r.ftp, position: r.pos, samples: r.trace, labels: true });
+  drawWorkout($("rStrip"), { timeline: r.timeline, ftp: r.ftp, position: r.pos, samples: r.trace, labels: true, small: true });
 
   // main rolling window: ~20% history, the rest what's coming
   const span = Math.min(720, dur);
@@ -1398,10 +1367,7 @@ function renderFtp() {
 function renderErgState() {
   const el = $("rErg");
   if (!ride) return;
-  if (!ride.erg) {
-    el.textContent = "ERG OFF · free resistance";
-    el.className = "erg-state";
-  } else if (!trainer.canControl) {
+  if (!trainer.canControl) {
     el.textContent = "ERG · trainer not controllable";
     el.className = "erg-state";
   } else {
@@ -1597,14 +1563,6 @@ $("rSkip").addEventListener("click", skipForward);
 $("rBack").addEventListener("click", restartInterval);
 $("rSkipBtn").addEventListener("click", skipForward);
 $("rRestartBtn").addEventListener("click", restartInterval);
-$("rErgToggle").addEventListener("change", (e) => {
-  ride.erg = e.target.checked;
-  ride.trainerMode = null;
-  ride.lastTargetAt = 0;
-  trainer.lastTarget = null;
-  renderErgState();
-  driveTrainer();
-});
 $("rBeepToggle").addEventListener("change", (e) => (ride.beep = e.target.checked));
 
 document.addEventListener("keydown", (e) => {
@@ -1897,7 +1855,6 @@ $("rvAgain").addEventListener("click", () => {
   const item = rideView && workoutForRide(rideView.summary);
   if (!item) return;
   closeRide();
-  selectWorkout(item.key);
   openDetails(item);
 });
 

@@ -47,7 +47,7 @@ Later runs only push new code and settings. They keep the session secret, so nob
 
 1. **Connect** your trainer. Smart trainers that speak FTMS get full ERG control. A power-only device still works, but it can't set resistance. Heart rate is optional. No hardware handy? Click **Simulate trainer**.
 2. Set your **FTP**. Every target in a `.zwo` is a % of FTP.
-3. Pick a workout from **Browse** or **Favorites** and hit **START RIDE**. The clock starts when you start pedaling.
+3. Tap a workout in **Browse** or **Favorites** and hit **START RIDE** in its window. FTP and the trainer and heart-rate **Connect** buttons are right there too. The clock starts when you start pedaling.
 
 On the ride screen:
 
@@ -57,7 +57,7 @@ On the ride screen:
 | **space** | pause / resume |
 | **Skip interval ⏭** (or `→`) | jump to the next interval |
 | **↺ Restart interval** (or `←`) | back to the start of the current interval |
-| **MENU** (or `esc`) | ERG on/off, beeps, auto-pause, skip/restart, pause, end ride |
+| **MENU** (or `esc`) | beeps, auto-pause, skip/restart, pause, end ride |
 
 Skip, restart, and end ride all ask "are you sure?" first (`enter` confirms, `esc` cancels). The destination is locked in when you press the button, so an interval that rolls over while the prompt is open won't turn into a double skip.
 
@@ -68,7 +68,7 @@ Skip, restart, and end ride all ask "are you sure?" first (`enter` confirms, `es
 
 Any change in target cadence pops up mid-screen ("Spin up now · 105 RPM", "Slow cadence now", "New cadence"). Changes of 8 rpm or more get a 5-second countdown first.
 
-Auto-pause stops the clock after 3 s of zero power and resumes when you pedal. Beeps count down the last 3 s before the target changes. Free-ride blocks (and ERG off) put the trainer in flat-road simulation instead.
+Auto-pause stops the clock after 3 s of zero power and resumes when you pedal. Beeps count down the last 3 s before the target changes. Workouts always run the trainer in ERG mode; only free-ride blocks put it in flat-road simulation instead.
 
 Finished rides can be saved to `rides/` as JSON (per-second power, HR, cadence, and target, plus a summary).
 

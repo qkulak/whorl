@@ -294,7 +294,6 @@
     display: flex; flex-direction: column; gap: 8px; cursor: pointer; text-align: left;
   }
   .wo:hover { border-color: rgba(239,233,226,.18); }
-  .wo.sel { border-color: var(--moss); box-shadow: 0 0 0 4px rgba(79,122,90,.3); }
   .wo-title { font-weight: 700; font-size: 16px; }
   .wo-meta { display: flex; gap: 14px; color: var(--muted); font-size: 13px; }
   .wo-meta b { color: var(--text); font-family: var(--num); font-size: 16px; }
@@ -304,13 +303,6 @@
   .empty { color: var(--muted); padding: 30px; text-align: center; border: 1px dashed var(--line); border-radius: 14px; grid-column: 1 / -1; }
   .dropping .home-grid { outline: 2px dashed var(--text); outline-offset: 6px; border-radius: 14px; }
 
-  .startbar {
-    position: sticky; bottom: 14px; display: flex; align-items: center; gap: 14px;
-    background: rgba(30,27,23,.92); backdrop-filter: blur(10px); border: 1px solid var(--line);
-    border-radius: 999px; padding: 8px 8px 8px 20px;
-  }
-  .startbar .sel-name { margin-right: auto; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .startbar .btn.primary { padding: 12px 34px; font-size: 16px; letter-spacing: .08em; }
 
   /* ================= BUILDER ================= */
   #builder { flex-direction: column; min-height: 100%; max-width: 1240px; margin: 0 auto; padding: 22px 20px 40px; gap: 16px; }
@@ -520,7 +512,6 @@
 <section id="home" class="view active">
   <div class="brand">
     <h1><img src="/brand/whorl-logo-cream.png" alt="whorl"></h1>
-    <span>ride .zwo workouts on your smart trainer</span>
     <div class="account" id="account" hidden>
       <span class="who" id="acctEmail"></span>
       <a class="btn small ghost" href="/logout">Sign out</a>
@@ -555,7 +546,6 @@
     <div class="card">
       <h3>Mode</h3>
       <div style="display:flex; flex-direction:column; gap:8px">
-        <label class="toggle"><input type="checkbox" id="setErg" checked><i></i> ERG mode</label>
         <label class="toggle"><input type="checkbox" id="setBeep" checked><i></i> Interval beeps</label>
         <button class="btn small ghost" id="btnSim" style="align-self:flex-start">Simulate trainer</button>
       </div>
@@ -696,18 +686,14 @@
         <button class="btn ghost danger" id="dDelete">Delete</button>
         <button class="btn" id="dDownload">Download .zwo</button>
         <button class="btn" id="dEdit">Copy &amp; edit</button>
-        <button class="btn primary" id="dRide">RIDE IT</button>
+        <button class="btn primary echo" id="dRide">
+          <svg viewBox="32 26 48 48" aria-hidden="true"><path transform="rotate(25 56 50)" d="M50 50A6 6 0 0 1 62 50A12 12 0 0 1 38 50A18 18 0 0 1 74 50" fill="none" stroke="currentColor" stroke-width="6.5" stroke-linecap="round"/></svg>
+          START RIDE
+        </button>
       </div>
     </div>
   </div>
 
-  <div class="startbar">
-    <span class="sel-name" id="selName">Pick a workout</span>
-    <button class="btn primary echo" id="btnStart" disabled>
-      <svg viewBox="32 26 48 48" aria-hidden="true"><path transform="rotate(25 56 50)" d="M50 50A6 6 0 0 1 62 50A12 12 0 0 1 38 50A18 18 0 0 1 74 50" fill="none" stroke="currentColor" stroke-width="6.5" stroke-linecap="round"/></svg>
-      START RIDE
-    </button>
-  </div>
 </section>
 
 <!-- ================= BUILDER ================= -->
@@ -867,7 +853,6 @@
 
   <aside class="menu" id="rMenu">
     <div class="menu-head"><h3>MENU</h3><button class="icon-btn" id="rMenuClose">✕</button></div>
-    <label class="menu-item">ERG mode <span class="toggle"><input type="checkbox" id="rErgToggle"><i></i></span></label>
     <label class="menu-item">Interval beeps <span class="toggle"><input type="checkbox" id="rBeepToggle"><i></i></span></label>
     <label class="menu-item">Auto-pause <span class="toggle"><input type="checkbox" id="rAutoPause" checked><i></i></span></label>
     <button class="menu-item" id="rBack">↺ Restart current interval</button>
