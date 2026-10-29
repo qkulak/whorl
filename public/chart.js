@@ -263,6 +263,7 @@ export function drawWorkout(canvas, opts) {
     timeAt: (px) => t0 + ((px - pad.l) / W) * (t1 - t0),
     xAt: x,
     yAt: y,
+    fracAt: (py) => ((base - py) / H) * yMaxF, // a height on the chart back to a fraction of FTP
   };
 }
 

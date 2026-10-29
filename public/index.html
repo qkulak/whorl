@@ -315,8 +315,17 @@
   .b-head input { flex: 1; min-width: 220px; font-size: 20px; font-weight: 700; }
   #bDesc { width: 100%; min-height: 44px; resize: vertical; }
   .b-preview { background: var(--panel); border-radius: 14px; padding: 12px 14px 6px; }
-  .b-preview canvas { width: 100%; height: 190px; display: block; }
-  .b-stats { display: flex; gap: 20px; color: var(--muted); font-size: 13px; padding: 4px 2px 6px; }
+  .b-preview canvas { width: 100%; height: 230px; display: block; touch-action: none; }
+  .b-preview > .hint { padding: 4px 2px 6px; }
+  .b-stats { display: flex; gap: 20px; align-items: center; flex-wrap: wrap; color: var(--muted); font-size: 13px; padding: 4px 2px 6px; }
+  .b-ftp { margin-left: auto; }
+  .b-chart { position: relative; }
+  .drag-tip {
+    position: absolute; transform: translate(-50%, -130%); pointer-events: none; white-space: nowrap;
+    background: rgba(10,9,7,.92); border: 1px solid var(--line-2); border-radius: 8px; padding: 4px 9px;
+    font-family: var(--num); font-size: 17px; font-weight: 700; opacity: 0; transition: opacity .1s;
+  }
+  .drag-tip.show { opacity: 1; }
   .b-stats b { color: var(--text); font-family: var(--num); font-size: 18px; }
   .add-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
   .add-row span { color: var(--muted); font-size: 13px; margin-right: 4px; }
@@ -370,24 +379,18 @@
   .metric .v { font-family: var(--num); font-size: 30px; font-weight: 700; line-height: 1; min-width: 44px; }
   .metric .u { font-size: 10px; color: var(--muted); letter-spacing: .08em; line-height: 1.1; }
 
-  /* top-center: interval card */
-  .interval {
-    min-width: 330px; text-align: center; background: var(--glass); border: 1px solid var(--line);
-    border-radius: 16px; padding: 12px 22px 14px; backdrop-filter: blur(8px);
-  }
-  .iv-lbl { font-size: 11px; letter-spacing: .14em; color: var(--muted); text-transform: uppercase; }
-  .iv-target { font-family: var(--num); font-weight: 700; font-size: 64px; line-height: 1; margin: 2px 0; }
-  .iv-target small { font-size: .45em; }
-  .iv-row { display: flex; justify-content: center; gap: 18px; font-family: var(--num); font-size: 22px; font-weight: 600; }
-  .iv-left { color: var(--text); }
-  .iv-rep { color: var(--muted); }
-  .iv-prog { height: 5px; background: rgba(239,233,226,.1); border-radius: 3px; margin: 10px 0 8px; overflow: hidden; }
-  .iv-prog div { height: 100%; width: 0; background: var(--text); border-radius: 3px; }
-  .iv-next { font-size: 14px; color: var(--muted); }
-  .iv-next b { color: var(--text); font-family: var(--num); font-size: 17px; }
-  .delta { font-family: var(--num); font-size: 18px; font-weight: 700; margin-top: 2px; }
-  .interval.flash { animation: flash .5s ease 2; }
-  @keyframes flash { 50% { box-shadow: 0 0 0 3px var(--text); } }
+  /* top-center: the current block as a ring that empties, with the next two as overlapping
+     circles behind it, like the logo */
+  .interval { width: 430px; max-width: 100%; }
+  .interval svg { width: 100%; height: auto; display: block; font-family: var(--num); font-weight: 700; }
+  .interval text { fill: var(--text); text-anchor: middle; }
+  .interval .lbl { font-family: Barlow, system-ui, sans-serif; font-size: 11px; letter-spacing: 1.5px; fill-opacity: .7; }
+  .interval .sub { font-family: Barlow, system-ui, sans-serif; font-size: 13px; font-weight: 600; fill-opacity: .6; }
+  .ring-bg { fill: var(--panel); }
+  .ring-track { fill: none; stroke: rgba(239,233,226,.1); stroke-width: 10; }
+  .ring-arc { fill: none; stroke-width: 10; stroke-linecap: round; }
+  .interval.flash .ring-cur { animation: flash .5s ease 2; }
+  @keyframes flash { 50% { filter: brightness(1.8); } }
 
   /* top-right: time, FTP, menu */
   .right-block { justify-self: end; display: flex; flex-direction: column; align-items: flex-end; gap: 10px; }
@@ -728,9 +731,19 @@
       <span>Duration <b id="bDur">0:00</b></span>
       <span>TSS <b id="bTss">0</b></span>
       <span>IF <b id="bIf">0.00</b></span>
-      <span class="hint" id="bFtpHint"></span>
+      <div class="d-ftp b-ftp">
+        <span class="d-lbl">FTP</span>
+        <button class="icon-btn" id="bFtpDown" title="FTP −5 W" aria-label="Lower FTP by 5 watts">−</button>
+        <input type="number" id="bFtpVal" min="50" max="600" step="1" inputmode="numeric" aria-label="FTP in watts">
+        <button class="icon-btn" id="bFtpUp" title="FTP +5 W" aria-label="Raise FTP by 5 watts">+</button>
+        <span class="d-unit">W</span>
+      </div>
     </div>
-    <canvas id="bChart"></canvas>
+    <div class="b-chart">
+      <canvas id="bChart"></canvas>
+      <div class="drag-tip" id="bDragTip"></div>
+    </div>
+    <div class="hint">Drag the top of a bar to change its power, or its right edge to change its length.</div>
   </div>
 
   <div class="add-row">
@@ -786,12 +799,27 @@
     </div>
 
     <div class="interval" id="rInterval">
-      <div class="iv-lbl" id="rIvLbl">Target</div>
-      <div class="iv-target"><span id="rTarget">--</span><small>W</small></div>
-      <div class="iv-row"><span class="iv-left" id="rIvLeft">--:--</span><span class="iv-rep" id="rIvRep"></span></div>
-      <div class="delta" id="rDelta"></div>
-      <div class="iv-prog"><div id="rIvProg"></div></div>
-      <div class="iv-next" id="rNext"></div>
+      <svg viewBox="0 0 430 200" role="img" id="rIvSvg">
+        <g id="rAfter">
+          <circle cx="352" cy="100" r="54" fill-opacity=".16" id="rAfterDisc"/>
+          <text x="368" y="96" font-size="20" fill-opacity=".65" id="rAfterW"></text>
+          <text x="368" y="118" font-size="18" font-weight="600" fill-opacity=".65" id="rAfterT"></text>
+        </g>
+        <g id="rNextG">
+          <circle cx="262" cy="100" r="72" fill-opacity=".34" id="rNextDisc"/>
+          <text x="272" y="74" class="lbl">NEXT</text>
+          <text x="272" y="102" font-size="26" id="rNextW"></text>
+          <text x="272" y="130" font-size="24" font-weight="600" fill-opacity=".8" id="rNextT"></text>
+        </g>
+        <g class="ring-cur">
+          <circle cx="106" cy="100" r="98" class="ring-bg"/>
+          <circle cx="106" cy="100" r="88" class="ring-track"/>
+          <circle cx="106" cy="100" r="88" class="ring-arc" id="rArc" transform="rotate(-90 106 100)"/>
+          <text x="106" y="68" font-size="22" fill-opacity=".8" id="rCurW">--</text>
+          <text x="106" y="124" font-size="70" id="rIvLeft">--:--</text>
+          <text x="106" y="148" class="sub" id="rIvSub"></text>
+        </g>
+      </svg>
     </div>
 
     <div class="right-block">

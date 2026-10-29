@@ -84,11 +84,14 @@ function setFtp(value) {
   else v = store.get("ftp", 200);
   ftpInput.value = v;
   $("dFtpVal").value = v;
+  $("bFtpVal").value = v;
   drawLibraryCharts();
   if (detailsItem) {
     renderDetailsMeta();
     drawDetails();
   }
+  // The builder shows watts next to every % field, so redraw its rows too.
+  if ($("builder").classList.contains("active")) renderBlocks();
 }
 ftpInput.addEventListener("change", () => setFtp(ftpInput.value));
 $("dFtpVal").addEventListener("change", () => setFtp($("dFtpVal").value));
@@ -99,6 +102,13 @@ $("dFtpVal").addEventListener("input", () => {
 });
 $("dFtpDown").addEventListener("click", () => setFtp(homeFtp() - FTP_STEP));
 $("dFtpUp").addEventListener("click", () => setFtp(homeFtp() + FTP_STEP));
+$("bFtpVal").addEventListener("change", () => setFtp($("bFtpVal").value));
+$("bFtpVal").addEventListener("input", () => {
+  const v = Number($("bFtpVal").value);
+  if (v >= 50 && v <= 600) setFtp(v);
+});
+$("bFtpDown").addEventListener("click", () => setFtp(homeFtp() - FTP_STEP));
+$("bFtpUp").addEventListener("click", () => setFtp(homeFtp() + FTP_STEP));
 
 $("setBeep").checked = store.get("beep", true);
 $("setBeep").addEventListener("change", (e) => store.set("beep", e.target.checked));
@@ -785,6 +795,7 @@ function openBuilder(item) {
     ? structuredClone(item.workout)
     : { name: "", author: "", description: "", tags: [], blocks: [{ type: "warmup", ...DEFAULT_BLOCKS.warmup }] };
   builder.selected = null;
+  $("bFtpVal").value = homeFtp();
   $("bName").value = builder.workout.name;
   $("bDesc").value = builder.workout.description;
   renderBlocks();
@@ -936,14 +947,125 @@ function renderPreview() {
   $("bDur").textContent = fmtTime(s.duration);
   $("bTss").textContent = Math.round(s.tss);
   $("bIf").textContent = s.IF.toFixed(2);
-  $("bFtpHint").textContent = `watts shown at FTP ${homeFtp()}`;
+  builder.timeline = timeline;
   if (timeline.duration > 0) {
-    drawWorkout($("bChart"), { timeline, ftp: homeFtp(), labels: true, selected: builder.selected });
+    builder.geom = drawWorkout($("bChart"), { timeline, ftp: homeFtp(), labels: true, selected: builder.selected });
   } else {
+    builder.geom = null;
     const c = $("bChart");
     c.getContext("2d").clearRect(0, 0, c.width, c.height);
   }
 }
+
+// ---- drag the chart: the top of a bar sets its power, its right edge its length ----
+
+const GRAB_PX = 9;
+let drag = null; // { b, key, kind, orig, px0, perRep, g } while a handle is held
+
+// Which block field the top of a bar controls. Ramps have two ends, so the half
+// you grab decides which one moves; intervals change every rep's on or off power.
+function powerKey(b, seg, t) {
+  const firstHalf = t - seg.start < seg.duration / 2;
+  switch (b.type) {
+    case "steady":
+      return "power";
+    case "intervals":
+      return seg.on ? "onPower" : "offPower";
+    case "warmup":
+    case "ramp":
+      return firstHalf ? "powerLow" : "powerHigh";
+    case "cooldown": {
+      // Cooldowns are drawn high to low whichever way the file stores them.
+      const startKey = b.powerLow >= b.powerHigh ? "powerLow" : "powerHigh";
+      return firstHalf ? startKey : startKey === "powerLow" ? "powerHigh" : "powerLow";
+    }
+  }
+  return null;
+}
+
+// What's under the pointer on the builder chart.
+function chartHandle(px, py) {
+  const g = builder.geom;
+  const segs = builder.timeline?.segments;
+  if (!g || !segs?.length) return null;
+  const base = g.yAt(0);
+  // Right edges first: they're thin, so they win over a bar top right next to them.
+  let edge = null;
+  for (const seg of segs) {
+    const xe = g.xAt(seg.start + seg.duration);
+    const top = g.yAt(seg.free ? 0.5 : Math.max(seg.from, seg.to));
+    const dist = Math.abs(px - xe);
+    if (dist <= 6 && py >= top - GRAB_PX && py <= base && (!edge || dist < edge.dist)) edge = { seg, dist };
+  }
+  if (edge) return { seg: edge.seg, kind: "length" };
+  const t = g.timeAt(px);
+  const seg = segs.find((s) => t >= s.start && t < s.start + s.duration);
+  if (!seg) return null;
+  if (!seg.free) {
+    const f = seg.from + ((seg.to - seg.from) * (t - seg.start)) / seg.duration;
+    if (Math.abs(py - g.yAt(f)) <= GRAB_PX) return { seg, kind: "power", t };
+  }
+  return py <= base && py >= g.yAt(seg.free ? 0.5 : Math.max(seg.from, seg.to)) - GRAB_PX ? { seg, kind: "select" } : null;
+}
+
+function chartPoint(e) {
+  const r = $("bChart").getBoundingClientRect();
+  return [e.clientX - r.left, e.clientY - r.top];
+}
+
+function showDragTip(px, py, text) {
+  const tip = $("bDragTip");
+  tip.textContent = text;
+  tip.style.left = `${px}px`;
+  tip.style.top = `${py}px`;
+  tip.classList.add("show");
+}
+
+$("bChart").addEventListener("pointerdown", (e) => {
+  const [px, py] = chartPoint(e);
+  const h = chartHandle(px, py);
+  if (!h) return;
+  const g = builder.geom; // keep the scale from the moment of grabbing, so the bar tracks the pointer
+  const b = builder.workout.blocks[h.seg.blockIndex];
+  selectBlock(h.seg.blockIndex);
+  document.querySelectorAll("#blocks .block")[h.seg.blockIndex]?.scrollIntoView({ block: "nearest" });
+  if (h.kind === "select") return;
+  const key = h.kind === "power" ? powerKey(b, h.seg, h.t) : b.type === "intervals" ? (h.seg.on ? "onDuration" : "offDuration") : "duration";
+  if (!key) return;
+  drag = { b, key, kind: h.kind, orig: b[key], px0: px, perRep: h.seg.rep || 1, g };
+  $("bChart").setPointerCapture(e.pointerId);
+  e.preventDefault();
+});
+
+$("bChart").addEventListener("pointermove", (e) => {
+  const [px, py] = chartPoint(e);
+  if (!drag) {
+    const h = chartHandle(px, py);
+    $("bChart").style.cursor = !h ? "default" : h.kind === "power" ? "ns-resize" : h.kind === "length" ? "ew-resize" : "pointer";
+    return;
+  }
+  const { b, key, g } = drag;
+  if (drag.kind === "power") {
+    b[key] = Math.max(0.2, Math.min(3, Math.round(g.fracAt(py) * 100) / 100));
+    showDragTip(px, py, `${Math.round(b[key] * 100)}% · ${Math.round(b[key] * homeFtp())}W`);
+  } else {
+    // In intervals the grabbed edge moves by one step per rep before it, so share the drag out.
+    const dt = (g.timeAt(px) - g.timeAt(drag.px0)) / drag.perRep;
+    const step = drag.orig >= 120 ? 15 : 5;
+    b[key] = Math.max(step, Math.round((drag.orig + dt) / step) * step);
+    showDragTip(px, py, fmtTime(b[key]));
+  }
+  renderPreview();
+});
+
+function endDrag() {
+  if (!drag) return;
+  drag = null;
+  $("bDragTip").classList.remove("show");
+  renderBlocks(); // the block's fields show the new numbers
+}
+$("bChart").addEventListener("pointerup", endDrag);
+$("bChart").addEventListener("pointercancel", endDrag);
 
 $("bDownload").addEventListener("click", () => downloadZwo(builder.workout));
 $("bSave").addEventListener("click", async () => {
@@ -1309,33 +1431,40 @@ function render() {
   $("rSpeed").textContent = live.speed != null && currentPower() !== null ? live.speed.toFixed(1) : "--";
   $("rKj").textContent = Math.round(r.log.reduce((a, s) => a + s.w, 0) / 1000);
 
-  // top-center: current interval
+  // top-center: the current block as a ring that empties, the next two as circles behind it
   if (seg) {
     const left = seg.start + seg.duration - r.pos;
-    $("rIvLbl").textContent = seg.free
-      ? "Free ride"
-      : seg.from !== seg.to
-        ? `Ramp ${Math.round(seg.from * r.ftp)} → ${Math.round(seg.to * r.ftp)} W`
-        : seg.rep
-          ? seg.on
-            ? "Interval"
-            : "Recovery"
-          : "Target";
-    $("rTarget").textContent = target ?? "—";
+    const watts = (s) =>
+      s.free ? "Free ride" : s.from === s.to ? `${Math.round(s.from * r.ftp)} W` : `${Math.round(s.from * r.ftp)}→${Math.round(s.to * r.ftp)} W`;
+    const colour = (s, f = (s.from + s.to) / 2) => (s.free ? ZONES[0].color : zoneFor(f).color);
+    $("rCurW").textContent = seg.free ? "Free ride" : `${target} W`;
     $("rIvLeft").textContent = fmtTime(Math.ceil(left));
-    $("rIvRep").textContent = seg.rep ? `${seg.rep}/${seg.reps}` : seg.cadence ? `${seg.cadence} rpm` : "";
-    $("rIvProg").style.width = `${Math.min(100, ((r.pos - seg.start) / seg.duration) * 100)}%`;
-    $("rIvProg").style.background = seg.free ? "#8a8f98" : zoneFor(fractionAt(seg, r.pos)).color;
+    const rep = seg.rep ? (seg.on ? `Rep ${seg.rep} of ${seg.reps}` : `Rest ${seg.rep} of ${seg.reps}`) : "";
+    const cad = seg.cadence ? `${seg.cadence} rpm` : "";
+    $("rIvSub").textContent = [rep, cad].filter(Boolean).join(" · ");
+    const arc = $("rArc");
+    const around = 2 * Math.PI * 88;
+    arc.setAttribute("stroke-dasharray", `${Math.max(0, (left / seg.duration) * around)} ${around}`);
+    arc.setAttribute("stroke", colour(seg, fractionAt(seg, r.pos)));
     const next = r.timeline.segments[r.segIdx + 1];
-    $("rNext").innerHTML = next
-      ? `Next: <b>${next.free ? "Free ride" : next.from === next.to ? `${Math.round(next.from * r.ftp)} W` : `${Math.round(next.from * r.ftp)}→${Math.round(next.to * r.ftp)} W`}</b> · ${fmtTime(next.duration)}`
-      : "Last interval";
-    if (target !== null && p3 !== null && r.running) {
-      const d = p3 - target;
-      const close = Math.abs(d) <= Math.max(5, target * 0.05);
-      $("rDelta").textContent = `${d > 0 ? "+" : ""}${d} W`;
-      $("rDelta").style.color = close ? "var(--good)" : d < 0 ? "var(--warn)" : "var(--bad)";
-    } else $("rDelta").textContent = "";
+    const after = r.timeline.segments[r.segIdx + 2];
+    $("rNextG").style.display = next ? "" : "none";
+    $("rAfter").style.display = after ? "" : "none";
+    if (next) {
+      $("rNextDisc").setAttribute("fill", colour(next));
+      $("rNextW").textContent = watts(next);
+      $("rNextT").textContent = fmtTime(next.duration);
+    }
+    if (after) {
+      $("rAfterDisc").setAttribute("fill", colour(after));
+      $("rAfterW").textContent = watts(after);
+      $("rAfterT").textContent = fmtTime(after.duration);
+    }
+    $("rIvSvg").setAttribute(
+      "aria-label",
+      `${$("rCurW").textContent}, ${fmtTime(Math.ceil(left))} left${rep ? `, ${rep}` : ""}. ` +
+        (next ? `Next: ${watts(next)} for ${fmtTime(next.duration)}.` : "Last interval."),
+    );
   }
 
   // top-right

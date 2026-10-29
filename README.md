@@ -96,7 +96,7 @@ Only uploads and your own workouts can be deleted. Bundled presets can't.
 
 ## Build
 
-Use **+ New workout** on Browse, or **Copy & edit** on any preset (the preset itself is untouched). Saved workouts go in Browse's **My workouts** collection. The builder lets you add Warmup / Steady / Intervals / Ramp / Cooldown / Free-ride blocks, then reorder, duplicate, or delete them. Times are `m:ss`, power is % FTP, and the watts at your current FTP show next to each field. **Save** writes the file to `workouts/`, and **Download .zwo** gives you a file you can use in Zwift, TrainerRoad, etc.
+Use **+ New workout** on Browse, or **Copy & edit** on any preset (the preset itself is untouched). Saved workouts go in Browse's **My workouts** collection. The builder lets you add Warmup / Steady / Intervals / Ramp / Cooldown / Free-ride blocks, then reorder, duplicate, or delete them. Times are `m:ss`, power is % FTP, and the watts at your current FTP show next to each field; the builder has its own FTP control, shared with the rest of the app. On the chart, drag the top of a bar to change its power (on a ramp, the end you grab) or its right edge to change its length. For intervals that applies to every rep. **Save** writes the file to `workouts/`, and **Download .zwo** gives you a file you can use in Zwift, TrainerRoad, etc.
 
 ## Notes
 
