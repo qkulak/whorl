@@ -27,6 +27,7 @@ from urllib.parse import parse_qs, unquote, urlsplit
 
 from accounts import AccountError, Accounts
 from storage import open_store
+from strava import Strava, StravaError, load_app
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 PRESET_DIR = os.path.join(ROOT, "presets")  # bundled, read-only
@@ -38,7 +39,8 @@ UPLOADS = "presets/uploaded/"
 RIDES = "rides/"
 RIDE_INDEX = "ride-index.json"  # each ride's summary, so History doesn't read every full ride
 FAVORITES = "favorites.json"
-PORT = 8010
+STRAVA_TOKENS = "strava-token.json"  # the rider's connected Strava account
+PORT = int(os.environ.get("WHORL_PORT", 8010))
 # 0.0.0.0 accepts connections from other machines; WHORL_HOST=127.0.0.1 keeps it local.
 HOST = os.environ.get("WHORL_HOST", "0.0.0.0")
 
@@ -68,6 +70,10 @@ else:
     MODE = "password" if PASSWORD else "closed" if os.environ.get("WHORL_BUCKET") else "open"
     # Signed with the password, so changing the password signs everyone out.
     SESSION_KEY = (PASSWORD or "").encode()
+
+_strava_app = load_app()
+STRAVA = Strava(*_strava_app) if _strava_app else None
+STRAVA_STATE_COOKIE = "whorl_strava_state"
 
 SESSION_COOKIE = "whorl_session"
 SESSION_DAYS = 30
@@ -177,6 +183,26 @@ def read_favorites(space):
     except json.JSONDecodeError:
         return []
     return [k for k in keys if isinstance(k, str)] if isinstance(keys, list) else []
+
+
+def read_json(key):
+    try:
+        data = json.loads(STORE.read(key) or "null")
+    except json.JSONDecodeError:
+        return None
+    return data if isinstance(data, dict) else None
+
+
+def strava_tokens(space):
+    """The rider's Strava tokens, refreshed (and saved) if they'd expired, or
+    None when they haven't connected Strava."""
+    tokens = read_json(space + STRAVA_TOKENS)
+    if not STRAVA or not tokens or not tokens.get("refresh_token"):
+        return None
+    tokens, changed = STRAVA.fresh(tokens)
+    if changed:
+        STORE.write(space + STRAVA_TOKENS, json.dumps(tokens))
+    return tokens
 
 
 # ---- session cookie: who is signed in, signed so it can't be forged ----
@@ -359,8 +385,80 @@ class Handler(SimpleHTTPRequestHandler):
             ACCOUNTS.delete(user["access_token"])
         except AccountError as e:
             return self._json(400, {"error": e.message, "code": e.code})
+        tokens = read_json(self.space + STRAVA_TOKENS)
+        if tokens and STRAVA:
+            STRAVA.disconnect(tokens)
         STORE.delete_tree(self.space)
         self._json(200, {"ok": True}, self.CLEAR_COOKIE)
+
+    # ---- Strava: connect an account, post rides to it ----
+
+    def _origin(self):
+        proto = self.headers.get("X-Forwarded-Proto") or "http"
+        return f"{proto}://{self.headers.get('Host', f'localhost:{PORT}')}"
+
+    def _strava_connect(self):
+        state = Strava.new_state()
+        secure = "; Secure" if self.headers.get("X-Forwarded-Proto") == "https" else ""
+        cookie = f"{STRAVA_STATE_COOKIE}={state}; Path=/strava; Max-Age=600; HttpOnly; SameSite=Lax{secure}"
+        self._redirect(STRAVA.authorize_url(self._origin() + "/strava/callback", state), cookie)
+
+    def _strava_callback(self):
+        query = parse_qs(urlsplit(self.path).query)
+        cookie = SimpleCookie(self.headers.get("Cookie", ""))
+        want = cookie[STRAVA_STATE_COOKIE].value if STRAVA_STATE_COOKIE in cookie else ""
+        state = query.get("state", [""])[0]
+        clear = f"{STRAVA_STATE_COOKIE}=; Path=/strava; Max-Age=0; HttpOnly; SameSite=Lax"
+        if not want or not hmac.compare_digest(state, want):
+            return self._redirect("/?strava=error", clear)
+        if "error" in query or "activity:write" not in query.get("scope", [""])[0]:
+            # Denied, or allowed without permission to upload.
+            return self._redirect("/?strava=denied", clear)
+        try:
+            tokens = STRAVA.exchange(query.get("code", [""])[0])
+        except StravaError:
+            return self._redirect("/?strava=error", clear)
+        STORE.write(self.space + STRAVA_TOKENS, json.dumps(tokens))
+        self._redirect("/?strava=connected", clear)
+
+    def _strava_post(self, name):
+        """Upload the saved ride; the ride file remembers the upload."""
+        key = self.space + RIDES + name
+        ride = read_json(key)
+        if ride is None:
+            return self._json(404, {"error": "not found"})
+        try:
+            tokens = strava_tokens(self.space)
+            if not tokens:
+                return self._json(400, {"error": "Connect Strava in Settings first."})
+            done = (ride.get("strava") or {}).get("activity_id")
+            status = {"state": "done", "activity_id": done} if done else STRAVA.upload(tokens, ride, name[: -len(".json")])
+        except StravaError as e:
+            return self._json(502, {"error": e.message})
+        return self._json(200, self._strava_record(key, ride, status))
+
+    def _strava_check(self, name):
+        key = self.space + RIDES + name
+        ride = read_json(key)
+        status = (ride or {}).get("strava")
+        if not status:
+            return self._json(404, {"error": "not posted to Strava"})
+        if status.get("state") == "processing" and status.get("upload_id"):
+            try:
+                tokens = strava_tokens(self.space)
+                if tokens:
+                    status = self._strava_record(key, ride, STRAVA.upload_status(tokens, status["upload_id"]))
+            except StravaError as e:
+                return self._json(502, {"error": e.message})
+        self._json(200, status)
+
+    @staticmethod
+    def _strava_record(key, ride, status):
+        status = {k: v for k, v in status.items() if v is not None}
+        if ride.get("strava") != status:
+            ride["strava"] = status
+            STORE.write(key, json.dumps(ride))
+        return status
 
     # ---- requests from a signed-in rider ----
 
@@ -371,7 +469,19 @@ class Handler(SimpleHTTPRequestHandler):
     def do_GET(self):
         if self._gate():
             return
-        if self.path == "/api/workouts":
+        route = self._route()
+        if route == "/strava/connect" and STRAVA:
+            self._strava_connect()
+        elif route == "/strava/callback" and STRAVA:
+            self._strava_callback()
+        elif self.path == "/api/strava":
+            tokens = read_json(self.space + STRAVA_TOKENS) if STRAVA else None
+            self._json(200, {"available": bool(STRAVA), "connected": bool(tokens),
+                             "athlete": (tokens or {}).get("athlete")})
+        elif self.path.startswith("/api/rides/") and self.path.endswith("/strava"):
+            name = safe_ride_name(self.path[len("/api/rides/"):-len("/strava")])
+            self._strava_check(name) if name else self._json(404, {"error": "not found"})
+        elif self.path == "/api/workouts":
             self._json(200, list_workouts(self.space))
         elif self.path == "/api/presets":
             self._json(200, list_presets(self.space))
@@ -401,6 +511,9 @@ class Handler(SimpleHTTPRequestHandler):
             return
         if self.path == "/auth/delete-account" and MODE == "accounts":
             return self._delete_account()
+        if self.path.startswith("/api/rides/") and self.path.endswith("/strava") and STRAVA:
+            name = safe_ride_name(self.path[len("/api/rides/"):-len("/strava")])
+            return self._strava_post(name) if name else self._json(404, {"error": "not found"})
         try:
             payload = self._body()
         except json.JSONDecodeError:
@@ -457,6 +570,12 @@ class Handler(SimpleHTTPRequestHandler):
             return
         # Only files the rider made or uploaded can be deleted; bundled presets can't.
         key = None
+        if self.path == "/api/strava":
+            tokens = read_json(self.space + STRAVA_TOKENS)
+            if tokens and STRAVA:
+                STRAVA.disconnect(tokens)
+            STORE.delete(self.space + STRAVA_TOKENS)
+            return self._json(200, {"ok": True})
         if self.path.startswith("/api/workouts/"):
             name = safe_name(self.path[len("/api/workouts/"):])
             key = name and self.space + WORKOUTS + name
@@ -473,7 +592,7 @@ class Handler(SimpleHTTPRequestHandler):
 
     def log_message(self, format, *args):
         # only log API traffic, not static file requests
-        if args and ("/api/" in str(args[0]) or "/auth/" in str(args[0])):
+        if args and any(p in str(args[0]) for p in ("/api/", "/auth/", "/strava/")):
             super().log_message(format, *args)
 
 
@@ -489,4 +608,5 @@ if __name__ == "__main__":
             "open": "Sign-in → off (set WHORL_PASSWORD or beta-password.txt to require a password)",
         }[MODE]
     )
+    print("Strava   → " + ("on" if STRAVA else "off (add strava-app.json to turn it on)"))
     HTTPServer((HOST, PORT), Handler).serve_forever()

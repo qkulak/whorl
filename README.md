@@ -8,7 +8,8 @@ Browser (Web Bluetooth) ──FTMS──▶ trainer   (target watts every interv
         ├── /api/presets  ──▶ server.py ──▶ presets/<collection>/*.zwo
         ├── /api/workouts ──▶ server.py ──▶ workouts/*.zwo
         ├── /api/rides    ──▶ server.py ──▶ rides/*.json
-        └── /api/favorites ─▶ server.py ──▶ favorites.json
+        ├── /api/favorites ─▶ server.py ──▶ favorites.json
+        └── /api/strava   ──▶ server.py ──▶ Strava upload API (strava.py)
 ```
 
 ## Run it
@@ -70,7 +71,24 @@ Any change in target cadence pops up mid-screen ("Spin up now · 105 RPM", "Slow
 
 Auto-pause stops the clock after 3 s of zero power and resumes when you pedal. Beeps count down the last 3 s before the target changes. Workouts always run the trainer in ERG mode; only free-ride blocks put it in flat-road simulation instead.
 
-Finished rides can be saved to `rides/` as JSON (per-second power, HR, cadence, and target, plus a summary).
+Finished rides can be saved to `rides/` as JSON (per-second power, HR, cadence, speed, and target, plus a summary).
+
+## Strava
+
+Once a rider connects Strava (**Settings → Strava → Connect**), every ride they save is posted there automatically: a TCX file with per-second power, heart rate, cadence and speed, marked as a trainer ride, titled "Whorl - <workout name>", with NP / IF / TSS / FTP in the description. A notice at the bottom of the screen says when it's up, with a link. A ride saved before connecting, or one whose upload failed, gets a **Post to Strava** button on its page in History, and posting the same ride twice links to the activity Strava already has. Disconnecting (or deleting the account) also revokes Whorl's access on Strava.
+
+To turn it on, create an API application at https://www.strava.com/settings/api:
+
+- **Authorization Callback Domain:** the host of the deployed URL, e.g. `abc123.lambda-url.us-east-1.on.aws`. Strava always allows `localhost` too, so local testing works with the same app.
+- **App icon:** `public/brand/whorl-app-icon.png` works.
+
+Put its id and secret in `strava-app.json` next to `server.py` (git ignores it), or in `WHORL_STRAVA_CLIENT_ID` / `WHORL_STRAVA_CLIENT_SECRET`:
+
+```json
+{"client_id": "12345", "client_secret": "..."}
+```
+
+`./deploy.sh` passes them to the Lambda function. Without them the Strava row doesn't appear in Settings. Each rider's Strava tokens are kept with their other files (`strava-token.json`, under `users/<id>/` on AWS) and never sent to the browser. A new Strava app can connect only one athlete (its owner) until Strava approves it for more through their developer program.
 
 ## Browse
 
@@ -102,4 +120,5 @@ Use **+ New workout** on Browse, or **Copy & edit** on any preset (the preset it
 
 - A trainer only allows one controlling connection. If it doesn't show up in the picker, close Zwift or anything else connected to it.
 - Text events (`<textevent>`) in a `.zwo` show up as on-screen messages at their time offsets.
+- `WHORL_PORT` changes the local port (default 8010).
 - The server accepts connections from other machines (it binds to 0.0.0.0). Set `WHORL_HOST=127.0.0.1` to keep it on this computer only. It speaks plain HTTP, so put it behind HTTPS before it's on the internet: Web Bluetooth needs HTTPS, and so does sending the beta password safely.

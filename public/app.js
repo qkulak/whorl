@@ -213,6 +213,88 @@ $("settings").addEventListener("click", (e) => {
   if (e.target === $("settings")) $("settings").classList.remove("show");
 });
 
+// ---- Strava: once connected, every saved ride is posted there ----
+
+let strava = { available: false, connected: false, athlete: null };
+
+async function loadStrava() {
+  strava = await api("/api/strava")
+    .then((r) => r.json())
+    .catch(() => strava);
+  $("setStrava").hidden = !strava.available;
+  $("stravaConnect").hidden = strava.connected;
+  $("stravaDisconnect").hidden = !strava.connected;
+  $("stravaSub").textContent = strava.connected
+    ? `Connected${strava.athlete?.name ? ` as ${strava.athlete.name}` : ""}. Saved rides are posted automatically.`
+    : "Post every saved ride to Strava";
+}
+
+$("stravaDisconnect").addEventListener("click", async () => {
+  if (!confirm("Disconnect Strava? Rides you save won't be posted there any more.")) return;
+  await api("/api/strava", { method: "DELETE" });
+  loadStrava();
+});
+
+const stravaUrl = (id) => `https://www.strava.com/activities/${id}`;
+
+let noticeTimer = null;
+function notice(text, link, ms = 8000) {
+  const el = $("notice");
+  el.textContent = text;
+  if (link) {
+    const a = document.createElement("a");
+    a.className = "strava-link";
+    a.href = link.href;
+    a.target = "_blank";
+    a.rel = "noopener";
+    a.textContent = link.text;
+    el.append(a);
+  }
+  el.classList.add("show");
+  clearTimeout(noticeTimer);
+  if (ms) noticeTimer = setTimeout(() => el.classList.remove("show"), ms);
+}
+
+// Uploads the saved ride, then waits for Strava to finish processing it.
+// Resolves to the final status ({ state: "done", activity_id } or { state: "error", error }).
+async function postToStrava(file) {
+  const url = `/api/rides/${encodeURIComponent(file)}/strava`;
+  notice("Posting to Strava…", null, 0);
+  let status;
+  try {
+    status = await api(url, { method: "POST" }).then((r) => r.json());
+    for (let i = 0; status.state === "processing" && i < 20; i++) {
+      await new Promise((ok) => setTimeout(ok, 3000));
+      status = await api(url).then((r) => r.json());
+    }
+  } catch (e) {
+    status = { state: "error", error: e.message };
+  }
+  if (status.state === "done") {
+    notice("Posted to Strava.", { href: stravaUrl(status.activity_id), text: "View ↗" });
+  } else if (status.state === "processing") {
+    notice("Strava is still processing the ride. It'll show up there shortly.");
+  } else {
+    notice(`Couldn't post to Strava: ${status.error || "unknown error"} You can retry from the ride in History.`, null, 12000);
+  }
+  if (rideView?.summary.id === file) showRideStrava(status);
+  return status;
+}
+
+// Coming back from Strava's authorization page.
+{
+  const back = new URLSearchParams(location.search).get("strava");
+  if (back) {
+    history.replaceState(null, "", location.pathname);
+    notice(
+      {
+        connected: "Strava connected. Rides you save will be posted there.",
+        denied: "Strava wasn't connected: Whorl needs permission to upload activities.",
+      }[back] || "Couldn't connect Strava. Try again from Settings.",
+    );
+  }
+}
+
 $("btnSim").addEventListener("click", () => {
   trainer.simulate();
   $("btnSim").disabled = true;
@@ -460,9 +542,23 @@ function renderBrowseFilters() {
   renderDurSlider();
 }
 
-$("fSearch").addEventListener("input", (e) => {
-  browse.q = e.target.value.trim().toLowerCase();
+let accountEmail = ""; // the signed-in rider's email, once /auth/me answers
+
+function setSearch(value) {
+  $("fSearch").value = value;
+  browse.q = value.trim().toLowerCase();
+  $("fSearchClear").hidden = !value;
   renderHome();
+}
+$("fSearch").addEventListener("input", (e) => {
+  // A password manager can mistake this box for a username field and fill in the
+  // rider's email, which filters every workout out. Nobody searches for that.
+  const v = e.target.value;
+  setSearch(accountEmail && v.trim().toLowerCase() === accountEmail ? "" : v);
+});
+$("fSearchClear").addEventListener("click", () => {
+  setSearch("");
+  $("fSearch").focus();
 });
 
 // A category's colour is the zone it lives in, so the chips match the charts.
@@ -1253,7 +1349,7 @@ function tick() {
       ride.lastSecond = sec;
       const w = watts ?? 0;
       ride.trace.push({ t: ride.pos, w });
-      ride.log.push({ t: sec, w, hr: currentHr(), cad: live.cadence, target: currentTargetW() });
+      ride.log.push({ t: sec, w, hr: currentHr(), cad: live.cadence, spd: live.speed, target: currentTargetW() });
     }
     if (ride.pos >= ride.timeline.duration) return finishRide();
   }
@@ -1648,8 +1744,9 @@ function exitRide() {
 
 $("rSaveRide").addEventListener("click", async () => {
   if (ride.log.length) {
+    let saved;
     try {
-      await api("/api/rides", {
+      saved = await api("/api/rides", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -1662,12 +1759,13 @@ $("rSaveRide").addEventListener("click", async () => {
           summary: ride.summary,
           samples: ride.log,
         }),
-      });
+      }).then((r) => r.json());
     } catch (e) {
       alert(`Couldn't save the ride: ${e.message}`);
       return;
     }
     loadRides();
+    if (strava.connected && saved?.file) postToStrava(saved.file);
   }
   exitRide();
 });
@@ -1749,6 +1847,9 @@ async function loadAccount() {
   // Open mode has nobody to sign out; the shared password has no account to delete.
   $("account").hidden = me.mode === "open";
   $("acctEmail").textContent = me.email || "";
+  accountEmail = (me.email || "").toLowerCase();
+  $("daUser").value = me.email || ""; // the username the Delete account password belongs to
+  if (accountEmail && $("fSearch").value.trim().toLowerCase() === accountEmail) setSearch("");
   $("acctDelete").hidden = me.mode !== "accounts";
 }
 
@@ -1784,6 +1885,7 @@ $("daCancel").addEventListener("click", closeDeleteAccount);
 $("delAcct").addEventListener("click", (e) => {
   if (e.target === $("delAcct")) closeDeleteAccount();
 });
+$("daForm").addEventListener("submit", (e) => e.preventDefault());
 $("daPassword").addEventListener("keydown", (e) => {
   if (e.key === "Enter") $("daConfirm").click();
 });
@@ -1922,6 +2024,7 @@ async function openRide(r) {
   ];
   $("rvStats").innerHTML = cells.map(([k, v]) => `<span>${k}<b>${v}</b></span>`).join("");
   $("rvAgain").hidden = !workoutForRide(r);
+  showRideStrava(null);
   $("rvLoading").hidden = false;
   $("rvTip").classList.remove("show");
   const c = $("rvChart");
@@ -1933,6 +2036,7 @@ async function openRide(r) {
     const data = await res.json();
     if (rideView?.summary !== r) return; // closed or switched while loading
     rideView.data = data;
+    showRideStrava(data.strava || null);
     $("rvLoading").hidden = true;
     drawRideView();
   } catch (e) {
@@ -1995,6 +2099,25 @@ $("rvAgain").addEventListener("click", () => {
   openDetails(item);
 });
 
+// "View on Strava" once it's there; otherwise a button to post it (a ride
+// saved before connecting, or one whose upload failed).
+function showRideStrava(status) {
+  const done = status?.state === "done";
+  $("rvStravaLink").hidden = !done;
+  if (done) $("rvStravaLink").href = stravaUrl(status.activity_id);
+  const post = $("rvStravaPost");
+  post.hidden = done || !strava.connected || !rideView?.data;
+  post.disabled = status?.state === "processing" && !!status.posting;
+  post.textContent = post.disabled ? "Posting…" : status?.state === "error" ? "Retry Strava" : "Post to Strava";
+}
+
+$("rvStravaPost").addEventListener("click", async () => {
+  const r = rideView?.summary;
+  if (!r) return;
+  showRideStrava({ state: "processing", posting: true });
+  await postToStrava(r.id);
+});
+
 $("rvDelete").addEventListener("click", async () => {
   const r = rideView?.summary;
   if (!r || !confirm(`Delete this ride (${r.workout}, ${fmtWhen(r.started_at)}) from your history?`)) return;
@@ -2004,5 +2127,6 @@ $("rvDelete").addEventListener("click", async () => {
 });
 
 loadAccount();
+loadStrava();
 loadLibrary();
 loadRides();

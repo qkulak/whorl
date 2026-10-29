@@ -81,6 +81,21 @@
   .set-row small { display: block; color: var(--muted); font-size: 13px; margin-top: 2px; }
   label.set-row { cursor: pointer; }
   .account .who { color: var(--muted); font-size: 14px; margin-right: 4px; }
+  a.btn { text-decoration: none; color: var(--text); }
+  .btn.strava { background: #fc4c02; border-color: #fc4c02; color: #fff; }
+  .btn.strava:hover:not(:disabled) { background: #ff6a2b; border-color: #ff6a2b; }
+  a.strava-link { color: #fc4c02; font-weight: 600; }
+  a.btn.strava-link { background: none; border-color: transparent; }
+  a.strava-link:hover { text-decoration: underline; }
+  /* app-wide message along the bottom (Strava upload progress) */
+  .notice {
+    position: fixed; left: 50%; bottom: 24px; z-index: 50; transform: translate(-50%, 12px);
+    max-width: calc(100% - 32px); background: var(--panel-2); border: 1px solid var(--line-2); border-radius: 12px;
+    padding: 10px 16px; font-size: 15px; font-weight: 600; box-shadow: 0 8px 30px rgba(0,0,0,.4);
+    opacity: 0; pointer-events: none; transition: opacity .25s, transform .25s;
+  }
+  .notice.show { opacity: 1; transform: translate(-50%, 0); pointer-events: auto; }
+  .notice a { margin-left: 8px; }
   .account a.btn { text-decoration: none; color: var(--text); }
 
   .modal-box.narrow { width: min(440px, 100%); }
@@ -135,7 +150,15 @@
   .tab:hover:not(.on) { color: var(--text); }
 
   .browse-bar { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-bottom: 10px; }
-  .browse-bar input[type=search] { flex: 1; min-width: 200px; max-width: 420px; border-radius: 999px; padding: 8px 16px; }
+  .search-wrap { position: relative; flex: 1; min-width: 200px; max-width: 420px; display: flex; }
+  .browse-bar input[type=search] { flex: 1; width: 100%; border-radius: 999px; padding: 8px 40px 8px 16px; }
+  .browse-bar input[type=search]::-webkit-search-cancel-button { display: none; } /* ours is below */
+  .search-clear {
+    position: absolute; right: 6px; top: 50%; transform: translateY(-50%); width: 28px; height: 28px;
+    border: none; border-radius: 50%; background: var(--panel-2); color: var(--text); font-size: 18px; line-height: 1; padding: 0;
+  }
+  .search-clear:hover { background: var(--line-2); }
+  .visually-hidden { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; border: 0; overflow: hidden; clip: rect(0 0 0 0); opacity: 0; pointer-events: none; }
   .browse-bar .hint { margin-right: auto; }
   .filters { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
   .chips { display: flex; gap: 6px; flex-wrap: wrap; }
@@ -566,7 +589,10 @@
 
   <div id="browsePane">
     <div class="browse-bar">
-      <input type="search" id="fSearch" placeholder="Search workouts…">
+      <div class="search-wrap">
+        <input type="search" id="fSearch" name="workout-search" placeholder="Search workouts…" autocomplete="off" autocapitalize="off" spellcheck="false" data-lpignore="true" data-1p-ignore data-bwignore data-form-type="other">
+        <button type="button" class="search-clear" id="fSearchClear" aria-label="Clear search" hidden>×</button>
+      </div>
       <span class="hint" id="browseCount"></span>
       <label class="btn small" for="uploadFile">⇪ Upload .zwo</label>
       <input type="file" id="uploadFile" accept=".zwo,.xml" multiple hidden>
@@ -626,6 +652,8 @@
       </div>
       <div class="modal-foot">
         <button class="btn ghost danger" id="rvDelete">Delete ride</button>
+        <a class="btn strava-link" id="rvStravaLink" target="_blank" rel="noopener" hidden>View on Strava ↗</a>
+        <button class="btn strava" id="rvStravaPost" hidden>Post to Strava</button>
         <button class="btn primary" id="rvAgain">Ride this again</button>
       </div>
     </div>
@@ -645,6 +673,11 @@
         <span><b>Simulate trainer</b><small>Try a ride without any hardware</small></span>
         <button class="btn small" id="btnSim">Simulate</button>
       </div>
+      <div class="set-row" id="setStrava" hidden>
+        <span><b>Strava</b><small id="stravaSub">Post every saved ride to Strava</small></span>
+        <a class="btn small strava" id="stravaConnect" href="/strava/connect">Connect</a>
+        <button class="btn small ghost danger" id="stravaDisconnect" hidden>Disconnect</button>
+      </div>
     </div>
   </div>
 
@@ -656,14 +689,17 @@
       </div>
       <p>This permanently deletes your account and everything in it: your workouts, uploads, favorites and saved rides. It can't be undone.</p>
       <p>Enter your password to confirm.</p>
-      <div class="pw-wrap">
-        <input type="password" id="daPassword" autocomplete="current-password" placeholder="Password">
-        <button type="button" class="pw-eye" id="daEye"></button>
-      </div>
+      <form id="daForm" autocomplete="on">
+        <input type="email" class="visually-hidden" id="daUser" name="username" autocomplete="username" tabindex="-1" aria-hidden="true" readonly>
+        <div class="pw-wrap">
+          <input type="password" id="daPassword" name="password" autocomplete="current-password" placeholder="Password">
+          <button type="button" class="pw-eye" id="daEye"></button>
+        </div>
+      </form>
       <div class="form-error" id="daError"></div>
       <div class="modal-foot">
-        <button class="btn ghost" id="daCancel">Cancel</button>
-        <button class="btn danger-solid" id="daConfirm">Delete my account</button>
+        <button type="button" class="btn ghost" id="daCancel">Cancel</button>
+        <button type="button" class="btn danger-solid" id="daConfirm">Delete my account</button>
       </div>
     </div>
   </div>
@@ -722,9 +758,9 @@
 <section id="builder" class="view">
   <div class="b-head">
     <button class="btn small ghost" id="bBack">← Back</button>
-    <input id="bName" placeholder="Workout name">
+    <input id="bName" name="workout-name" placeholder="Workout name" autocomplete="off" autocapitalize="off" spellcheck="false" data-lpignore="true" data-1p-ignore data-bwignore data-form-type="other">
   </div>
-  <textarea id="bDesc" placeholder="Description (optional)"></textarea>
+  <textarea id="bDesc" name="workout-description" placeholder="Description (optional)" autocomplete="off" autocapitalize="off" spellcheck="false" data-lpignore="true" data-1p-ignore data-bwignore data-form-type="other"></textarea>
 
   <div class="b-preview">
     <div class="b-stats">
@@ -910,6 +946,8 @@
     </div>
   </aside>
 </section>
+
+<div class="notice" id="notice" role="status"></div>
 
 <script type="module" src="app.js"></script>
 </body>

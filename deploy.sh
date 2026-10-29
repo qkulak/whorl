@@ -70,12 +70,16 @@ ROLE_ARN=$(aws iam get-role --role-name "$ROLE" --query Role.Arn --output text)
 BUILD=$(mktemp -d)
 trap 'rm -rf "$BUILD"' EXIT
 mkdir -p "$BUILD/pkg/presets"
-cp server.py storage.py accounts.py lambda_function.py "$BUILD/pkg/"
+cp server.py storage.py accounts.py strava.py lambda_function.py "$BUILD/pkg/"
 cp -R public "$BUILD/pkg/public"
 for dir in presets/*/; do
   [ "$(basename "$dir")" = uploaded ] || cp -R "${dir%/}" "$BUILD/pkg/presets/"
 done
 (cd "$BUILD/pkg" && zip -qr ../function.zip . -x '*.DS_Store')
+
+# Strava (optional): the API application's id and secret, from the environment
+# or strava-app.json. Without them the app just doesn't offer Strava.
+read -r STRAVA_ID STRAVA_SECRET < <(python3 -c 'import os, sys; sys.path.insert(0, "."); from strava import load_app; print(*(load_app() or ("", "")))')
 
 # Sessions are signed with this secret. Keep the live one so a deploy doesn't
 # sign everyone out; make one on the first deploy.
@@ -85,9 +89,10 @@ if [ -z "$SESSION_SECRET" ] || [ "$SESSION_SECRET" = None ]; then
   SESSION_SECRET=$(python3 -c 'import secrets; print(secrets.token_hex(32))')
 fi
 write_env() { # pool id, client id (empty until the pool exists)
-  python3 -c 'import json, sys; b, s, i, p, c = sys.argv[1:]; v = {"WHORL_BUCKET": b, "WHORL_SESSION_SECRET": s, "WHORL_INVITE_CODE": i}
+  python3 -c 'import json, sys; b, s, i, p, c, si, ss = sys.argv[1:]; v = {"WHORL_BUCKET": b, "WHORL_SESSION_SECRET": s, "WHORL_INVITE_CODE": i}
 if p and c: v.update(WHORL_COGNITO_POOL=p, WHORL_COGNITO_CLIENT=c)
-print(json.dumps({"Variables": v}))' "$BUCKET" "$SESSION_SECRET" "$INVITE_CODE" "$1" "$2" >"$BUILD/env.json"
+if si and ss: v.update(WHORL_STRAVA_CLIENT_ID=si, WHORL_STRAVA_CLIENT_SECRET=ss)
+print(json.dumps({"Variables": v}))' "$BUCKET" "$SESSION_SECRET" "$INVITE_CODE" "$1" "$2" "$STRAVA_ID" "$STRAVA_SECRET" >"$BUILD/env.json"
 }
 POOL_ID=$(aws cognito-idp list-user-pools --max-results 60 --query "UserPools[?Name=='$POOL_NAME'].Id | [0]" --output text)
 [ "$POOL_ID" = None ] && POOL_ID=""
