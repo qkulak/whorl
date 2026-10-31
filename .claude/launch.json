@@ -4,7 +4,7 @@
     {
       "name": "whorl",
       "runtimeExecutable": "python3",
-      "runtimeArgs": ["/Users/quintonkulak/Documents/GitHub/quinvy/server.py"],
+      "runtimeArgs": ["/Users/quintonkulak/Documents/GitHub/whorl/server.py"],
       "port": 8010
     }
   ]

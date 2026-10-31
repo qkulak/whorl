@@ -13,10 +13,10 @@
     --bg: #14120f;
     --panel: #1e1b17;
     --panel-2: #2a2621;
-    --line: rgba(239,233,226,.1);
-    --line-2: rgba(239,233,226,.16);
+    --line: rgba(79,122,90,.55);   /* moss hairlines, as on the ride screen */
+    --line-2: rgba(79,122,90,.7);
     --text: #efe9e2;
-    --muted: rgba(239,233,226,.6);
+    --muted: rgba(239,233,226,.7); /* 7:1 on the background */
     --primary: #efe9e2;     /* cream: anything you press */
     --on-primary: #1f3a2c;  /* forest text on cream */
     --moss: #4f7a5a;        /* the logo's disc: selection and switched-on toggles */
@@ -36,6 +36,7 @@
   body {
     margin: 0; background: var(--bg); color: var(--text);
     font-family: Barlow, system-ui, -apple-system, sans-serif; font-size: 15px;
+    font-variant-numeric: tabular-nums; /* figures keep their width, so nothing shifts as numbers change */
   }
   button { font: inherit; color: inherit; cursor: pointer; }
   button:disabled { opacity: .4; cursor: default; }
@@ -48,7 +49,7 @@
   .view.active { display: flex; }
 
   .btn {
-    border: 1px solid var(--line); background: var(--panel-2); border-radius: 999px;
+    border: 1px solid var(--line-2); background: var(--forest); border-radius: 999px;
     padding: 8px 16px; font-weight: 700; white-space: nowrap;
   }
   .btn:hover:not(:disabled) { border-color: rgba(239,233,226,.35); }
@@ -62,17 +63,21 @@
   .btn.danger:hover:not(:disabled) { border-color: var(--bad); color: var(--bad); }
   .btn.small { padding: 5px 12px; font-size: 13px; }
   .icon-btn {
-    width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--line);
-    background: var(--panel-2); display: inline-grid; place-items: center; font-weight: 700; padding: 0;
+    width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--line-2);
+    background: var(--forest); display: inline-grid; place-items: center; font-weight: 700; padding: 0;
   }
   .icon-btn:hover:not(:disabled) { border-color: rgba(239,233,226,.4); }
 
   /* ================= HOME ================= */
   #home { flex-direction: column; min-height: 100%; max-width: 1240px; margin: 0 auto; padding: 22px 20px 40px; gap: 20px; }
-  .brand { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
-  .brand { align-items: center; }
+  /* the same forest bar as the ride screen, run edge to edge */
+  .brand {
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap; min-height: 60px; margin-top: -22px;
+    background: var(--forest); box-shadow: 0 0 0 100vmax var(--forest); clip-path: inset(0 -100vmax);
+  }
   .brand h1 { margin: 0; line-height: 0; }
-  .brand h1 img { height: 40px; width: auto; }
+  .brand h1 img { height: 26px; width: auto; }
+  .brand .btn { display: inline-flex; align-items: center; min-height: 44px; padding: 0 18px; font-size: 14px; background: var(--bg); }
   .brand span { color: var(--muted); }
   .top-actions { margin-left: auto; display: flex; align-items: center; gap: 8px; align-self: center; flex-wrap: wrap; }
   .account { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
@@ -122,12 +127,17 @@
   .card {
     background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 14px 16px;
   }
-  .card h3 { margin: 0 0 8px; font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+  .card h3 { margin: 0 0 8px; font-size: 13px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); font-weight: 700; }
   .conn { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
   .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #555; margin-right: 6px; }
   .dot.on { background: var(--good); box-shadow: 0 0 8px var(--good); }
   .conn-name { font-weight: 600; }
   .conn-sub { color: var(--muted); font-size: 13px; }
+  .link-btn {
+    background: none; border: none; padding: 2px 0 0; font-size: 13px; color: var(--muted);
+    text-decoration: underline; text-underline-offset: 3px; cursor: pointer;
+  }
+  .link-btn:hover { color: var(--text); }
   .ftp-row { display: flex; align-items: center; gap: 10px; }
   .ftp-row input { width: 90px; font-family: var(--num); font-size: 26px; font-weight: 700; text-align: center; padding: 2px 6px; }
   .toggle { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; user-select: none; }
@@ -371,79 +381,101 @@
   .hint { color: var(--muted); font-size: 13px; }
 
   /* ================= RIDE ================= */
+  /* A Swiss grid: four equal metrics, then the current block, what's next and the controls, then
+     the charts. Every field has a fixed slot and tabular figures, so nothing moves as numbers change. */
   #ride {
-    position: fixed; inset: 0; flex-direction: column; overflow: hidden;
-    background: radial-gradient(ellipse at 50% 0%, var(--glow) 0%, var(--bg) 65%);
+    --grid: var(--line);
+    --grid-strong: var(--line-2);
+    --soft: var(--muted);
+    position: fixed; inset: 0; flex-direction: column; overflow: hidden; background: var(--bg);
+    font-variant-numeric: tabular-nums;
   }
-  .hud { display: grid; grid-template-columns: 1fr auto 1fr; gap: 16px; padding: 18px 22px 0; align-items: start; }
-
-  /* top-left: power block */
-  .power-block { justify-self: start; }
-  .pw { display: flex; align-items: flex-end; gap: 10px; }
-  .pw-now { font-family: var(--num); font-style: italic; font-weight: 700; font-size: 104px; line-height: .85; letter-spacing: -.02em; }
-  .pw-now small { font-size: .5em; margin-left: 6px; }
-  .pw-side { display: flex; flex-direction: column; gap: 2px; padding-bottom: 6px; font-family: var(--num); }
-  .pw-side .lbl { font-size: 11px; color: var(--muted); letter-spacing: .08em; }
-  .pw-side .val { font-size: 24px; font-weight: 700; line-height: 1; }
-  .hr-now {
-    display: flex; align-items: flex-end; gap: 8px; margin-left: 18px; padding-left: 22px;
-    border-left: 1px solid var(--line); font-family: var(--num); font-style: italic; font-weight: 700;
-    font-size: 92px; line-height: .85; letter-spacing: -.02em;
+  .r-top { display: flex; align-items: center; gap: 16px; height: 60px; flex: none; padding: 0 8px 0 24px; background: var(--forest); }
+  .r-top img { height: 20px; width: auto; }
+  .r-name { font-size: 15px; font-weight: 700; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .r-status { margin-left: auto; display: flex; align-items: center; gap: 20px; font-size: 13px; font-weight: 600; color: rgba(239,233,226,.85); white-space: nowrap; }
+  .r-status > span { display: flex; align-items: center; gap: 6px; }
+  .r-status i { width: 8px; height: 8px; border-radius: 50%; background: rgba(239,233,226,.3); }
+  .r-status i.on { background: var(--good); }
+  .erg-state { font-weight: 700; letter-spacing: .06em; color: var(--muted); }
+  .erg-state.on { color: var(--good); }
+  .menu-btn {
+    height: 44px; padding: 0 18px; border-radius: 999px; border: 1px solid var(--line-2); background: var(--bg);
+    display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 14px;
   }
-  .hr-now svg { width: 42px; height: 42px; color: #ff3b5c; flex: none; margin-bottom: 1px; filter: drop-shadow(0 0 10px rgba(255,59,92,.45)); }
-  .hr-now small { font-size: .26em; font-style: normal; color: var(--muted); letter-spacing: .08em; padding-bottom: 6px; }
-  .zonebar { position: relative; height: 6px; width: 300px; margin: 12px 0 4px; border-radius: 3px; overflow: hidden; display: flex; background: rgba(239,233,226,.08); }
-  .zonebar span { flex: 1; opacity: .35; }
-  .zonebar span.on { opacity: 1; }
-  .zone-lbl { font-family: var(--num); font-size: 14px; color: var(--muted); }
-  .metrics { display: grid; grid-template-columns: repeat(3, auto); gap: 8px 28px; margin-top: 14px; width: max-content; }
-  .metric { display: flex; align-items: center; gap: 8px; }
-  .metric svg { width: 18px; height: 18px; opacity: .6; flex: none; }
-  .metric .v { font-family: var(--num); font-size: 30px; font-weight: 700; line-height: 1; min-width: 44px; }
-  .metric .u { font-size: 10px; color: var(--muted); letter-spacing: .08em; line-height: 1.1; }
+  .menu-btn:hover { border-color: rgba(239,233,226,.45); }
+  .menu-btn svg, .ctl-btn svg { width: 20px; height: 20px; flex: none; }
 
-  /* top-center: the current block as a ring that empties, with the next two as overlapping
-     circles behind it, like the logo */
-  .interval { width: 430px; max-width: 100%; }
-  .interval svg { width: 100%; height: auto; display: block; font-family: var(--num); font-weight: 700; }
+  /* time, power, heart rate and cadence: the same size, side by side */
+  .r-metrics { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); flex: none; border-bottom: 1px solid var(--grid); }
+  .r-metric {
+    height: 176px; padding: 16px 24px; min-width: 0; overflow: hidden;
+    display: flex; flex-direction: column; justify-content: space-between;
+  }
+  .r-metric + .r-metric { border-left: 1px solid var(--grid); }
+  .r-lbl { display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 700; letter-spacing: .12em; color: var(--soft); white-space: nowrap; }
+  .r-lbl svg { width: 16px; height: 16px; color: #ff3b5c; flex: none; }
+  .r-zone { display: inline-flex; align-items: center; gap: 6px; letter-spacing: .04em; color: var(--text); }
+  .r-zone i { width: 10px; height: 10px; border-radius: 2px; background: var(--c, transparent); }
+  .r-big { font-family: var(--num); font-weight: 700; font-size: 104px; line-height: .85; white-space: nowrap; }
+  .r-big small { font-size: 32px; margin-left: 6px; color: var(--soft); }
+  .r-sub { display: flex; justify-content: space-between; gap: 12px; min-height: 24px; font-size: 16px; color: var(--soft); white-space: nowrap; }
+  .r-sub b { font-family: var(--num); font-size: 20px; color: var(--text); }
+
+  .r-block {
+    display: grid; grid-template-columns: 200px minmax(0, 1fr) 400px; align-items: center; gap: 32px;
+    flex: none; padding: 14px 24px; border-bottom: 1px solid var(--grid);
+  }
+  /* the current block as a ring that empties, in that block's zone colour */
+  .interval svg { width: 176px; height: 176px; display: block; font-family: var(--num); font-weight: 700; }
   .interval text { fill: var(--text); text-anchor: middle; }
-  .interval .lbl { font-family: Barlow, system-ui, sans-serif; font-size: 11px; letter-spacing: 1.5px; fill-opacity: .7; }
-  .interval .sub { font-family: Barlow, system-ui, sans-serif; font-size: 13px; font-weight: 600; fill-opacity: .6; }
-  .ring-bg { fill: var(--panel); }
-  .ring-track { fill: none; stroke: rgba(239,233,226,.1); stroke-width: 10; }
+  .interval .sub { font-family: Barlow, system-ui, sans-serif; font-size: 14px; font-weight: 600; fill-opacity: .75; }
+  .ring-track { fill: none; stroke: var(--forest); stroke-width: 10; }
   .ring-arc { fill: none; stroke-width: 10; stroke-linecap: round; }
-  .interval.flash .ring-cur { animation: flash .5s ease 2; }
+  .interval.flash .ring-arc { animation: flash .5s ease 2; }
   @keyframes flash { 50% { filter: brightness(1.8); } }
 
-  /* top-right: time, FTP, menu */
-  .right-block { justify-self: end; display: flex; flex-direction: column; align-items: flex-end; gap: 10px; }
-  .topbar { display: flex; align-items: center; gap: 10px; }
-  .pill { background: rgba(0,0,0,.35); border-radius: 999px; padding: 5px 12px; font-family: var(--num); font-size: 18px; font-weight: 600; }
-  .menu-btn { background: rgba(0,0,0,.35); border: none; border-radius: 999px; padding: 6px 16px; font-weight: 700; letter-spacing: .1em; font-size: 13px; }
-  .menu-btn:hover { background: rgba(239,233,226,.15); }
-  .time-big { font-family: var(--num); font-size: 44px; font-weight: 700; line-height: 1; }
-  .time-sub { color: var(--muted); font-size: 13px; font-family: var(--num); }
+  /* what's next: rounded bars that rise with effort, fading the further out they are */
+  .r-next { display: grid; grid-template-columns: repeat(4, 104px); gap: 16px; align-items: end; min-width: 0; overflow: hidden; font-family: var(--num); font-weight: 700; }
+  .r-step { display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 24px; line-height: 1; white-space: nowrap; }
+  .r-step:first-child { font-size: 28px; }
+  .r-step:nth-child(2) { opacity: .8; }
+  .r-step:nth-child(3) { opacity: .6; }
+  .r-step:nth-child(4) { opacity: .45; }
+  .r-step .tag { font-family: Barlow, system-ui, sans-serif; font-size: 13px; letter-spacing: .12em; color: var(--soft); }
+  .r-step i { width: 28px; border-radius: 999px; background: var(--c); }
+  .r-step .rpm { font-size: 18px; color: rgba(239,233,226,.75); }
+  .r-last { grid-column: 1 / -1; font-family: Barlow, system-ui, sans-serif; font-size: 16px; color: var(--soft); }
+
+  .r-ctl { display: flex; flex-direction: column; gap: 12px; }
   .ftp-adj {
-    display: flex; align-items: center; gap: 10px; background: var(--glass); border: 1px solid var(--line);
-    border-radius: 999px; padding: 5px 6px;
+    display: grid; grid-template-columns: 56px minmax(0, 1fr) 56px; align-items: center; height: 64px; padding: 0 6px;
+    border-radius: 999px; background: var(--forest); border: 1px solid var(--grid-strong);
   }
-  .ftp-adj .icon-btn { width: 38px; height: 38px; font-size: 22px; background: var(--primary); border-color: var(--primary); color: var(--on-primary); }
+  .ftp-adj .icon-btn { width: 52px; height: 52px; font-size: 26px; background: var(--primary); border-color: var(--primary); color: var(--on-primary); }
   .ftp-adj .icon-btn:hover { background: #fff; }
-  .ftp-adj .f { text-align: center; min-width: 70px; }
-  .ftp-adj .f b { display: block; font-family: var(--num); font-size: 26px; line-height: 1; }
-  .ftp-adj .f span { font-size: 10px; letter-spacing: .12em; color: var(--muted); }
-  .iv-ctl { display: flex; gap: 8px; }
+  .ftp-adj .f { display: flex; align-items: baseline; justify-content: center; gap: 8px; }
+  .ftp-adj .f span { font-size: 13px; font-weight: 700; letter-spacing: .12em; color: var(--soft); }
+  .ftp-adj .f b { font-family: var(--num); font-size: 34px; line-height: 1; }
+  .ftp-adj .f small { font-family: var(--num); font-size: 18px; color: var(--soft); }
+  .iv-ctl { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
   .ctl-btn {
-    background: var(--glass); border: 1px solid var(--line); border-radius: 999px;
-    padding: 8px 14px; font-weight: 700; font-size: 14px; white-space: nowrap;
+    height: 56px; border-radius: 999px; border: 1px solid var(--grid-strong); background: var(--forest);
+    display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 700; font-size: 14px;
   }
-  .ctl-btn:hover:not(:disabled) { border-color: rgba(239,233,226,.45); background: rgba(239,233,226,.08); }
-  .erg-state { font-size: 12px; letter-spacing: .1em; color: var(--muted); }
-  .erg-state.on { color: var(--good); }
+  .ctl-btn:hover:not(:disabled) { border-color: rgba(239,233,226,.45); }
 
   /* middle: rolling chart */
-  .main-chart { flex: 1; min-height: 120px; padding: 12px 0 0; position: relative; }
+  .main-chart { flex: 1; min-height: 120px; padding-top: 32px; position: relative; }
   .main-chart canvas { width: 100%; height: 100%; display: block; }
+  .chart-legend {
+    position: absolute; left: 24px; right: 24px; top: 10px; display: flex; align-items: center; gap: 18px;
+    font-size: 13px; font-weight: 600; color: var(--soft);
+  }
+  .chart-legend span { display: flex; align-items: center; gap: 6px; }
+  .chart-legend i { width: 16px; height: 3px; border-radius: 2px; background: var(--c); }
+  .chart-legend i.lg-target { width: 12px; height: 10px; background: linear-gradient(90deg, #2f8cff, #f5c518, #ff7a1a); }
+  .chart-legend .lg-window { margin-left: auto; }
   .toast {
     position: absolute; left: 50%; top: 18%; transform: translateX(-50%); max-width: 70%;
     background: rgba(0,0,0,.6); border-radius: 12px; padding: 10px 18px; font-size: 20px; font-weight: 600;
@@ -472,16 +504,12 @@
 
   /* bottom: full workout strip */
   .strip {
-    height: 33vh; min-height: 200px; flex: none; display: flex; flex-direction: column; gap: 4px;
-    padding: 8px 22px 10px; background: linear-gradient(transparent, rgba(0,0,0,.45));
+    height: 22vh; min-height: 170px; flex: none; display: flex; flex-direction: column; gap: 4px;
+    padding: 8px 24px 10px; border-top: 1px solid var(--grid);
   }
-  .strip-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 18px; }
   .strip-canvas { flex: 1; min-height: 0; position: relative; }
   .strip-canvas canvas { width: 100%; height: 100%; display: block; cursor: default; }
-  .strip-lbl { font-family: var(--num); font-size: 17px; font-weight: 600; color: rgba(239,233,226,.8); white-space: nowrap; }
-  .strip-lbl .dim { color: var(--muted); }
-  .strip-right { text-align: right; min-width: 110px; }
-  .strip-right .big { font-family: var(--num); font-size: 26px; font-weight: 700; line-height: 1; }
+  .strip-lbl { font-size: 13px; font-weight: 700; letter-spacing: .12em; color: var(--soft); }
 
   /* overlays */
   .overlay {
@@ -527,15 +555,23 @@
   .summary div span { display: block; font-size: 11px; letter-spacing: .12em; color: var(--muted); }
   .summary div b { font-family: var(--num); font-size: 34px; }
 
-  @media (max-width: 900px) {
-    .hud { grid-template-columns: 1fr 1fr; }
-    .interval { grid-column: 1 / -1; grid-row: 2; justify-self: center; }
-    .pw-now { font-size: 76px; }
-    .hr-now { font-size: 64px; margin-left: 10px; padding-left: 14px; }
-    .hr-now svg { width: 32px; height: 32px; }
+  @media (max-width: 1100px) {
+    .r-big { font-size: 76px; }
+    .r-block { grid-template-columns: 180px minmax(0, 1fr); }
+    .r-ctl { grid-column: 1 / -1; flex-direction: row; }
+    .r-ctl > * { flex: 1; }
+  }
+  @media (max-width: 760px) {
+    .r-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .r-metric { height: 140px; }
+    .r-metric:nth-child(3) { border-left: none; border-top: 1px solid var(--grid); }
+    .r-metric:nth-child(4) { border-top: 1px solid var(--grid); }
+    .r-big { font-size: 60px; }
+    .r-status > span:not(.erg-state) { display: none; }
+    .r-ctl { flex-direction: column; }
+    .chart-legend .lg-window { display: none; }
     .ca-val { font-size: 60px; }
     .ca-arrow { font-size: 54px; }
-    .zonebar { width: 220px; }
   }
 </style>
 </head>
@@ -560,7 +596,8 @@
       <h3>Trainer</h3>
       <div class="conn">
         <div><span class="dot" id="trDot"></span><span class="conn-name" id="trName">Not connected</span>
-          <div class="conn-sub" id="trSub">FTMS smart trainer or power meter</div></div>
+          <div class="conn-sub" id="trSub">FTMS smart trainer or power meter</div>
+          <button type="button" class="link-btn" id="btnTrainerOther" hidden>Choose another</button></div>
         <button class="btn small primary" id="btnTrainer">Connect</button>
       </div>
     </div>
@@ -568,7 +605,8 @@
       <h3>Heart rate</h3>
       <div class="conn">
         <div><span class="dot" id="hrDot"></span><span class="conn-name" id="hrName">Not connected</span>
-          <div class="conn-sub">optional</div></div>
+          <div class="conn-sub" id="hrSub">optional</div>
+          <button type="button" class="link-btn" id="btnHrOther" hidden>Choose another</button></div>
         <button class="btn small" id="btnHr">Connect</button>
       </div>
     </div>
@@ -803,96 +841,83 @@
 
 <!-- ================= RIDE ================= -->
 <section id="ride" class="view">
-  <div class="hud">
-    <div class="power-block">
-      <div class="pw">
-        <div class="pw-now"><span id="rPower">--</span><small>W</small></div>
-        <div class="pw-side">
-          <span class="lbl">AVG</span><span class="val" id="rAvg">--</span>
-          <span class="lbl" style="margin-top:4px">NP</span><span class="val" id="rNp">--</span>
-        </div>
-        <div class="hr-now">
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21s-7-4.5-9.5-9A5.5 5.5 0 0 1 12 6a5.5 5.5 0 0 1 9.5 6C19 16.5 12 21 12 21z"/></svg>
-          <span id="rHr">--</span><small>BPM</small>
-        </div>
-      </div>
-      <div class="zonebar" id="rZoneBar"></div>
-      <div class="zone-lbl" id="rZone">--</div>
-      <div class="metrics">
-        <div class="metric">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 12l4-3"/></svg>
-          <span class="v" id="rCad">--</span><span class="u">RPM</span>
-        </div>
-        <div class="metric">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 16a8 8 0 1 1 16 0"/><path d="M12 16l5-5"/></svg>
-          <span class="v" id="rSpeed">--</span><span class="u">KM/H</span>
-        </div>
-        <div class="metric">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L4 14h7l-1 8 9-12h-7z"/></svg>
-          <span class="v" id="rKj">0</span><span class="u">KJ</span>
-        </div>
-      </div>
+  <div class="r-top">
+    <img src="/brand/whorl-logo-cream.png" alt="whorl">
+    <span class="r-name" id="rWoName"></span>
+    <div class="r-status" role="status" aria-label="Connections">
+      <span><i id="rTrDot"></i>Trainer</span>
+      <span><i id="rHrDot"></i>Heart rate</span>
+      <span class="erg-state" id="rErg">ERG</span>
     </div>
+    <button class="menu-btn" id="rMenuBtn" title="Menu (esc)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>Menu
+    </button>
+  </div>
 
+  <div class="r-metrics">
+    <div class="r-metric">
+      <span class="r-lbl">ELAPSED</span>
+      <span class="r-big" id="rClock">0:00</span>
+      <span class="r-sub"><span><b id="rRemain">--:--</b> to go</span><span><b id="rPct">0%</b> done</span></span>
+    </div>
+    <div class="r-metric">
+      <span class="r-lbl">POWER <span class="r-zone"><i id="rZoneDot"></i><span id="rZone"></span></span></span>
+      <span class="r-big"><span id="rPower">--</span><small>W</small></span>
+      <span class="r-sub"><span>Target <b id="rTarget">--</b></span><span>Avg <b id="rAvg">--</b></span></span>
+    </div>
+    <div class="r-metric">
+      <span class="r-lbl"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 21s-7-4.5-9.5-9A5.5 5.5 0 0 1 12 6a5.5 5.5 0 0 1 9.5 6C19 16.5 12 21 12 21z"/></svg>HEART RATE</span>
+      <span class="r-big"><span id="rHr">--</span><small>bpm</small></span>
+      <span class="r-sub"><span>Avg <b id="rHrAvg">--</b></span></span>
+    </div>
+    <div class="r-metric">
+      <span class="r-lbl">CADENCE</span>
+      <span class="r-big"><span id="rCad">--</span><small>rpm</small></span>
+      <span class="r-sub"></span>
+    </div>
+  </div>
+
+  <div class="r-block">
     <div class="interval" id="rInterval">
-      <svg viewBox="0 0 430 200" role="img" id="rIvSvg">
-        <g id="rAfter">
-          <circle cx="352" cy="100" r="54" fill-opacity=".16" id="rAfterDisc"/>
-          <text x="368" y="96" font-size="20" fill-opacity=".65" id="rAfterW"></text>
-          <text x="368" y="118" font-size="18" font-weight="600" fill-opacity=".65" id="rAfterT"></text>
-        </g>
-        <g id="rNextG">
-          <circle cx="262" cy="100" r="72" fill-opacity=".34" id="rNextDisc"/>
-          <text x="272" y="74" class="lbl">NEXT</text>
-          <text x="272" y="102" font-size="26" id="rNextW"></text>
-          <text x="272" y="130" font-size="24" font-weight="600" fill-opacity=".8" id="rNextT"></text>
-        </g>
-        <g class="ring-cur">
-          <circle cx="106" cy="100" r="98" class="ring-bg"/>
-          <circle cx="106" cy="100" r="88" class="ring-track"/>
-          <circle cx="106" cy="100" r="88" class="ring-arc" id="rArc" transform="rotate(-90 106 100)"/>
-          <text x="106" y="68" font-size="22" fill-opacity=".8" id="rCurW">--</text>
-          <text x="106" y="124" font-size="70" id="rIvLeft">--:--</text>
-          <text x="106" y="148" class="sub" id="rIvSub"></text>
-        </g>
+      <svg viewBox="0 0 200 200" role="img" id="rIvSvg">
+        <circle cx="100" cy="100" r="88" class="ring-track"/>
+        <circle cx="100" cy="100" r="88" class="ring-arc" id="rArc" transform="rotate(-90 100 100)"/>
+        <text x="100" y="70" font-size="22" id="rCurW">--</text>
+        <text x="100" y="126" font-size="68" id="rIvLeft">--:--</text>
+        <text x="100" y="150" class="sub" id="rIvSub"></text>
       </svg>
     </div>
-
-    <div class="right-block">
-      <div class="topbar">
-        <span class="pill" id="rClock">0:00:00</span>
-        <button class="menu-btn" id="rMenuBtn">MENU</button>
-      </div>
-      <div style="text-align:right">
-        <div class="time-big" id="rRemain">--:--</div>
-        <div class="time-sub">remaining</div>
-      </div>
-      <div class="ftp-adj">
-        <button class="icon-btn" id="rFtpDown" title="FTP −5 W (−)">−</button>
-        <div class="f"><b id="rFtp">--</b><span>FTP</span></div>
-        <button class="icon-btn" id="rFtpUp" title="FTP +5 W (+)">+</button>
+    <div class="r-next" id="rNext" role="img"></div>
+    <div class="r-ctl">
+      <div class="ftp-adj" role="group" aria-label="FTP">
+        <button class="icon-btn" id="rFtpDown" title="FTP −5 W (−)" aria-label="FTP down 5 watts">−</button>
+        <div class="f"><span>FTP</span><b id="rFtp">--</b><small>W</small></div>
+        <button class="icon-btn" id="rFtpUp" title="FTP +5 W (+)" aria-label="FTP up 5 watts">+</button>
       </div>
       <div class="iv-ctl">
-        <button class="ctl-btn" id="rRestartBtn" title="Restart this interval (←)">↺ Restart interval</button>
-        <button class="ctl-btn" id="rSkipBtn" title="Skip to the next interval (→)">Skip interval ⏭</button>
+        <button class="ctl-btn" id="rRestartBtn" title="Restart this interval (←)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>Restart
+        </button>
+        <button class="ctl-btn" id="rSkipBtn" title="Skip to the next interval (→)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 5l10 7-10 7z" fill="currentColor"/><path d="M19 5v14"/></svg>Skip
+        </button>
       </div>
-      <div class="erg-state" id="rErg">ERG</div>
     </div>
   </div>
 
   <div class="main-chart">
+    <div class="chart-legend" aria-hidden="true">
+      <span><i style="--c:#efe9e2"></i>Power</span>
+      <span><i style="--c:#ff3b5c"></i>Heart rate</span>
+      <span><i class="lg-target"></i>Target, by zone</span>
+      <span class="lg-window">12-minute window</span>
+    </div>
     <canvas id="rChart"></canvas>
     <div class="toast" id="rToast"></div>
   </div>
 
   <div class="strip">
-    <div class="strip-head">
-      <div class="strip-lbl"><span id="rStripPos">0:00</span> <span class="dim">→|</span> <span id="rStripTotal">0:00</span></div>
-      <div class="strip-right">
-        <div class="big" id="rPct">--%</div>
-        <div class="time-sub" id="rWoName"></div>
-      </div>
-    </div>
+    <span class="strip-lbl">WHOLE WORKOUT</span>
     <div class="strip-canvas"><canvas id="rStrip"></canvas></div>
   </div>
 

@@ -39,7 +39,8 @@ export function peakFraction(timeline) {
  *   ftp        watts
  *   t0, t1     visible window in workout seconds (default: whole workout)
  *   position   cursor in workout seconds (null = no cursor, nothing "done")
- *   samples    [{ t, w }] actual power, workout seconds
+ *   samples    [{ t, w, hr }] actual power (and heart rate), workout seconds
+ *   heartRate  also trace heart rate from samples, on its own 60–200 bpm scale
  *   labels     draw target labels + time axis
  *   selected   block index to highlight (builder)
  *   hover      segment index to outline (details tooltip)
@@ -49,7 +50,7 @@ export function peakFraction(timeline) {
  */
 export function drawWorkout(canvas, opts) {
   const { ctx, width, height } = fitCanvas(canvas);
-  const { timeline, ftp, labels = false, small = false, samples = [], selected = null, hover = null } = opts;
+  const { timeline, ftp, labels = false, small = false, samples = [], heartRate = false, selected = null, hover = null } = opts;
   const t0 = opts.t0 ?? 0;
   const t1 = opts.t1 ?? Math.max(1, timeline.duration);
   const pos = opts.position ?? null;
@@ -194,6 +195,32 @@ export function drawWorkout(canvas, opts) {
       ctx.fillStyle = "#efe9e2";
       ctx.fillText(watts, cx, top - (small ? 19 : 25));
     }
+  }
+
+  // Heart rate, under the power line, on its own scale so it never fights the targets.
+  if (heartRate && samples.length > 1) {
+    const yHr = (bpm) => base - ((Math.min(200, Math.max(60, bpm)) - 60) / 140) * H;
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(pad.l, 0, W, height);
+    ctx.clip();
+    ctx.lineWidth = small ? 1.5 : 2;
+    ctx.strokeStyle = "rgba(255,59,92,.9)";
+    ctx.lineJoin = "round";
+    ctx.beginPath();
+    let started = false;
+    for (const s of samples) {
+      if (s.t < t0 - 5 || s.t > t1 || !s.hr) {
+        started = false;
+        continue;
+      }
+      if (!started) {
+        ctx.moveTo(x(s.t), yHr(s.hr));
+        started = true;
+      } else ctx.lineTo(x(s.t), yHr(s.hr));
+    }
+    ctx.stroke();
+    ctx.restore();
   }
 
   // Actual power trace (3 s rolling average so it isn't a scribble).

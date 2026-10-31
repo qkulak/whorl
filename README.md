@@ -46,7 +46,7 @@ Later runs only push new code and settings. They keep the session secret, so nob
 
 ## Ride
 
-1. **Connect** your trainer. Smart trainers that speak FTMS get full ERG control. A power-only device still works, but it can't set resistance. Heart rate is optional. No hardware handy? Open **Settings** at the top right and choose **Simulate**. Settings is also where interval beeps are switched on or off.
+1. **Connect** your trainer. Smart trainers that speak FTMS get full ERG control. A power-only device still works, but it can't set resistance. Heart rate is optional. Whorl remembers both: next time it reconnects them by itself (or waits up to 30 s for them to wake up) and reconnects mid-ride if one drops, without Chrome's device picker. That needs Chrome's `navigator.bluetooth.getDevices()`; where it isn't available, the cards show what you used last and **Connect** opens the picker as before. **Change** or **Choose another** picks a different device. No hardware handy? Open **Settings** at the top right and choose **Simulate**. Settings is also where interval beeps are switched on or off.
 2. Set your **FTP**. Every target in a `.zwo` is a % of FTP.
 3. Tap a workout in **Browse** or **Favorites** and hit **START RIDE** in its window. FTP and the trainer and heart-rate **Connect** buttons are right there too. The clock starts when you start pedaling.
 

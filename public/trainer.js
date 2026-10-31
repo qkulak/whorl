@@ -18,6 +18,16 @@ const OP = {
   RESPONSE: 0x80,
 };
 
+// Reconnecting can hand back the same device and characteristic objects, so
+// listeners are attached once per object; otherwise every reading would arrive twice.
+const watched = new WeakSet();
+const listening = new WeakSet();
+function listenOnce(characteristic, handler) {
+  if (listening.has(characteristic)) return;
+  listening.add(characteristic);
+  characteristic.addEventListener("characteristicvaluechanged", handler);
+}
+
 export class Trainer extends EventTarget {
   constructor() {
     super();
@@ -37,18 +47,32 @@ export class Trainer extends EventTarget {
     this.dispatchEvent(new CustomEvent(type, { detail }));
   }
 
+  // Pick a trainer with the browser's device picker, then connect to it.
   async connect() {
     const device = await navigator.bluetooth.requestDevice({
       filters: [{ services: [FTMS] }, { services: ["cycling_power"] }],
       optionalServices: [FTMS, "cycling_power"],
     });
+    await this.attach(device);
+  }
+
+  // Connect to a trainer the rider has already picked, now or on an earlier
+  // visit, so reconnecting never needs the picker.
+  async attach(device) {
     const server = await device.gatt.connect();
+    const previous = this.device;
     this.device = device;
-    device.addEventListener("gattserverdisconnected", () => {
-      this.canControl = false;
-      this.controlPoint = null;
-      this._emit("status", { connected: false, name: device.name });
-    });
+    this.lastTarget = null; // a fresh connection needs the current target written again
+    if (previous && previous !== device && previous.gatt?.connected) previous.gatt.disconnect();
+    if (!watched.has(device)) {
+      watched.add(device);
+      device.addEventListener("gattserverdisconnected", () => {
+        if (this.device !== device) return; // the old trainer after switching to another
+        this.canControl = false;
+        this.controlPoint = null;
+        this._emit("status", { connected: false, name: device.name });
+      });
+    }
 
     let ftms = null;
     try {
@@ -60,12 +84,12 @@ export class Trainer extends EventTarget {
     if (ftms) {
       const data = await ftms.getCharacteristic(INDOOR_BIKE_DATA);
       await data.startNotifications();
-      data.addEventListener("characteristicvaluechanged", (e) => this._onIndoorBikeData(e.target.value));
+      listenOnce(data, (e) => this._onIndoorBikeData(e.target.value));
 
       // Indications on the control point must be on before we write to it.
       const cp = await ftms.getCharacteristic(CONTROL_POINT);
       await cp.startNotifications();
-      cp.addEventListener("characteristicvaluechanged", (e) => this._onControlResponse(e.target.value));
+      listenOnce(cp, (e) => this._onControlResponse(e.target.value));
       this.controlPoint = cp;
       await this._write([OP.REQUEST_CONTROL]);
       await this._write([OP.START]);
@@ -74,7 +98,7 @@ export class Trainer extends EventTarget {
       const svc = await server.getPrimaryService("cycling_power");
       const ch = await svc.getCharacteristic("cycling_power_measurement");
       await ch.startNotifications();
-      ch.addEventListener("characteristicvaluechanged", (e) => this._onCyclingPower(e.target.value));
+      listenOnce(ch, (e) => this._onCyclingPower(e.target.value));
     }
     this._emit("status", { connected: true, name: device.name || "trainer", canControl: this.canControl });
   }
@@ -221,17 +245,67 @@ export class Trainer extends EventTarget {
   }
 }
 
-export async function connectHeartRate(onBpm, onDisconnect) {
-  const device = await navigator.bluetooth.requestDevice({ filters: [{ services: ["heart_rate"] }] });
+// Pick a heart-rate strap with the browser's device picker.
+export function requestHeartRate() {
+  return navigator.bluetooth.requestDevice({ filters: [{ services: ["heart_rate"] }] });
+}
+
+// Connect to a strap the rider has already picked. Returns its name.
+export async function attachHeartRate(device, onBpm, onDisconnect) {
   const server = await device.gatt.connect();
   const service = await server.getPrimaryService("heart_rate");
   const ch = await service.getCharacteristic("heart_rate_measurement");
   await ch.startNotifications();
-  ch.addEventListener("characteristicvaluechanged", (e) => {
+  listenOnce(ch, (e) => {
     const dv = e.target.value;
     const flags = dv.getUint8(0);
     onBpm(flags & 0x1 ? dv.getUint16(1, true) : dv.getUint8(1));
   });
-  device.addEventListener("gattserverdisconnected", onDisconnect);
+  if (!watched.has(device)) {
+    watched.add(device);
+    device.addEventListener("gattserverdisconnected", () => onDisconnect(device));
+  }
   return device.name || "HR strap";
+}
+
+// Devices this site was allowed to use on an earlier visit (Chrome's
+// getDevices()). Empty where the browser can't remember them.
+export async function rememberedDevices() {
+  try {
+    return navigator.bluetooth?.getDevices ? await navigator.bluetooth.getDevices() : [];
+  } catch {
+    return [];
+  }
+}
+
+// Reach a remembered device without the picker: connect straight away if it's
+// in range, otherwise wait up to waitMs for it to advertise (a strap that's
+// just been put on, a trainer that's waking up).
+export async function whenReachable(device, connect, waitMs) {
+  try {
+    return await connect(device);
+  } catch (first) {
+    if (!device.watchAdvertisements || !waitMs) throw first;
+  }
+  await new Promise((resolve, reject) => {
+    const stop = new AbortController();
+    const timer = setTimeout(() => {
+      stop.abort();
+      reject(new Error("not in range"));
+    }, waitMs);
+    device.addEventListener(
+      "advertisementreceived",
+      () => {
+        clearTimeout(timer);
+        stop.abort();
+        resolve();
+      },
+      { once: true },
+    );
+    device.watchAdvertisements({ signal: stop.signal }).catch((e) => {
+      clearTimeout(timer);
+      reject(e);
+    });
+  });
+  return connect(device);
 }

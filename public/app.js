@@ -16,7 +16,7 @@ import {
   parseTime,
 } from "./zwo.js";
 import { drawWorkout, drawRide } from "./chart.js";
-import { Trainer, connectHeartRate } from "./trainer.js";
+import { Trainer, requestHeartRate, attachHeartRate, rememberedDevices, whenReachable } from "./trainer.js";
 
 const $ = (id) => document.getElementById(id);
 
@@ -137,20 +137,45 @@ trainer.addEventListener("data", ({ detail: d }) => {
   }
 });
 
+// Devices from earlier visits that can be reconnected without the browser's
+// picker (Chrome's getDevices()). Their ids are saved when they first connect.
+const known = { trainer: null, hr: null };
+let trainerReconnecting = false;
+let hrReconnecting = false;
+const RECONNECT_WAIT_MS = 30000; // how long to wait for a remembered device to show up
+
 trainer.addEventListener("status", ({ detail }) => {
   $("trDot").classList.toggle("on", detail.connected);
-  $("trName").textContent = detail.connected ? detail.name : "Disconnected";
+  $("trName").textContent = detail.connected ? detail.name : detail.name || "Disconnected";
   $("trSub").textContent = detail.connected
     ? detail.canControl
       ? "ERG control ready"
       : "power only — no ERG control"
     : "FTMS smart trainer or power meter";
-  $("btnTrainer").textContent = detail.connected ? "Reconnect" : "Connect";
   $("btnSim").disabled = detail.connected;
+  if (detail.connected && trainer.device) {
+    known.trainer = trainer.device;
+    store.set("trainerDevice", { id: trainer.device.id, name: detail.name });
+  }
   renderErgState();
-  mirrorSensors();
+  renderSensorButtons();
+  // Dropped mid-session (out of range, trainer restarted): get it back by itself.
+  if (!detail.connected && known.trainer && !trainerReconnecting) reconnectTrainer();
 });
 trainer.addEventListener("error", ({ detail }) => toast(`Trainer: ${detail.message}`));
+
+// Connect when there's nothing to remember, Reconnect for a remembered device
+// (no picker), Change once connected; "Choose another" always opens the picker.
+function renderSensorButtons() {
+  const trainerOn = trainer.simulated || !!trainer.device?.gatt?.connected;
+  $("btnTrainer").textContent = trainerReconnecting ? "Reconnecting…" : trainerOn ? "Change" : known.trainer ? "Reconnect" : "Connect";
+  $("btnTrainer").disabled = trainerReconnecting;
+  $("btnTrainerOther").hidden = trainerOn || !known.trainer;
+  $("btnHr").textContent = hrReconnecting ? "Reconnecting…" : hrStrapConnected ? "Change" : known.hr ? "Reconnect" : "Connect";
+  $("btnHr").disabled = hrReconnecting;
+  $("btnHrOther").hidden = hrStrapConnected || !known.hr;
+  mirrorSensors();
+}
 
 // The workout details window shows the same trainer / heart rate status as the
 // cards at the top of Browse, and its Connect buttons press the same buttons.
@@ -159,8 +184,11 @@ function mirrorSensors() {
   $("dTrName").textContent = $("trName").textContent;
   $("dTrSub").textContent = $("trSub").textContent;
   $("dTrainer").textContent = $("btnTrainer").textContent;
+  $("dTrainer").disabled = $("btnTrainer").disabled;
   $("dHrDot").classList.toggle("on", $("hrDot").classList.contains("on"));
   $("dHrName").textContent = $("hrName").textContent;
+  $("dHr").textContent = $("btnHr").textContent;
+  $("dHr").disabled = $("btnHr").disabled;
 }
 $("dTrainer").addEventListener("click", () => $("btnTrainer").click());
 $("dHr").addEventListener("click", () => $("btnHr").click());
@@ -171,7 +199,9 @@ function needBluetooth() {
   return false;
 }
 
-$("btnTrainer").addEventListener("click", async () => {
+// ---- trainer ----
+
+async function pickTrainer() {
   if (!needBluetooth()) return;
   $("trSub").textContent = "connecting…";
   mirrorSensors();
@@ -180,32 +210,104 @@ $("btnTrainer").addEventListener("click", async () => {
   } catch (e) {
     $("trSub").textContent = e.name === "NotFoundError" ? "FTMS smart trainer or power meter" : `error: ${e.message}`;
   }
-  mirrorSensors();
-});
+  renderSensorButtons();
+}
 
-$("btnHr").addEventListener("click", async () => {
+async function reconnectTrainer() {
+  const device = known.trainer;
+  if (!device || trainerReconnecting || trainer.simulated) return;
+  trainerReconnecting = true;
+  $("trName").textContent = device.name || "Trainer";
+  $("trSub").textContent = "reconnecting…";
+  renderSensorButtons();
+  try {
+    await whenReachable(device, (d) => trainer.attach(d), RECONNECT_WAIT_MS);
+  } catch {
+    $("trSub").textContent = "not found. Is it on? Tap Reconnect";
+  }
+  trainerReconnecting = false;
+  renderSensorButtons();
+}
+
+$("btnTrainer").addEventListener("click", () => {
+  const on = trainer.simulated || trainer.device?.gatt?.connected;
+  if (!on && known.trainer) return reconnectTrainer();
+  pickTrainer();
+});
+$("btnTrainerOther").addEventListener("click", pickTrainer);
+
+// ---- heart-rate strap ----
+
+function onBpm(bpm) {
+  live.hr = bpm;
+  live.hrAt = Date.now();
+}
+
+function onHrDisconnect() {
+  hrStrapConnected = false;
+  $("hrDot").classList.remove("on");
+  $("hrName").textContent = known.hr?.name || "Disconnected";
+  $("hrSub").textContent = "disconnected";
+  renderSensorButtons();
+  reconnectHr(); // straps drop when you step off the bike or the battery blips
+}
+
+async function useHrStrap(device) {
+  const name = await attachHeartRate(device, onBpm, onHrDisconnect);
+  hrStrapConnected = true;
+  known.hr = device;
+  store.set("hrDevice", { id: device.id, name });
+  $("hrDot").classList.add("on");
+  $("hrName").textContent = name;
+  $("hrSub").textContent = "connected";
+}
+
+async function pickHr() {
   if (!needBluetooth()) return;
   try {
-    const name = await connectHeartRate(
-      (bpm) => {
-        live.hr = bpm;
-        live.hrAt = Date.now();
-      },
-      () => {
-        hrStrapConnected = false;
-        $("hrDot").classList.remove("on");
-        $("hrName").textContent = "Disconnected";
-        mirrorSensors();
-      },
-    );
-    hrStrapConnected = true;
-    $("hrDot").classList.add("on");
-    $("hrName").textContent = name;
+    await useHrStrap(await requestHeartRate());
   } catch (e) {
     if (e.name !== "NotFoundError") $("hrName").textContent = `error: ${e.message}`;
   }
-  mirrorSensors();
+  renderSensorButtons();
+}
+
+async function reconnectHr() {
+  const device = known.hr;
+  if (!device || hrReconnecting) return;
+  hrReconnecting = true;
+  $("hrName").textContent = device.name || "HR strap";
+  $("hrSub").textContent = "reconnecting…";
+  renderSensorButtons();
+  try {
+    await whenReachable(device, useHrStrap, RECONNECT_WAIT_MS);
+  } catch {
+    $("hrSub").textContent = "not found. Strap on? Tap Reconnect";
+  }
+  hrReconnecting = false;
+  renderSensorButtons();
+}
+
+$("btnHr").addEventListener("click", () => {
+  if (!hrStrapConnected && known.hr) return reconnectHr();
+  pickHr();
 });
+$("btnHrOther").addEventListener("click", pickHr);
+
+// On load: reconnect the trainer and strap from last time, if the browser can.
+async function restoreSensors() {
+  const saved = { trainer: store.get("trainerDevice", null), hr: store.get("hrDevice", null) };
+  if (!saved.trainer && !saved.hr) return;
+  const devices = await rememberedDevices();
+  known.trainer = devices.find((d) => d.id === saved.trainer?.id) || null;
+  known.hr = devices.find((d) => d.id === saved.hr?.id) || null;
+  // Can't reconnect here (the browser doesn't remember devices): say what was used last.
+  if (saved.trainer && !known.trainer) $("trSub").textContent = `last used: ${saved.trainer.name}`;
+  if (saved.hr && !known.hr) $("hrSub").textContent = `last used: ${saved.hr.name}`;
+  renderSensorButtons();
+  if (known.trainer) reconnectTrainer();
+  if (known.hr) reconnectHr();
+}
 
 $("btnSettings").addEventListener("click", () => $("settings").classList.add("show"));
 $("setClose").addEventListener("click", () => $("settings").classList.remove("show"));
@@ -1259,12 +1361,10 @@ function startRide(item) {
   };
   $("rBeepToggle").checked = ride.beep;
   $("rWoName").textContent = item.workout.name;
-  $("rStripTotal").textContent = fmtTime(ride.timeline.duration);
   $("rDone").classList.remove("show");
   $("rMenu").classList.remove("open");
   hideCadence();
   closeConfirm(false);
-  buildZoneBar();
   renderFtp();
   renderErgState();
   showPause();
@@ -1273,10 +1373,6 @@ function startRide(item) {
   clearInterval(tickTimer);
   tickTimer = setInterval(tick, TICK_MS);
   tick();
-}
-
-function buildZoneBar() {
-  $("rZoneBar").innerHTML = ZONES.map((z) => `<span style="background:${z.color}"></span>`).join("");
 }
 
 function pause(reason) {
@@ -1348,7 +1444,7 @@ function tick() {
     if (sec !== ride.lastSecond) {
       ride.lastSecond = sec;
       const w = watts ?? 0;
-      ride.trace.push({ t: ride.pos, w });
+      ride.trace.push({ t: ride.pos, w, hr: currentHr() });
       ride.log.push({ t: sec, w, hr: currentHr(), cad: live.cadence, spd: live.speed, target: currentTargetW() });
     }
     if (ride.pos >= ride.timeline.duration) return finishRide();
@@ -1512,26 +1608,34 @@ function render() {
   const seg = currentSeg();
   const target = currentTargetW();
 
-  // top-left
-  $("rPower").textContent = p3 ?? "--";
-  const avg = r.log.length ? Math.round(r.log.reduce((a, s) => a + s.w, 0) / r.log.length) : null;
-  $("rAvg").textContent = avg ?? "--";
-  if (r.lastSecond % 5 === 0 || r.npCache === undefined) r.npCache = npOf(r.log);
-  $("rNp").textContent = r.npCache ?? "--";
-  const bars = $("rZoneBar").children;
-  const zi = p3 === null ? -1 : ZONES.indexOf(zoneFor(p3 / r.ftp));
-  for (let i = 0; i < bars.length; i++) bars[i].classList.toggle("on", i === zi);
-  $("rZone").textContent = p3 === null ? "--" : `${ZONES[zi].name} · ${Math.round((p3 / r.ftp) * 100)}% FTP`;
-  $("rCad").textContent = live.cadence ?? "--";
-  $("rHr").textContent = currentHr() ?? "--";
-  $("rSpeed").textContent = live.speed != null && currentPower() !== null ? live.speed.toFixed(1) : "--";
-  $("rKj").textContent = Math.round(r.log.reduce((a, s) => a + s.w, 0) / 1000);
+  // top bar: is everything still connected?
+  $("rTrDot").classList.toggle("on", !!(trainer.simulated || trainer.device?.gatt?.connected));
+  $("rHrDot").classList.toggle("on", currentHr() !== null);
 
-  // top-center: the current block as a ring that empties, the next two as circles behind it
+  // the four metrics. Elapsed only shows hours once there is one.
+  $("rClock").textContent = fmtTime(r.pos);
+  $("rRemain").textContent = fmtTime(dur - r.pos);
+  $("rPct").textContent = `${Math.floor((r.pos / dur) * 100)}%`;
+  $("rPower").textContent = p3 ?? "--";
+  const zone = p3 === null ? null : zoneFor(p3 / r.ftp);
+  $("rZoneDot").style.setProperty("--c", zone ? zone.color : "transparent");
+  $("rZone").textContent = zone ? `${zone.name} · ${Math.round((p3 / r.ftp) * 100)}%` : "";
+  $("rTarget").textContent = seg?.free ? "free" : target !== null ? `${target} W` : "--";
+  const avg = r.log.length ? Math.round(r.log.reduce((a, s) => a + s.w, 0) / r.log.length) : null;
+  $("rAvg").textContent = avg !== null ? `${avg} W` : "--";
+  $("rHr").textContent = currentHr() ?? "--";
+  if (r.lastSecond % 5 === 0 || r.hrAvg === undefined) {
+    const hrs = r.log.map((s) => s.hr).filter(Boolean);
+    r.hrAvg = hrs.length ? Math.round(hrs.reduce((a, b) => a + b, 0) / hrs.length) : null;
+  }
+  $("rHrAvg").textContent = r.hrAvg ?? "--";
+  $("rCad").textContent = live.cadence ?? "--";
+
+  // the current block as a ring that empties, then the next few as bars that rise with effort
   if (seg) {
     const left = seg.start + seg.duration - r.pos;
     const watts = (s) =>
-      s.free ? "Free ride" : s.from === s.to ? `${Math.round(s.from * r.ftp)} W` : `${Math.round(s.from * r.ftp)}→${Math.round(s.to * r.ftp)} W`;
+      s.free ? "Free" : s.from === s.to ? `${Math.round(s.from * r.ftp)} W` : `${Math.round(s.from * r.ftp)}→${Math.round(s.to * r.ftp)} W`;
     const colour = (s, f = (s.from + s.to) / 2) => (s.free ? ZONES[0].color : zoneFor(f).color);
     $("rCurW").textContent = seg.free ? "Free ride" : `${target} W`;
     $("rIvLeft").textContent = fmtTime(Math.ceil(left));
@@ -1542,38 +1646,44 @@ function render() {
     const around = 2 * Math.PI * 88;
     arc.setAttribute("stroke-dasharray", `${Math.max(0, (left / seg.duration) * around)} ${around}`);
     arc.setAttribute("stroke", colour(seg, fractionAt(seg, r.pos)));
-    const next = r.timeline.segments[r.segIdx + 1];
-    const after = r.timeline.segments[r.segIdx + 2];
-    $("rNextG").style.display = next ? "" : "none";
-    $("rAfter").style.display = after ? "" : "none";
-    if (next) {
-      $("rNextDisc").setAttribute("fill", colour(next));
-      $("rNextW").textContent = watts(next);
-      $("rNextT").textContent = fmtTime(next.duration);
+    $("rIvSvg").setAttribute("aria-label", `${$("rCurW").textContent}, ${fmtTime(Math.ceil(left))} left${rep ? `, ${rep}` : ""}`);
+
+    // Only rebuilt when the block or FTP changes, not every tick.
+    const nextKey = `${r.segIdx}|${r.ftp}`;
+    if (r.nextKey !== nextKey) {
+      r.nextKey = nextKey;
+      const ahead = r.timeline.segments.slice(r.segIdx + 1, r.segIdx + 5);
+      const withCadence = ahead.some((s) => s.cadence);
+      $("rNext").innerHTML = ahead.length
+        ? ahead
+            .map((s, i) => {
+              const f = s.free ? 0.5 : Math.max(s.from, s.to);
+              const h = Math.round(Math.max(10, Math.min(80, (f / 1.2) * 80)));
+              return `<div class="r-step">${i === 0 ? '<span class="tag">NEXT</span>' : ""}<i style="--c:${colour(s)}; height:${h}px"></i><span>${watts(s)}</span><span>${fmtTime(s.duration)}</span>${withCadence ? `<span class="rpm">${s.cadence ? `${s.cadence} rpm` : ""}</span>` : ""}</div>`;
+            })
+            .join("")
+        : '<span class="r-last">Last interval</span>';
+      $("rNext").setAttribute(
+        "aria-label",
+        ahead.length ? `Up next: ${ahead.map((s) => `${watts(s)} for ${fmtTime(s.duration)}`).join(", then ")}` : "Last interval",
+      );
     }
-    if (after) {
-      $("rAfterDisc").setAttribute("fill", colour(after));
-      $("rAfterW").textContent = watts(after);
-      $("rAfterT").textContent = fmtTime(after.duration);
-    }
-    $("rIvSvg").setAttribute(
-      "aria-label",
-      `${$("rCurW").textContent}, ${fmtTime(Math.ceil(left))} left${rep ? `, ${rep}` : ""}. ` +
-        (next ? `Next: ${watts(next)} for ${fmtTime(next.duration)}.` : "Last interval."),
-    );
   }
 
-  // top-right
   const onLast = r.segIdx >= r.timeline.segments.length - 1;
   $("rSkipBtn").disabled = onLast;
   $("rSkip").disabled = onLast;
-  $("rClock").textContent = fmtTime(r.pos, { hours: true });
-  $("rRemain").textContent = fmtTime(dur - r.pos);
 
   // bottom strip
-  $("rStripPos").textContent = fmtTime(r.pos);
-  $("rPct").textContent = `${Math.floor((r.pos / dur) * 100)}%`;
-  drawWorkout($("rStrip"), { timeline: r.timeline, ftp: r.ftp, position: r.pos, samples: r.trace, labels: true, small: true });
+  drawWorkout($("rStrip"), {
+    timeline: r.timeline,
+    ftp: r.ftp,
+    position: r.pos,
+    samples: r.trace,
+    heartRate: true,
+    labels: true,
+    small: true,
+  });
 
   // main rolling window: ~20% history, the rest what's coming
   const span = Math.min(720, dur);
@@ -1585,6 +1695,7 @@ function render() {
     t1: t0 + span,
     position: r.pos,
     samples: r.trace,
+    heartRate: true,
     labels: true,
   });
 }
@@ -1597,10 +1708,10 @@ function renderErgState() {
   const el = $("rErg");
   if (!ride) return;
   if (!trainer.canControl) {
-    el.textContent = "ERG · trainer not controllable";
+    el.textContent = "ERG unavailable";
     el.className = "erg-state";
   } else {
-    el.textContent = "● ERG ON";
+    el.textContent = "ERG ON";
     el.className = "erg-state on";
   }
 }
@@ -2130,3 +2241,4 @@ loadAccount();
 loadStrava();
 loadLibrary();
 loadRides();
+restoreSensors();
