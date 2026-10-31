@@ -72,20 +72,18 @@
   #home { flex-direction: column; min-height: 100%; max-width: 1240px; margin: 0 auto; padding: 22px 20px 40px; gap: 20px; }
   /* the same forest bar as the ride screen, run edge to edge */
   .brand {
-    display: flex; align-items: center; gap: 12px; flex-wrap: wrap; min-height: 60px; margin-top: -22px;
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap; min-height: 48px; margin-top: -22px;
     background: var(--forest); box-shadow: 0 0 0 100vmax var(--forest); clip-path: inset(0 -100vmax);
   }
   .brand h1 { margin: 0; line-height: 0; }
-  .brand h1 img { height: 26px; width: auto; }
-  .brand .btn { display: inline-flex; align-items: center; min-height: 44px; padding: 0 18px; font-size: 14px; background: var(--bg); }
-  .brand span { color: var(--muted); }
+  .brand h1 img { height: 22px; width: auto; }
+  .brand .btn { display: inline-flex; align-items: center; height: 30px; padding: 0 12px; font-size: 13px; background: var(--bg); }
   .top-actions { margin-left: auto; display: flex; align-items: center; gap: 8px; align-self: center; flex-wrap: wrap; }
-  .account { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .top-actions .who { color: rgba(239,233,226,.85); font-size: 13px; margin-right: 4px; }
   .set-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 12px 0; border-top: 1px solid var(--line); cursor: default; }
   .set-row b { display: block; font-size: 16px; }
   .set-row small { display: block; color: var(--muted); font-size: 13px; margin-top: 2px; }
   label.set-row { cursor: pointer; }
-  .account .who { color: var(--muted); font-size: 14px; margin-right: 4px; }
   a.btn { text-decoration: none; color: var(--text); }
   .btn.strava { background: #fc4c02; border-color: #fc4c02; color: #fff; }
   .btn.strava:hover:not(:disabled) { background: #ff6a2b; border-color: #ff6a2b; }
@@ -101,7 +99,7 @@
   }
   .notice.show { opacity: 1; transform: translate(-50%, 0); pointer-events: auto; }
   .notice a { margin-left: 8px; }
-  .account a.btn { text-decoration: none; color: var(--text); }
+  .top-actions a.btn { text-decoration: none; color: var(--text); }
 
   .modal-box.narrow { width: min(440px, 100%); }
   .modal-box.narrow p { margin: 0; color: rgba(239,233,226,.8); line-height: 1.5; }
@@ -582,12 +580,9 @@
   <div class="brand">
     <h1><img src="/brand/whorl-logo-cream.png" alt="whorl"></h1>
     <div class="top-actions">
+      <span class="who" id="acctEmail" hidden></span>
       <button class="btn small ghost" id="btnSettings">Settings</button>
-      <div class="account" id="account" hidden>
-        <span class="who" id="acctEmail"></span>
-        <a class="btn small ghost" href="/logout">Sign out</a>
-        <button class="btn small ghost danger" id="acctDelete" hidden>Delete account</button>
-      </div>
+      <a class="btn small ghost" id="acctSignOut" href="/logout" hidden>Sign out</a>
     </div>
   </div>
 
@@ -715,6 +710,13 @@
         <span><b>Strava</b><small id="stravaSub">Post every saved ride to Strava</small></span>
         <a class="btn small strava" id="stravaConnect" href="/strava/connect">Connect</a>
         <button class="btn small ghost danger" id="stravaDisconnect" hidden>Disconnect</button>
+      </div>
+      <div class="set-row" id="setEmail" hidden>
+        <span><b>Signed in as</b><small id="setEmailVal"></small></span>
+      </div>
+      <div class="set-row" id="setAccount" hidden>
+        <span><b>Delete account</b><small>Removes your account and everything saved in it</small></span>
+        <button class="btn small ghost danger" id="acctDelete">Delete</button>
       </div>
     </div>
   </div>

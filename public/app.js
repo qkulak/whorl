@@ -1956,12 +1956,16 @@ async function loadAccount() {
     .then((r) => r.json())
     .catch(() => ({ mode: "open" }));
   // Open mode has nobody to sign out; the shared password has no account to delete.
-  $("account").hidden = me.mode === "open";
+  $("acctSignOut").hidden = me.mode === "open";
   $("acctEmail").textContent = me.email || "";
+  $("acctEmail").hidden = !me.email;
+  // A local server signs everyone in with one shared password, so there's no email to show.
+  $("setEmailVal").textContent = me.email || "the shared beta password";
+  $("setEmail").hidden = me.mode === "open";
   accountEmail = (me.email || "").toLowerCase();
   $("daUser").value = me.email || ""; // the username the Delete account password belongs to
   if (accountEmail && $("fSearch").value.trim().toLowerCase() === accountEmail) setSearch("");
-  $("acctDelete").hidden = me.mode !== "accounts";
+  $("setAccount").hidden = me.mode !== "accounts";
 }
 
 // Show/hide eye inside the password field.
@@ -1987,6 +1991,7 @@ function closeDeleteAccount() {
 }
 
 $("acctDelete").addEventListener("click", () => {
+  $("settings").classList.remove("show");
   $("daError").textContent = "";
   $("delAcct").classList.add("show");
   $("daPassword").focus();
