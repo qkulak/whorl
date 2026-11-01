@@ -388,94 +388,89 @@
     position: fixed; inset: 0; flex-direction: column; overflow: hidden; background: var(--bg);
     font-variant-numeric: tabular-nums;
   }
-  .r-top { display: flex; align-items: center; gap: 16px; height: 60px; flex: none; padding: 0 8px 0 24px; background: var(--forest); }
-  .r-top img { height: 20px; width: auto; }
+  .r-top { display: flex; align-items: center; gap: 16px; height: 52px; flex: none; padding: 0 8px 0 24px; background: var(--forest); }
+  .r-top img { height: 18px; width: auto; }
   .r-name { font-size: 15px; font-weight: 700; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .r-status { margin-left: auto; display: flex; align-items: center; gap: 20px; font-size: 13px; font-weight: 600; color: rgba(239,233,226,.85); white-space: nowrap; }
-  .r-status > span { display: flex; align-items: center; gap: 6px; }
-  .r-status i { width: 8px; height: 8px; border-radius: 50%; background: rgba(239,233,226,.3); }
-  .r-status i.on { background: var(--good); }
-  .erg-state { font-weight: 700; letter-spacing: .06em; color: var(--muted); }
-  .erg-state.on { color: var(--good); }
+  .r-status { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+  .r-warn {
+    display: inline-flex; align-items: center; gap: 8px; height: 30px; padding: 0 14px; border-radius: 999px;
+    background: rgba(255,159,26,.14); color: #ffc56b; font-size: 13px; font-weight: 700; white-space: nowrap;
+  }
+  .r-warn::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: #ff9f1a; }
+  .r-warn[hidden] { display: none; }
   .menu-btn {
-    height: 44px; padding: 0 18px; border-radius: 999px; border: 1px solid var(--line-2); background: var(--bg);
+    height: 40px; padding: 0 16px; border-radius: 999px; border: 1px solid var(--line-2); background: var(--bg);
     display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 14px;
   }
   .menu-btn:hover { border-color: rgba(239,233,226,.45); }
-  .menu-btn svg, .ctl-btn svg { width: 20px; height: 20px; flex: none; }
+  .menu-btn svg, .menu-item svg, .menu-head .icon-btn svg { width: 20px; height: 20px; flex: none; }
 
-  /* time, power, heart rate and cadence: the same size, side by side */
-  .r-metrics { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); flex: none; border-bottom: 1px solid var(--grid); }
-  .r-metric {
-    height: 176px; padding: 16px 24px; min-width: 0; overflow: hidden;
-    display: flex; flex-direction: column; justify-content: space-between;
+  /* the heads-up row: power in the middle and biggest, time and cadence either side, still readable from the bars */
+  .r-hud { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2fr) minmax(0, 1fr); flex: none; border-bottom: 1px solid var(--grid); }
+  .r-side { display: flex; flex-direction: column; justify-content: center; gap: 10px; padding: 20px 32px; min-width: 0; }
+  .r-right { align-items: flex-end; text-align: right; }
+  .r-lbl { font-size: 13px; font-weight: 700; letter-spacing: .12em; color: var(--soft); white-space: nowrap; }
+  .r-mid { font-family: var(--num); font-weight: 700; font-size: 104px; line-height: .82; white-space: nowrap; }
+  .r-mid small { font-size: 30px; margin-left: 6px; color: var(--soft); }
+  .r-sub { display: flex; align-items: center; gap: 8px; font-size: 17px; color: var(--soft); white-space: nowrap; }
+  .r-sub b { font-family: var(--num); font-size: 28px; color: var(--text); }
+  .r-lbl svg { width: 14px; height: 14px; margin-right: 6px; vertical-align: -1px; color: #ff3b5c; }
+  /* cadence and heart rate split the right-hand square, one above the other */
+  .r-pair { display: grid; grid-template-rows: repeat(2, minmax(0, 1fr)); min-width: 0; }
+  .r-pair .r-side { gap: 8px; padding: 14px 32px; }
+  .r-pair .r-side + .r-side { border-top: 1px solid var(--grid); }
+  .r-pair .r-mid { font-size: 80px; }
+  .r-pair .r-mid small { font-size: 26px; }
+  /* the band across the top of power takes the target's zone colour: the block's difficulty, never the brand */
+  .r-power {
+    --c: var(--moss);
+    position: relative; display: flex; align-items: center; justify-content: center; gap: 40px;
+    padding: 22px 28px 20px; background: var(--panel); border-inline: 1px solid var(--grid);
   }
-  .r-metric + .r-metric { border-left: 1px solid var(--grid); }
-  .r-lbl { display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 700; letter-spacing: .12em; color: var(--soft); white-space: nowrap; }
-  .r-lbl svg { width: 16px; height: 16px; color: #ff3b5c; flex: none; }
-  .r-zone { display: inline-flex; align-items: center; gap: 6px; letter-spacing: .04em; color: var(--text); }
-  .r-zone i { width: 10px; height: 10px; border-radius: 2px; background: var(--c, transparent); }
-  .r-big { font-family: var(--num); font-weight: 700; font-size: 104px; line-height: .85; white-space: nowrap; }
-  .r-big small { font-size: 32px; margin-left: 6px; color: var(--soft); }
-  .r-sub { display: flex; justify-content: space-between; gap: 12px; min-height: 24px; font-size: 16px; color: var(--soft); white-space: nowrap; }
-  .r-sub b { font-family: var(--num); font-size: 20px; color: var(--text); }
+  .r-pw { display: flex; flex-direction: column; align-items: center; gap: 14px; min-width: 0; }
+  .r-power::before { content: ""; position: absolute; inset: 0 0 auto; height: 6px; background: var(--c); transition: background .4s ease; }
+  .r-hero { font-family: var(--num); font-weight: 700; font-size: 184px; line-height: .78; white-space: nowrap; }
+  .r-hero small { font-size: 44px; margin-left: 8px; color: var(--soft); }
+  .r-target {
+    display: inline-flex; align-items: center; gap: 10px; height: 44px; padding: 0 20px; border-radius: 999px; background: var(--bg);
+    font-size: 14px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--soft); white-space: nowrap;
+  }
+  .r-target b { font-family: var(--num); font-size: 30px; letter-spacing: 0; text-transform: none; color: var(--text); }
+  .r-target i { width: 10px; height: 10px; border-radius: 50%; background: var(--c); }
 
-  .r-block {
-    display: grid; grid-template-columns: 200px minmax(0, 1fr) 400px; align-items: center; gap: 32px;
-    flex: none; padding: 14px 24px; border-bottom: 1px solid var(--grid);
-  }
+  /* the stage: what's next on the left, the rolling chart filling the rest */
+  .r-stage { flex: 1; min-height: 0; display: grid; grid-template-columns: 320px minmax(0, 1fr); }
+  .r-iv { display: flex; align-items: center; padding: 20px 24px; border-right: 1px solid var(--grid); min-height: 0; overflow: hidden; }
   /* the current block as a ring that empties, in that block's zone colour */
-  .interval svg { width: 176px; height: 176px; display: block; font-family: var(--num); font-weight: 700; }
+  .interval { flex: none; }
+  .interval svg { width: 200px; height: 200px; display: block; font-family: var(--num); font-weight: 700; }
   .interval text { fill: var(--text); text-anchor: middle; }
-  .interval .sub { font-family: Barlow, system-ui, sans-serif; font-size: 14px; font-weight: 600; fill-opacity: .75; }
+  .interval .sub { font-family: Barlow, system-ui, sans-serif; font-size: 14px; font-weight: 700; letter-spacing: .12em; fill-opacity: .75; }
   .ring-track { fill: none; stroke: var(--forest); stroke-width: 10; }
   .ring-arc { fill: none; stroke-width: 10; stroke-linecap: round; }
   .interval.flash .ring-arc { animation: flash .5s ease 2; }
   @keyframes flash { 50% { filter: brightness(1.8); } }
 
-  /* what's next: rounded bars that rise with effort, fading the further out they are */
-  .r-next { display: grid; grid-template-columns: repeat(4, 104px); gap: 16px; align-items: end; min-width: 0; overflow: hidden; font-family: var(--num); font-weight: 700; }
-  .r-step { display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 24px; line-height: 1; white-space: nowrap; }
-  .r-step:first-child { font-size: 28px; }
-  .r-step:nth-child(2) { opacity: .8; }
-  .r-step:nth-child(3) { opacity: .6; }
-  .r-step:nth-child(4) { opacity: .45; }
+  /* what's next: rounded bars that rise with effort, fading the further out they are; watts and duration the same size */
+  .r-next { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; align-items: end; width: 100%; font-family: var(--num); font-weight: 700; }
+  .r-step { display: flex; flex-direction: column; align-items: center; gap: 8px; font-size: 26px; line-height: 1; white-space: nowrap; }
+  .r-step:first-child { font-size: 30px; }
+  .r-step:nth-child(2) { opacity: .7; }
+  .r-step:nth-child(3) { opacity: .5; }
   .r-step .tag { font-family: Barlow, system-ui, sans-serif; font-size: 13px; letter-spacing: .12em; color: var(--soft); }
-  .r-step i { width: 28px; border-radius: 999px; background: var(--c); }
+  .r-step i { width: 32px; border-radius: 999px; background: var(--c); }
   .r-step .rpm { font-size: 18px; color: rgba(239,233,226,.75); }
-  .r-last { grid-column: 1 / -1; font-family: Barlow, system-ui, sans-serif; font-size: 16px; color: var(--soft); }
+  .r-last { grid-column: 1 / -1; text-align: center; font-family: Barlow, system-ui, sans-serif; font-size: 16px; color: var(--soft); }
 
-  .r-ctl { display: flex; flex-direction: column; gap: 12px; }
-  .ftp-adj {
-    display: grid; grid-template-columns: 56px minmax(0, 1fr) 56px; align-items: center; height: 64px; padding: 0 6px;
-    border-radius: 999px; background: var(--forest); border: 1px solid var(--grid-strong);
-  }
-  .ftp-adj .icon-btn { width: 52px; height: 52px; font-size: 26px; background: var(--primary); border-color: var(--primary); color: var(--on-primary); }
-  .ftp-adj .icon-btn:hover { background: #fff; }
-  .ftp-adj .f { display: flex; align-items: baseline; justify-content: center; gap: 8px; }
-  .ftp-adj .f span { font-size: 13px; font-weight: 700; letter-spacing: .12em; color: var(--soft); }
-  .ftp-adj .f b { font-family: var(--num); font-size: 34px; line-height: 1; }
-  .ftp-adj .f small { font-family: var(--num); font-size: 18px; color: var(--soft); }
-  .iv-ctl { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
-  .ctl-btn {
-    height: 56px; border-radius: 999px; border: 1px solid var(--grid-strong); background: var(--forest);
-    display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 700; font-size: 14px;
-  }
-  .ctl-btn:hover:not(:disabled) { border-color: rgba(239,233,226,.45); }
-
-  /* middle: rolling chart */
-  .main-chart { flex: 1; min-height: 120px; padding-top: 32px; position: relative; }
+  .main-chart { position: relative; min-height: 0; padding-top: 12px; }
   .main-chart canvas { width: 100%; height: 100%; display: block; }
-  .chart-legend {
-    position: absolute; left: 24px; right: 24px; top: 10px; display: flex; align-items: center; gap: 18px;
-    font-size: 13px; font-weight: 600; color: var(--soft);
+  .r-pop {
+    position: absolute; inset: 0; z-index: 4; pointer-events: none;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px;
   }
-  .chart-legend span { display: flex; align-items: center; gap: 6px; }
-  .chart-legend i { width: 16px; height: 3px; border-radius: 2px; background: var(--c); }
-  .chart-legend i.lg-target { width: 12px; height: 10px; background: linear-gradient(90deg, #2f8cff, #f5c518, #ff7a1a); }
-  .chart-legend .lg-window { margin-left: auto; }
+  .r-pop > :not(.show) { position: absolute; } /* a hidden message takes no room, so a lone one sits dead centre */
   .toast {
-    position: absolute; left: 50%; top: 18%; transform: translateX(-50%); max-width: 70%;
+    max-width: min(70%, 720px);
     background: rgba(0,0,0,.6); border-radius: 12px; padding: 10px 18px; font-size: 20px; font-weight: 600;
     text-align: center; opacity: 0; transition: opacity .3s; pointer-events: none;
   }
@@ -484,13 +479,13 @@
   /* cadence change call-out: fades in over the middle of the screen */
   .cad-alert {
     --c: var(--text);
-    position: absolute; left: 50%; top: 46%; z-index: 4; display: flex; align-items: center; gap: 22px;
+    display: flex; align-items: center; gap: 22px;
     padding: 18px 34px 18px 26px; border-radius: 22px; border: 3px solid var(--c);
     background: rgba(20,18,15,.88); box-shadow: 0 0 40px color-mix(in srgb, var(--c) 55%, transparent);
     backdrop-filter: blur(6px); pointer-events: none;
-    opacity: 0; transform: translate(-50%, -50%) scale(.85); transition: opacity .35s ease, transform .35s ease;
+    opacity: 0; transform: scale(.85); transition: opacity .35s ease, transform .35s ease;
   }
-  .cad-alert.show { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  .cad-alert.show { opacity: 1; transform: none; }
   .cad-alert.now { animation: cad-pulse 1s ease-in-out 3; }
   .cad-alert.up { --c: #ff9f1a; }
   .cad-alert.down { --c: #2fc6ff; }
@@ -500,14 +495,9 @@
   .ca-val small { font-size: .3em; font-style: normal; color: var(--muted); margin-left: 8px; letter-spacing: .08em; }
   @keyframes cad-pulse { 50% { box-shadow: 0 0 70px var(--c); border-color: var(--text); } }
 
-  /* bottom: full workout strip */
-  .strip {
-    height: 22vh; min-height: 170px; flex: none; display: flex; flex-direction: column; gap: 4px;
-    padding: 8px 24px 10px; border-top: 1px solid var(--grid);
-  }
-  .strip-canvas { flex: 1; min-height: 0; position: relative; }
-  .strip-canvas canvas { width: 100%; height: 100%; display: block; cursor: default; }
-  .strip-lbl { font-size: 13px; font-weight: 700; letter-spacing: .12em; color: var(--soft); }
+  /* bottom: the whole workout, where you are in it */
+  .strip { height: 15vh; min-height: 104px; flex: none; padding: 8px 24px 10px; border-top: 1px solid var(--grid); }
+  .strip canvas { width: 100%; height: 100%; display: block; cursor: default; }
 
   /* overlays */
   .overlay {
@@ -553,21 +543,53 @@
   .summary div span { display: block; font-size: 11px; letter-spacing: .12em; color: var(--muted); }
   .summary div b { font-family: var(--num); font-size: 34px; }
 
+  .ftp-item { justify-content: space-between; cursor: default; }
+  .ftp-item:hover { background: none !important; }
+  .ftp-adj {
+    display: grid; grid-template-columns: 44px minmax(0, 1fr) 44px; align-items: center; width: 176px; height: 52px; padding: 0 4px;
+    border-radius: 999px; background: var(--bg); border: 1px solid var(--grid-strong);
+  }
+  .ftp-adj .icon-btn { width: 42px; height: 42px; font-size: 22px; background: var(--primary); border-color: var(--primary); color: var(--on-primary); }
+  .ftp-adj .icon-btn:hover { background: #fff; }
+  .ftp-adj .f { display: flex; align-items: baseline; justify-content: center; gap: 4px; }
+  .ftp-adj .f b { font-family: var(--num); font-size: 28px; line-height: 1; }
+  .ftp-adj .f small { font-family: var(--num); font-size: 16px; color: var(--soft); }
+  .menu-item kbd {
+    margin-left: auto; padding: 2px 8px; border-radius: 6px; border: 1px solid rgba(239,233,226,.25);
+    font: 600 13px Barlow, system-ui, sans-serif; color: var(--soft);
+  }
+
   @media (max-width: 1100px) {
-    .r-big { font-size: 76px; }
-    .r-block { grid-template-columns: 180px minmax(0, 1fr); }
-    .r-ctl { grid-column: 1 / -1; flex-direction: row; }
-    .r-ctl > * { flex: 1; }
+    .r-hero { font-size: 136px; }
+    .r-mid { font-size: 76px; }
+    .r-side { padding: 16px 22px; }
+    .r-stage { grid-template-columns: 280px minmax(0, 1fr); }
+    .r-power { gap: 24px; }
+    .interval svg { width: 160px; height: 160px; }
+    .r-pair .r-mid { font-size: 60px; }
+    .r-pair .r-side { padding: 12px 22px; }
+    .r-step { font-size: 22px; }
+    .r-step:first-child { font-size: 26px; }
   }
   @media (max-width: 760px) {
-    .r-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    .r-metric { height: 140px; }
-    .r-metric:nth-child(3) { border-left: none; border-top: 1px solid var(--grid); }
-    .r-metric:nth-child(4) { border-top: 1px solid var(--grid); }
-    .r-big { font-size: 60px; }
-    .r-status > span:not(.erg-state) { display: none; }
-    .r-ctl { flex-direction: column; }
-    .chart-legend .lg-window { display: none; }
+    .r-hud { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .r-power { grid-column: 1 / -1; order: -1; border-inline: none; border-bottom: 1px solid var(--grid); }
+    .r-hero { font-size: 96px; }
+    .r-hero small { font-size: 30px; }
+    .r-target { height: 36px; padding: 0 14px; }
+    .r-target b { font-size: 24px; }
+    .r-mid { font-size: 60px; }
+    .r-pair .r-mid { font-size: 44px; }
+    .r-pair .r-mid small { font-size: 18px; }
+    .r-pair .r-side { padding: 10px 16px; }
+    /* a phone in portrait can't fit it all: scroll rather than crush the chart */
+    #ride { overflow-y: auto; }
+    .r-stage { flex: none; grid-template-columns: minmax(0, 1fr); }
+    .main-chart { height: 240px; }
+    .r-power { gap: 16px; padding: 18px 16px 16px; }
+    .r-iv { padding: 14px 16px; border-right: none; border-bottom: 1px solid var(--grid); }
+    .interval svg { width: 128px; height: 128px; }
+    .r-warn { display: none; }
     .ca-val { font-size: 60px; }
     .ca-arrow { font-size: 54px; }
   }
@@ -846,88 +868,72 @@
   <div class="r-top">
     <img src="/brand/whorl-logo-cream.png" alt="whorl">
     <span class="r-name" id="rWoName"></span>
-    <div class="r-status" role="status" aria-label="Connections">
-      <span><i id="rTrDot"></i>Trainer</span>
-      <span><i id="rHrDot"></i>Heart rate</span>
-      <span class="erg-state" id="rErg">ERG</span>
+    <!-- only speaks up when something needs attention -->
+    <div class="r-status" role="status" aria-live="polite">
+      <span class="r-warn" id="rTrWarn" hidden>Trainer not connected</span>
+      <span class="r-warn" id="rErgWarn" hidden>ERG off</span>
     </div>
     <button class="menu-btn" id="rMenuBtn" title="Menu (esc)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>Menu
     </button>
   </div>
 
-  <div class="r-metrics">
-    <div class="r-metric">
-      <span class="r-lbl">ELAPSED</span>
-      <span class="r-big" id="rClock">0:00</span>
-      <span class="r-sub"><span><b id="rRemain">--:--</b> to go</span><span><b id="rPct">0%</b> done</span></span>
+  <!-- power leads; time and cadence flank it, heart rate rides along with cadence -->
+  <div class="r-hud">
+    <div class="r-side">
+      <span class="r-lbl">TIME</span>
+      <span class="r-mid" id="rClock">0:00</span>
+      <span class="r-sub"><b id="rRemain">--:--</b> to go</span>
     </div>
-    <div class="r-metric">
-      <span class="r-lbl">POWER <span class="r-zone"><i id="rZoneDot"></i><span id="rZone"></span></span></span>
-      <span class="r-big"><span id="rPower">--</span><small>W</small></span>
-      <span class="r-sub"><span>Target <b id="rTarget">--</b></span><span>Avg <b id="rAvg">--</b></span></span>
-    </div>
-    <div class="r-metric">
-      <span class="r-lbl"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 21s-7-4.5-9.5-9A5.5 5.5 0 0 1 12 6a5.5 5.5 0 0 1 9.5 6C19 16.5 12 21 12 21z"/></svg>HEART RATE</span>
-      <span class="r-big"><span id="rHr">--</span><small>bpm</small></span>
-      <span class="r-sub"><span>Avg <b id="rHrAvg">--</b></span></span>
-    </div>
-    <div class="r-metric">
-      <span class="r-lbl">CADENCE</span>
-      <span class="r-big"><span id="rCad">--</span><small>rpm</small></span>
-      <span class="r-sub"></span>
-    </div>
-  </div>
-
-  <div class="r-block">
-    <div class="interval" id="rInterval">
-      <svg viewBox="0 0 200 200" role="img" id="rIvSvg">
-        <circle cx="100" cy="100" r="88" class="ring-track"/>
-        <circle cx="100" cy="100" r="88" class="ring-arc" id="rArc" transform="rotate(-90 100 100)"/>
-        <text x="100" y="70" font-size="22" id="rCurW">--</text>
-        <text x="100" y="126" font-size="68" id="rIvLeft">--:--</text>
-        <text x="100" y="150" class="sub" id="rIvSub"></text>
-      </svg>
-    </div>
-    <div class="r-next" id="rNext" role="img"></div>
-    <div class="r-ctl">
-      <div class="ftp-adj" role="group" aria-label="FTP">
-        <button class="icon-btn" id="rFtpDown" title="FTP −5 W (−)" aria-label="FTP down 5 watts">−</button>
-        <div class="f"><span>FTP</span><b id="rFtp">--</b><small>W</small></div>
-        <button class="icon-btn" id="rFtpUp" title="FTP +5 W (+)" aria-label="FTP up 5 watts">+</button>
+    <div class="r-power" id="rPowerTile">
+      <div class="r-pw">
+        <span class="r-hero"><span id="rPower">--</span><small>W</small></span>
+        <span class="r-target"><i id="rTargetDot"></i>Target <b id="rTarget">--</b></span>
       </div>
-      <div class="iv-ctl">
-        <button class="ctl-btn" id="rRestartBtn" title="Restart this interval (←)">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>Restart
-        </button>
-        <button class="ctl-btn" id="rSkipBtn" title="Skip to the next interval (→)">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 5l10 7-10 7z" fill="currentColor"/><path d="M19 5v14"/></svg>Skip
-        </button>
+      <div class="interval" id="rInterval">
+        <svg viewBox="0 0 200 200" role="img" id="rIvSvg">
+          <circle cx="100" cy="100" r="88" class="ring-track"/>
+          <circle cx="100" cy="100" r="88" class="ring-arc" id="rArc" transform="rotate(-90 100 100)"/>
+          <text x="100" y="68" class="sub">INTERVAL</text>
+          <text x="100" y="126" font-size="64" id="rIvLeft">--:--</text>
+          <text x="100" y="152" class="sub" id="rIvSub"></text>
+        </svg>
+      </div>
+    </div>
+    <div class="r-pair">
+      <div class="r-side r-right">
+        <span class="r-lbl">CADENCE</span>
+        <span class="r-mid"><span id="rCad">--</span><small>rpm</small></span>
+      </div>
+      <div class="r-side r-right">
+        <span class="r-lbl"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 21s-7-4.5-9.5-9A5.5 5.5 0 0 1 12 6a5.5 5.5 0 0 1 9.5 6C19 16.5 12 21 12 21z"/></svg>HEART RATE</span>
+        <span class="r-mid"><span id="rHr">--</span><small>bpm</small></span>
       </div>
     </div>
   </div>
 
-  <div class="main-chart">
-    <div class="chart-legend" aria-hidden="true">
-      <span><i style="--c:#efe9e2"></i>Power</span>
-      <span><i style="--c:#ff3b5c"></i>Heart rate</span>
-      <span><i class="lg-target"></i>Target, by zone</span>
-      <span class="lg-window">12-minute window</span>
+  <div class="r-stage">
+    <div class="r-iv">
+      <div class="r-next" id="rNext" role="img"></div>
     </div>
-    <canvas id="rChart"></canvas>
-    <div class="toast" id="rToast"></div>
+    <div class="main-chart">
+      <canvas id="rChart"></canvas>
+    </div>
   </div>
 
   <div class="strip">
-    <span class="strip-lbl">WHOLE WORKOUT</span>
-    <div class="strip-canvas"><canvas id="rStrip"></canvas></div>
+    <canvas id="rStrip"></canvas>
   </div>
 
-  <div class="cad-alert" id="rCadAlert">
-    <div class="ca-arrow" id="rCadArrow"></div>
-    <div>
-      <div class="ca-lbl" id="rCadLbl"></div>
-      <div class="ca-val"><span id="rCadVal"></span><small>RPM</small></div>
+  <!-- mid-ride messages: centred on the whole screen, stacked if two arrive together -->
+  <div class="r-pop">
+    <div class="toast" id="rToast" role="status"></div>
+    <div class="cad-alert" id="rCadAlert">
+      <div class="ca-arrow" id="rCadArrow"></div>
+      <div>
+        <div class="ca-lbl" id="rCadLbl"></div>
+        <div class="ca-val"><span id="rCadVal"></span><small>RPM</small></div>
+      </div>
     </div>
   </div>
 
@@ -962,11 +968,18 @@
   </div>
 
   <aside class="menu" id="rMenu">
-    <div class="menu-head"><h3>MENU</h3><button class="icon-btn" id="rMenuClose">✕</button></div>
+    <div class="menu-head"><h3>MENU</h3><button class="icon-btn" id="rMenuClose" aria-label="Close menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+    <div class="menu-item ftp-item">FTP
+      <div class="ftp-adj" role="group" aria-label="FTP">
+        <button class="icon-btn" id="rFtpDown" title="FTP −5 W (−)" aria-label="FTP down 5 watts">−</button>
+        <div class="f"><b id="rFtp">--</b><small>W</small></div>
+        <button class="icon-btn" id="rFtpUp" title="FTP +5 W (+)" aria-label="FTP up 5 watts">+</button>
+      </div>
+    </div>
     <label class="menu-item">Interval beeps <span class="toggle"><input type="checkbox" id="rBeepToggle"><i></i></span></label>
     <label class="menu-item">Auto-pause <span class="toggle"><input type="checkbox" id="rAutoPause" checked><i></i></span></label>
-    <button class="menu-item" id="rBack">↺ Restart current interval</button>
-    <button class="menu-item" id="rSkip">Skip to next interval ⏭</button>
+    <button class="menu-item" id="rBack" title="Restart this interval (←)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>Restart this interval<kbd>←</kbd></button>
+    <button class="menu-item" id="rSkip" title="Skip to the next interval (→)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 5l10 7-10 7z" fill="currentColor"/><path d="M19 5v14"/></svg>Skip to next interval<kbd>→</kbd></button>
     <div class="menu-foot">
       <button class="btn primary" id="rPause">PAUSE RIDE</button>
       <button class="btn ghost danger" id="rEnd">END RIDE</button>

@@ -1608,36 +1608,24 @@ function render() {
   const seg = currentSeg();
   const target = currentTargetW();
 
-  // top bar: is everything still connected?
-  $("rTrDot").classList.toggle("on", !!(trainer.simulated || trainer.device?.gatt?.connected));
-  $("rHrDot").classList.toggle("on", currentHr() !== null);
+  // top bar: only says something when the trainer has dropped
+  $("rTrWarn").hidden = !!(trainer.simulated || trainer.device?.gatt?.connected);
 
-  // the four metrics. Elapsed only shows hours once there is one.
+  // the heads-up row. Elapsed only shows hours once there is one.
   $("rClock").textContent = fmtTime(r.pos);
   $("rRemain").textContent = fmtTime(dur - r.pos);
-  $("rPct").textContent = `${Math.floor((r.pos / dur) * 100)}%`;
   $("rPower").textContent = p3 ?? "--";
-  const zone = p3 === null ? null : zoneFor(p3 / r.ftp);
-  $("rZoneDot").style.setProperty("--c", zone ? zone.color : "transparent");
-  $("rZone").textContent = zone ? `${zone.name} · ${Math.round((p3 / r.ftp) * 100)}%` : "";
-  $("rTarget").textContent = seg?.free ? "free" : target !== null ? `${target} W` : "--";
-  const avg = r.log.length ? Math.round(r.log.reduce((a, s) => a + s.w, 0) / r.log.length) : null;
-  $("rAvg").textContent = avg !== null ? `${avg} W` : "--";
+  $("rTarget").textContent = seg?.free ? "Free" : target !== null ? `${target} W` : "--";
+  $("rPowerTile").style.setProperty("--c", !seg || seg.free || target === null ? ZONES[0].color : zoneFor(target / r.ftp).color);
   $("rHr").textContent = currentHr() ?? "--";
-  if (r.lastSecond % 5 === 0 || r.hrAvg === undefined) {
-    const hrs = r.log.map((s) => s.hr).filter(Boolean);
-    r.hrAvg = hrs.length ? Math.round(hrs.reduce((a, b) => a + b, 0) / hrs.length) : null;
-  }
-  $("rHrAvg").textContent = r.hrAvg ?? "--";
   $("rCad").textContent = live.cadence ?? "--";
 
-  // the current block as a ring that empties, then the next few as bars that rise with effort
+  // the current block as a ring that empties beside power, then the next three as bars that rise with effort
   if (seg) {
     const left = seg.start + seg.duration - r.pos;
     const watts = (s) =>
       s.free ? "Free" : s.from === s.to ? `${Math.round(s.from * r.ftp)} W` : `${Math.round(s.from * r.ftp)}→${Math.round(s.to * r.ftp)} W`;
     const colour = (s, f = (s.from + s.to) / 2) => (s.free ? ZONES[0].color : zoneFor(f).color);
-    $("rCurW").textContent = seg.free ? "Free ride" : `${target} W`;
     $("rIvLeft").textContent = fmtTime(Math.ceil(left));
     const rep = seg.rep ? (seg.on ? `Rep ${seg.rep} of ${seg.reps}` : `Rest ${seg.rep} of ${seg.reps}`) : "";
     const cad = seg.cadence ? `${seg.cadence} rpm` : "";
@@ -1646,19 +1634,19 @@ function render() {
     const around = 2 * Math.PI * 88;
     arc.setAttribute("stroke-dasharray", `${Math.max(0, (left / seg.duration) * around)} ${around}`);
     arc.setAttribute("stroke", colour(seg, fractionAt(seg, r.pos)));
-    $("rIvSvg").setAttribute("aria-label", `${$("rCurW").textContent}, ${fmtTime(Math.ceil(left))} left${rep ? `, ${rep}` : ""}`);
+    $("rIvSvg").setAttribute("aria-label", `Interval: ${fmtTime(Math.ceil(left))} left${rep ? `, ${rep}` : ""}`);
 
     // Only rebuilt when the block or FTP changes, not every tick.
     const nextKey = `${r.segIdx}|${r.ftp}`;
     if (r.nextKey !== nextKey) {
       r.nextKey = nextKey;
-      const ahead = r.timeline.segments.slice(r.segIdx + 1, r.segIdx + 5);
+      const ahead = r.timeline.segments.slice(r.segIdx + 1, r.segIdx + 4);
       const withCadence = ahead.some((s) => s.cadence);
       $("rNext").innerHTML = ahead.length
         ? ahead
             .map((s, i) => {
               const f = s.free ? 0.5 : Math.max(s.from, s.to);
-              const h = Math.round(Math.max(10, Math.min(80, (f / 1.2) * 80)));
+              const h = Math.round(Math.max(14, Math.min(120, (f / 1.2) * 120)));
               return `<div class="r-step">${i === 0 ? '<span class="tag">NEXT</span>' : ""}<i style="--c:${colour(s)}; height:${h}px"></i><span>${watts(s)}</span><span>${fmtTime(s.duration)}</span>${withCadence ? `<span class="rpm">${s.cadence ? `${s.cadence} rpm` : ""}</span>` : ""}</div>`;
             })
             .join("")
@@ -1670,9 +1658,7 @@ function render() {
     }
   }
 
-  const onLast = r.segIdx >= r.timeline.segments.length - 1;
-  $("rSkipBtn").disabled = onLast;
-  $("rSkip").disabled = onLast;
+  $("rSkip").disabled = r.segIdx >= r.timeline.segments.length - 1;
 
   // bottom strip
   drawWorkout($("rStrip"), {
@@ -1705,15 +1691,8 @@ function renderFtp() {
 }
 
 function renderErgState() {
-  const el = $("rErg");
   if (!ride) return;
-  if (!trainer.canControl) {
-    el.textContent = "ERG unavailable";
-    el.className = "erg-state";
-  } else {
-    el.textContent = "ERG ON";
-    el.className = "erg-state on";
-  }
+  $("rErgWarn").hidden = !!trainer.canControl;
 }
 
 function adjustFtp(delta) {
@@ -1903,8 +1882,6 @@ $("rEnd").addEventListener("click", () =>
 );
 $("rSkip").addEventListener("click", skipForward);
 $("rBack").addEventListener("click", restartInterval);
-$("rSkipBtn").addEventListener("click", skipForward);
-$("rRestartBtn").addEventListener("click", restartInterval);
 $("rBeepToggle").addEventListener("change", (e) => {
   ride.beep = e.target.checked;
   store.set("beep", ride.beep);
