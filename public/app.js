@@ -2079,7 +2079,7 @@ function workoutForRide(r) {
   const file = r.workout_file || "";
   const key = r.workout_key || (file.includes("/") ? `${file.split("/")[0]}:${file}` : `mine:${file}`);
   const base = file.split("/").pop();
-  // Titles lost their lengths ("Zone 2 Staircase", "... (90min)"), so compare without them.
+  // Titles lost their lengths ("Long Ride 1.5h", "... (90min)"), so compare without them.
   const plain = (name) =>
     String(name || "")
       .replace(/\([^)]*\)/g, " ")
