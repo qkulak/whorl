@@ -28,6 +28,7 @@ from urllib.parse import parse_qs, unquote, urlsplit
 from accounts import AccountError, Accounts
 from storage import open_store
 from strava import Strava, StravaError, load_app
+import zwo
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 PRESET_DIR = os.path.join(ROOT, "presets")  # bundled, read-only
@@ -432,10 +433,32 @@ class Handler(SimpleHTTPRequestHandler):
             if not tokens:
                 return self._json(400, {"error": "Connect Strava in Settings first."})
             done = (ride.get("strava") or {}).get("activity_id")
-            status = {"state": "done", "activity_id": done} if done else STRAVA.upload(tokens, ride, name[: -len(".json")])
+            status = {"state": "done", "activity_id": done} if done else STRAVA.upload(
+                tokens, ride, name[: -len(".json")], self._ride_workout(ride))
         except StravaError as e:
             return self._json(502, {"error": e.message})
         return self._json(200, self._strava_record(key, ride, status))
+
+    def _ride_workout(self, ride):
+        """The workout a ride followed, if it's still there. Rides name it the
+        way the app does: a bare file for the rider's own, else
+        <collection>/<file>."""
+        collection, _, name = str(ride.get("workout_file") or "").rpartition("/")
+        if not name or safe_name(name) != name:
+            return None
+        if not collection:
+            xml = STORE.read(self.space + WORKOUTS + name)
+        elif collection == "uploaded":
+            xml = STORE.read(self.space + UPLOADS + name)
+        elif collection in os.listdir(PRESET_DIR) and os.path.isfile(os.path.join(PRESET_DIR, collection, name)):
+            xml = read_zwo(os.path.join(PRESET_DIR, collection, name))
+        else:
+            xml = None
+        try:
+            w = zwo.parse(xml) if xml else None
+        except zwo.WorkoutError:
+            return None
+        return w if w and w["blocks"] else None
 
     def _strava_check(self, name):
         key = self.space + RIDES + name

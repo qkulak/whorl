@@ -21,6 +21,8 @@ import urllib.request
 from datetime import datetime, timedelta, timezone
 from xml.sax.saxutils import escape
 
+import zwo
+
 API = "https://www.strava.com/api/v3"
 AUTHORIZE = "https://www.strava.com/oauth/authorize"
 TOKEN = "https://www.strava.com/oauth/token"
@@ -113,13 +115,14 @@ class Strava:
 
     # ---- uploading a ride ----
 
-    def upload(self, tokens, ride, external_id):
+    def upload(self, tokens, ride, external_id, workout=None):
         """Starts the upload; Strava processes it in the background. Returns the
-        upload id to check on with upload_status."""
+        upload id to check on with upload_status. With the ride's workout, the
+        description opens with its bar chart."""
         fields = {
             "data_type": "tcx",
             "name": f"Whorl - {ride.get('workout') or 'Ride'}",
-            "description": describe(ride),
+            "description": describe(ride, workout),
             "trainer": "1",
             "external_id": external_id,
         }
@@ -163,13 +166,16 @@ def status_of(upload):
     return {**out, "state": "processing"}
 
 
-def describe(ride):
+def describe(ride, workout=None):
+    """The activity description: the workout's chart (Strava's API takes no
+    images, so it's drawn in emoji), the ride's numbers, and where it was ridden."""
     s = ride.get("summary") or {}
     bits = [f"NP {s['np']} W" if s.get("np") else None,
             f"IF {s['if']:.2f}" if s.get("if") else None,
             f"TSS {s['tss']}" if s.get("tss") else None,
             f"FTP {ride['ftp']} W" if ride.get("ftp") else None]
-    return " · ".join(b for b in bits if b) + "\n\nRidden on Whorl"
+    parts = [zwo.text_chart(workout) if workout else "", " · ".join(b for b in bits if b), "Ridden on Whorl"]
+    return "\n\n".join(p for p in parts if p)
 
 
 def _iso(t):

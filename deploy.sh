@@ -70,7 +70,7 @@ ROLE_ARN=$(aws iam get-role --role-name "$ROLE" --query Role.Arn --output text)
 BUILD=$(mktemp -d)
 trap 'rm -rf "$BUILD"' EXIT
 mkdir -p "$BUILD/pkg/presets"
-cp server.py storage.py accounts.py strava.py lambda_function.py "$BUILD/pkg/"
+cp server.py storage.py accounts.py strava.py lambda_function.py zwo.py "$BUILD/pkg/"
 cp -R public "$BUILD/pkg/public"
 for dir in presets/*/; do
   [ "$(basename "$dir")" = uploaded ] || cp -R "${dir%/}" "$BUILD/pkg/presets/"
