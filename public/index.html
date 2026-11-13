@@ -403,6 +403,8 @@
     display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 14px;
   }
   .menu-btn:hover { border-color: rgba(239,233,226,.45); }
+  .menu-btn:disabled { opacity: .4; cursor: default; }
+  .menu-btn:disabled:hover { border-color: var(--line-2); }
   .menu-btn svg, .menu-item svg, .menu-head .icon-btn svg { width: 20px; height: 20px; flex: none; }
 
   /* the heads-up row: power in the middle and biggest, time and cadence either side, still readable from the bars */
@@ -509,8 +511,20 @@
   #rDone { background: color-mix(in srgb, var(--forest) 90%, transparent); }
   #rDone .box { background: var(--forest); border-color: var(--line-2); }
   .overlay.with-menu { padding-right: min(360px, 90vw); } /* keep the pause box clear of the ride menu */
-  @media (max-width: 760px) { .overlay.with-menu .box { display: none; } } /* menu has its own resume */
+  /* phones: no room for the menu beside the pause box, so the top bar (restart, skip, menu) stays above it instead */
+  @media (max-width: 760px) { #rPaused { top: 52px; overflow-y: auto; } }
   .overlay .box { text-align: center; }
+  /* trainer / heart rate on the pause screen, to reconnect without leaving the ride */
+  .p-devices { display: flex; flex-direction: column; gap: 10px; margin-top: 28px; width: min(420px, 86vw); text-align: left; }
+  .p-dev {
+    display: flex; align-items: center; gap: 12px; padding: 12px 14px 12px 16px; border-radius: 14px;
+    background: rgba(0,0,0,.22); border: 1px solid var(--line);
+  }
+  .p-dev .dot { margin-right: 0; flex: none; }
+  .p-dev-txt { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; align-items: flex-start; }
+  .p-dev-txt .conn-name, .p-dev-txt .conn-sub { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .p-dev-txt .conn-sub:empty { display: none; }
+  .p-dev .btn { flex: none; }
   .overlay h2 { font-family: var(--num); font-style: italic; font-size: 64px; margin: 0; letter-spacing: .04em; }
   .overlay p { color: var(--muted); font-size: 18px; margin: 6px 0 18px; }
   .overlay.confirm { z-index: 15; }
@@ -590,6 +604,9 @@
     .r-iv { padding: 14px 16px; border-right: none; border-bottom: 1px solid var(--grid); }
     .interval svg { width: 128px; height: 128px; }
     .r-warn { display: none; }
+    .r-top { gap: 8px; padding-left: 16px; }
+    .r-jump { padding: 0 11px; }
+    .r-jump span { display: none; }
     .ca-val { font-size: 60px; }
     .ca-arrow { font-size: 54px; }
   }
@@ -873,6 +890,12 @@
       <span class="r-warn" id="rTrWarn" hidden>Trainer not connected</span>
       <span class="r-warn" id="rErgWarn" hidden>ERG off</span>
     </div>
+    <button class="menu-btn r-jump" id="rBackTop" title="Restart this interval (←)" aria-label="Restart this interval">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg><span>Restart</span>
+    </button>
+    <button class="menu-btn r-jump" id="rSkipTop" title="Skip to the next interval (→)" aria-label="Skip to next interval">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 5l10 7-10 7z" fill="currentColor"/><path d="M19 5v14"/></svg><span>Skip</span>
+    </button>
     <button class="menu-btn" id="rMenuBtn" title="Menu (esc)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>Menu
     </button>
@@ -942,6 +965,21 @@
       <h2 id="rPausedTitle">PAUSED</h2>
       <p id="rPausedSub">Start pedaling to resume</p>
       <button class="btn primary" id="rResume">RESUME</button>
+      <!-- same status and buttons as the Trainer / Heart rate cards on Browse -->
+      <div class="p-devices" role="group" aria-label="Devices">
+        <div class="p-dev">
+          <span class="dot" id="pTrDot"></span>
+          <div class="p-dev-txt"><span class="d-lbl">TRAINER</span><span class="conn-name" id="pTrName"></span><span class="conn-sub" id="pTrSub"></span>
+            <button type="button" class="link-btn" id="pTrOther" hidden>Choose another</button></div>
+          <button class="btn small" id="pTrainer">Connect</button>
+        </div>
+        <div class="p-dev">
+          <span class="dot" id="pHrDot"></span>
+          <div class="p-dev-txt"><span class="d-lbl">HEART RATE</span><span class="conn-name" id="pHrName"></span><span class="conn-sub" id="pHrSub"></span>
+            <button type="button" class="link-btn" id="pHrOther" hidden>Choose another</button></div>
+          <button class="btn small" id="pHr">Connect</button>
+        </div>
+      </div>
     </div>
   </div>
 

@@ -157,6 +157,11 @@ trainer.addEventListener("status", ({ detail }) => {
     known.trainer = trainer.device;
     store.set("trainerDevice", { id: trainer.device.id, name: detail.name });
   }
+  // A trainer (re)connected mid-ride starts in its own mode: send ERG / free ride again.
+  if (detail.connected && ride) {
+    ride.trainerMode = null;
+    ride.lastTargetAt = 0;
+  }
   renderErgState();
   renderSensorButtons();
   // Dropped mid-session (out of range, trainer restarted): get it back by itself.
@@ -189,9 +194,25 @@ function mirrorSensors() {
   $("dHrName").textContent = $("hrName").textContent;
   $("dHr").textContent = $("btnHr").textContent;
   $("dHr").disabled = $("btnHr").disabled;
+  // ...and so does the pause screen, so a dropped device can be got back mid-ride.
+  for (const [p, home] of [["pTr", "tr"], ["pHr", "hr"]]) {
+    $(`${p}Dot`).classList.toggle("on", $(`${home}Dot`).classList.contains("on"));
+    $(`${p}Name`).textContent = $(`${home}Name`).textContent;
+    $(`${p}Sub`).textContent = $(`${home}Sub`).textContent;
+  }
+  $("pTrainer").textContent = $("btnTrainer").textContent;
+  $("pTrainer").disabled = $("btnTrainer").disabled;
+  $("pTrOther").hidden = $("btnTrainerOther").hidden;
+  $("pHr").textContent = $("btnHr").textContent;
+  $("pHr").disabled = $("btnHr").disabled;
+  $("pHrOther").hidden = $("btnHrOther").hidden;
 }
 $("dTrainer").addEventListener("click", () => $("btnTrainer").click());
 $("dHr").addEventListener("click", () => $("btnHr").click());
+$("pTrainer").addEventListener("click", () => $("btnTrainer").click());
+$("pHr").addEventListener("click", () => $("btnHr").click());
+$("pTrOther").addEventListener("click", () => $("btnTrainerOther").click());
+$("pHrOther").addEventListener("click", () => $("btnHrOther").click());
 
 function needBluetooth() {
   if (navigator.bluetooth) return true;
@@ -1413,9 +1434,12 @@ function showPause() {
 
 // Paused mid-ride (not the READY screen), the ride menu opens beside the pause
 // screen, so resume, restart/skip interval, end ride and the settings are all there.
+// On a phone there's no room beside it: the menu stays a tap away in the top bar,
+// and the pause box (with its device reconnect buttons) keeps the screen.
+const phone = matchMedia("(max-width: 760px)");
 function syncPauseMenu() {
   const paused = ride?.pauseReason === "auto" || ride?.pauseReason === "manual";
-  const open = paused && !pendingConfirm && !$("rDone").classList.contains("show");
+  const open = paused && !pendingConfirm && !$("rDone").classList.contains("show") && !phone.matches;
   $("rMenu").classList.toggle("open", open);
   $("rPaused").classList.toggle("with-menu", open);
 }
@@ -1658,7 +1682,8 @@ function render() {
     }
   }
 
-  $("rSkip").disabled = r.segIdx >= r.timeline.segments.length - 1;
+  $("rSkip").disabled = $("rSkipTop").disabled = r.segIdx >= r.timeline.segments.length - 1;
+  $("rBackTop").disabled = r.segIdx < 0;
 
   // bottom strip
   drawWorkout($("rStrip"), {
@@ -1882,6 +1907,8 @@ $("rEnd").addEventListener("click", () =>
 );
 $("rSkip").addEventListener("click", skipForward);
 $("rBack").addEventListener("click", restartInterval);
+$("rSkipTop").addEventListener("click", skipForward);
+$("rBackTop").addEventListener("click", restartInterval);
 $("rBeepToggle").addEventListener("change", (e) => {
   ride.beep = e.target.checked;
   store.set("beep", ride.beep);
