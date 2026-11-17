@@ -1,0 +1,48 @@
+<workout_file>
+    <author>Whorl</author>
+    <name>Sweet Spot Steps 2x15</name>
+    <description>Two 15-minute sweet spot blocks that step up partway through, at the low-to-middle end of sweet spot. Block 1 is 5 min at 86.5%, then 10 min at 89%. Block 2 is 5 min at 89%, then 10 min at 92%. Each block runs straight through, with 5 min easy between them. Built around a 185 W FTP, which makes the targets 160, 165 and 170 W. The rest of the ride is Z2 at 70%. Aim to keep your heart rate around 120-135 in the Z2 parts.</description>
+    <category>Sweet Spot</category>
+    <sportType>bike</sportType>
+    <tags>
+        <tag name="sweetspot"/>
+    </tags>
+    <workout>
+        <Warmup Duration="300" PowerLow="0.55" PowerHigh="0.65" Cadence="88">
+            <textevent timeoffset="10" message="Sweet spot: two 15-min blocks that step up partway through. Z2 the rest of the ride"/>
+        </Warmup>
+        <SteadyState Duration="900" Power="0.7" Cadence="90">
+            <textevent timeoffset="0" message="15 min Z2. Keep your heart rate around 120-135"/>
+            <textevent timeoffset="840" message="1 minute until block 1"/>
+        </SteadyState>
+        <SteadyState Duration="300" Power="0.865" Cadence="90">
+            <textevent timeoffset="0" message="Block 1 of 2: 5 min at 86.5%, then it steps up"/>
+            <textevent timeoffset="270" message="Stepping up in 30 seconds"/>
+        </SteadyState>
+        <SteadyState Duration="600" Power="0.89" Cadence="90">
+            <textevent timeoffset="0" message="10 min at 89%. Settle in, stay seated"/>
+            <textevent timeoffset="300" message="Halfway through this step. Relax your shoulders"/>
+            <textevent timeoffset="540" message="1 minute left"/>
+        </SteadyState>
+        <SteadyState Duration="300" Power="0.65" Cadence="88">
+            <textevent timeoffset="0" message="5 min easy. Drink"/>
+            <textevent timeoffset="240" message="1 minute until block 2"/>
+        </SteadyState>
+        <SteadyState Duration="300" Power="0.89" Cadence="90">
+            <textevent timeoffset="0" message="Block 2 of 2: 5 min at 89%, then it steps up"/>
+            <textevent timeoffset="270" message="Stepping up in 30 seconds"/>
+        </SteadyState>
+        <SteadyState Duration="600" Power="0.92" Cadence="90">
+            <textevent timeoffset="0" message="10 min at 92%. The last hard step of the day"/>
+            <textevent timeoffset="300" message="Halfway through this step. Smooth pedal stroke"/>
+            <textevent timeoffset="540" message="1 minute left"/>
+        </SteadyState>
+        <SteadyState Duration="1200" Power="0.7" Cadence="90">
+            <textevent timeoffset="0" message="Done with the hard part. 20 min Z2, heart rate around 120-135"/>
+            <textevent timeoffset="600" message="10 min of Z2 left. Keep about 90 rpm"/>
+        </SteadyState>
+        <Cooldown Duration="300" PowerLow="0.65" PowerHigh="0.5" Cadence="85">
+            <textevent timeoffset="0" message="5 min cooldown"/>
+        </Cooldown>
+    </workout>
+</workout_file>
